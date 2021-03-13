@@ -148,8 +148,7 @@ namespace YesAlready
         {
             if (ImGui.Checkbox($"###enabled-{entry.GetHashCode()}", ref entry.Enabled))
                 plugin.SaveConfiguration();
-
-            if (ImGui.IsMouseClicked(ImGuiMouseButton.Right))
+            if (ImGui.IsItemHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Right))
             {
                 TextEntryOptionsTarget = entry;
                 ImGui.OpenPopup("EntryOptions");
