@@ -87,10 +87,10 @@ namespace YesAlready
             sb.AppendLine();
             sb.AppendLine("Right click the enabled button to delete a line.");
             sb.AppendLine();
-            sb.AppendLine("Currently supported addons:");
+            sb.AppendLine("Currently supported text addons:");
             sb.AppendLine("  - SelectYesNo");
-            sb.AppendLine("  - SalvageDialog (Desynthesis)");
-            sb.AppendLine("  - Materialize (Materia creation)");
+            sb.AppendLine();
+            sb.AppendLine("Non-text addons are each listed separately in the lower config section.");
 
             ImGui.SameLine();
             ImGuiEx.IconButton(FontAwesomeIcon.QuestionCircle, sb.ToString());
@@ -190,6 +190,10 @@ namespace YesAlready
                 if (ImGui.Checkbox("Materialize", ref plugin.Configuration.MaterializeDialogEnabled))
                     plugin.SaveConfiguration();
                 ImGuiEx.TextTooltip("The dialog that extracts materia from items");
+
+                if (ImGui.Checkbox("ItemInspectionResult", ref plugin.Configuration.ItemInspectionResultEnabled))
+                    plugin.SaveConfiguration();
+                ImGuiEx.TextTooltip("Eureka/Bozja lockboxes, forgotten fragments, and more.");
             }
         }
     }

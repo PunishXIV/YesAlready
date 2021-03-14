@@ -1,4 +1,4 @@
-﻿using Dalamud.Configuration;
+using Dalamud.Configuration;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -16,6 +16,7 @@ namespace YesAlready
 
         public bool DesynthDialogEnabled = false;
         public bool MaterializeDialogEnabled = false;
+        public bool ItemInspectionResultEnabled = false;
     }
 
     internal class ConfigTextEntry

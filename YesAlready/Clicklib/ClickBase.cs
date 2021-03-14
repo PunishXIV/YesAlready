@@ -2,7 +2,6 @@
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace Clicklib
@@ -54,7 +53,6 @@ namespace Clicklib
                     Marshal.WriteByte(arg5, i, 0);
             }
 
-            PluginLog.Information($"SENDING arg4=0x{arg4.ToInt64():X} arg5=0x{arg5.ToInt64():X}");
             receiveEvent(arg1, arg2, arg3, arg4, arg5);
 
             Marshal.FreeHGlobal(arg4);

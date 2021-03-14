@@ -20,6 +20,7 @@ namespace YesAlready
         private Hook<OnSetupDelegate> AddonSelectYesNoOnSetupHook;
         private Hook<OnSetupDelegate> AddonSalvageDialogOnSetupHook;
         private Hook<OnSetupDelegate> AddonMaterializeDialogOnSetupHook;
+        private Hook<OnSetupDelegate> AddonItemInspectionResultOnSetupHook;
 
         public void Initialize(DalamudPluginInterface pluginInterface)
         {
@@ -46,6 +47,9 @@ namespace YesAlready
 
             AddonMaterializeDialogOnSetupHook = new(Address.AddonMaterializeDialongOnSetupAddress, new OnSetupDelegate(AddonMaterializeDialogOnSetupDetour), this);
             AddonMaterializeDialogOnSetupHook.Enable();
+
+            AddonItemInspectionResultOnSetupHook = new(Address.AddonItemInspectionResultOnSetupAddress, new OnSetupDelegate(AddonItemInspectionResultOnSetupDetour), this);
+            AddonItemInspectionResultOnSetupHook.Enable();
         }
 
         public void Dispose()
@@ -55,6 +59,7 @@ namespace YesAlready
             AddonSelectYesNoOnSetupHook.Dispose();
             AddonSalvageDialogOnSetupHook.Dispose();
             AddonMaterializeDialogOnSetupHook.Dispose();
+            AddonItemInspectionResultOnSetupHook.Dispose();
 
             PluginUi.Dispose();
         }
@@ -71,6 +76,7 @@ namespace YesAlready
 
         private IntPtr AddonSelectYesNoOnSetupDetour(IntPtr addon, uint a2, IntPtr dataPtr)
         {
+            PluginLog.Debug($"AddonSelectYesNo.OnSetup");
             var result = AddonSelectYesNoOnSetupHook.Original(addon, a2, dataPtr);
 
             try
@@ -104,6 +110,7 @@ namespace YesAlready
 
         private IntPtr AddonSalvageDialogOnSetupDetour(IntPtr addon, uint a2, IntPtr dataPtr)
         {
+            PluginLog.Debug($"AddonSalvageDialog.OnSetup");
             var result = AddonSalvageDialogOnSetupHook.Original(addon, a2, dataPtr);
 
             try
@@ -125,6 +132,7 @@ namespace YesAlready
 
         private IntPtr AddonMaterializeDialogOnSetupDetour(IntPtr addon, uint a2, IntPtr dataPtr)
         {
+            PluginLog.Debug($"AddonMaterializeDialog.OnSetupDetour");
             var result = AddonMaterializeDialogOnSetupHook.Original(addon, a2, dataPtr);
 
             try
@@ -132,6 +140,26 @@ namespace YesAlready
                 if (Configuration.Enabled && Configuration.MaterializeDialogEnabled)
                 {
                     Click.SendClick("materialize");
+                }
+            }
+            catch (Exception ex)
+            {
+                PluginLog.Error(ex, "Don't crash the game");
+            }
+
+            return result;
+        }
+
+        private IntPtr AddonItemInspectionResultOnSetupDetour(IntPtr addon, uint a2, IntPtr dataPtr)
+        {
+            PluginLog.Debug($"AddonItemInspectionResult.OnSetup");
+            var result = AddonItemInspectionResultOnSetupHook.Original(addon, a2, dataPtr);
+
+            try
+            {
+                if (Configuration.Enabled && Configuration.ItemInspectionResultEnabled)
+                {
+                    Click.SendClick("item_inspection_result_next");
                 }
             }
             catch (Exception ex)
