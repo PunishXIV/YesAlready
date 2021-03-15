@@ -1,4 +1,4 @@
-﻿using Clicklib;
+﻿using ClickLib;
 using Dalamud.Game.Command;
 using Dalamud.Hooking;
 using Dalamud.Plugin;
@@ -55,7 +55,7 @@ namespace YesAlready
         public void Dispose()
         {
             Interface.CommandManager.RemoveHandler(Command);
-
+            
             AddonSelectYesNoOnSetupHook.Dispose();
             AddonSalvageDialogOnSetupHook.Dispose();
             AddonMaterializeDialogOnSetupHook.Dispose();
@@ -82,7 +82,7 @@ namespace YesAlready
             try
             {
                 var data = Marshal.PtrToStructure<AddonSelectYesNoOnSetupData>(dataPtr);
-                var text = LastSeenDialogText = Marshal.PtrToStringAnsi(data.textPtr);
+                var text = LastSeenDialogText = Marshal.PtrToStringAnsi(data.textPtr).Replace('\n', ' ');
 
                 if (Configuration.Enabled)
                 {
