@@ -2,6 +2,7 @@
 using Dalamud.Game.Command;
 using Dalamud.Hooking;
 using Dalamud.Plugin;
+using FFXIVClientStructs.FFXIV.Client.UI;
 using System;
 using System.Runtime.InteropServices;
 
@@ -103,6 +104,18 @@ namespace YesAlready
                             if ((item.IsRegex && (item.Regex?.IsMatch(text) ?? false)) ||
                                 (!item.IsRegex && text.Contains(item.Text)))
                             {
+                                unsafe
+                                {
+                                    var addonObj = (AddonSelectYesno*)addon;
+                                    var yesButton = addonObj->YesButton;
+                                    if (yesButton != null && !yesButton->IsEnabled)
+                                    {
+                                        PluginLog.Debug($"AddonSelectYesNo: Enabling yes button");
+                                        yesButton->AtkComponentBase.OwnerNode->AtkResNode.Flags ^= 1 << 5;
+                                    }
+                                }
+
+                                PluginLog.Debug($"AddonSelectYesNo: Selecting yes");
                                 Click.SendClick("select_yes");
                                 break;
                             }
