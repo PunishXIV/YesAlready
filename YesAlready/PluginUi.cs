@@ -1,4 +1,4 @@
-using Dalamud.Interface;
+﻿using Dalamud.Interface;
 using ImGuiNET;
 using System;
 using System.Linq;
@@ -214,9 +214,17 @@ namespace YesAlready
                     plugin.SaveConfiguration();
                 ImGuiEx.TextTooltip("The dialog that extracts materia from items");
 
-                if (ImGui.Checkbox("ItemInspectionResult", ref plugin.Configuration.ItemInspectionResultEnabled))
+                if (ImGui.Checkbox("Item Inspection Result", ref plugin.Configuration.ItemInspectionResultEnabled))
                     plugin.SaveConfiguration();
                 ImGuiEx.TextTooltip("Eureka/Bozja lockboxes, forgotten fragments, and more.");
+
+                if (ImGui.Checkbox("Retainer Venture Request (send)", ref plugin.Configuration.RetainerTaskAskEnabled))
+                    plugin.SaveConfiguration();
+                ImGuiEx.TextTooltip("The final dialog before sending out a retainer.");
+
+                if (ImGui.Checkbox("Retainer Venture Result (resend)", ref plugin.Configuration.RetainerTaskResultEnabled))
+                    plugin.SaveConfiguration();
+                ImGuiEx.TextTooltip("Where you receive the item and can resend on the same task.");
             }
         }
     }

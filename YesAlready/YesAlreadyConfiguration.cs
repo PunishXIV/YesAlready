@@ -17,6 +17,8 @@ namespace YesAlready
         public bool DesynthDialogEnabled = false;
         public bool MaterializeDialogEnabled = false;
         public bool ItemInspectionResultEnabled = false;
+        public bool RetainerTaskAskEnabled = false;
+        public bool RetainerTaskResultEnabled = false;
     }
 
     internal class ConfigTextEntry
