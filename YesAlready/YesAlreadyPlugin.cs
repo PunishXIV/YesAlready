@@ -85,6 +85,12 @@ namespace YesAlready
             [FieldOffset(0x8)] public IntPtr textPtr;
         }
 
+        private string PtrToStringUTF8(IntPtr p)
+        {
+            byte[] bytes = System.Text.Encoding.Unicode.GetBytes(Marshal.PtrToStringUni(p));
+            return System.Text.Encoding.UTF8.GetString(bytes);
+        }
+
         private IntPtr AddonSelectYesNoOnSetupDetour(IntPtr addon, uint a2, IntPtr dataPtr)
         {
             PluginLog.Debug($"AddonSelectYesNo.OnSetup");
@@ -93,7 +99,7 @@ namespace YesAlready
             try
             {
                 var data = Marshal.PtrToStructure<AddonSelectYesNoOnSetupData>(dataPtr);
-                var text = LastSeenDialogText = Marshal.PtrToStringAnsi(data.textPtr).Replace('\n', ' ');
+                var text = LastSeenDialogText = PtrToStringUTF8(data.textPtr).Replace('\n', ' ');
 
                 if (Configuration.Enabled)
                 {
