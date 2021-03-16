@@ -1,4 +1,4 @@
-﻿using Dalamud.Interface;
+using Dalamud.Interface;
 using ImGuiNET;
 using System;
 using System.Linq;
@@ -53,6 +53,7 @@ namespace YesAlready
             UiBuilder_TextEntryButtons();
             UiBuilder_TextEntries();
             UiBuilder_TextEntryOptionsPopup();
+            UiBuilder_TextEntryQuickDelete();
 
             UiBuilder_ItemsWithoutText();
 
@@ -85,7 +86,8 @@ namespace YesAlready
             sb.AppendLine();
             sb.AppendLine("If it matches, the yes button (and checkbox if present) will be clicked.");
             sb.AppendLine();
-            sb.AppendLine("Right click the enabled button to delete a line.");
+            sb.AppendLine("Right click the enabled button to view options.");
+            sb.AppendLine("Ctrl-Shift right click the enabled button to delete that entry.");
             sb.AppendLine();
             sb.AppendLine("Currently supported text addons:");
             sb.AppendLine("  - SelectYesNo");
@@ -142,7 +144,20 @@ namespace YesAlready
             }
         }
 
+        private void UiBuilder_TextEntryQuickDelete()
+        {
+            var entry = TextEntryQuickDeleteTarget;
+
+            if (entry != null)
+            {
+                plugin.Configuration.TextEntries.Remove(entry);
+                plugin.SaveConfiguration();
+                TextEntryQuickDeleteTarget = null;
+            }
+        }
+
         private ConfigTextEntry TextEntryOptionsTarget = null;
+        private ConfigTextEntry TextEntryQuickDeleteTarget = null;
 
         private void UiBuilder_TextEntry(ConfigTextEntry entry)
         {
@@ -150,8 +165,16 @@ namespace YesAlready
                 plugin.SaveConfiguration();
             if (ImGui.IsItemHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Right))
             {
-                TextEntryOptionsTarget = entry;
-                ImGui.OpenPopup("EntryOptions");
+                var io = ImGui.GetIO();
+                if (io.KeyCtrl && io.KeyShift)
+                {
+                    TextEntryQuickDeleteTarget = entry;
+                }
+                else
+                {
+                    TextEntryOptionsTarget = entry;
+                    ImGui.OpenPopup("EntryOptions");
+                }
             }
 
             ImGuiEx.TextTooltip("Enabled");
