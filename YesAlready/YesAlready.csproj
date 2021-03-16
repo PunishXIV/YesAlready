@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Authors>daemitus</Authors>
     <Company>-</Company>
-    <Version>1.0.0.2</Version>
+    <Version>1.0.0.3</Version>
     <Description></Description>
     <Copyright></Copyright>
     <PackageProjectUrl>https://github.com/daemitus/YesAlready</PackageProjectUrl>
@@ -98,7 +98,7 @@
       <DeleteAssemblies Include="$(TargetDir)*.dll" Exclude="$(TargetPath)" />
     </ItemGroup>
     <Message Text="Deleting @(DeleteAssemblies)" Importance="high" />
-    <!--<Delete Files="@(DeleteAssemblies)" />-->
+    <Delete Files="@(DeleteAssemblies)" />
   </Target>
 
   <Target Name="LivePluginLoadCopy" AfterTargets="CleanOutDir" Condition=" '$(Configuration)' == 'Debug' ">
