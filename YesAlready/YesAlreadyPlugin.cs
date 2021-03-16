@@ -21,6 +21,8 @@ namespace YesAlready
         private Hook<OnSetupDelegate> AddonSalvageDialogOnSetupHook;
         private Hook<OnSetupDelegate> AddonMaterializeDialogOnSetupHook;
         private Hook<OnSetupDelegate> AddonItemInspectionResultOnSetupHook;
+        private Hook<OnSetupDelegate> AddonRetainerTaskAskOnSetupHook;
+        private Hook<OnSetupDelegate> AddonRetainerTaskResultOnSetupHook;
 
         public void Initialize(DalamudPluginInterface pluginInterface)
         {
@@ -50,16 +52,24 @@ namespace YesAlready
 
             AddonItemInspectionResultOnSetupHook = new(Address.AddonItemInspectionResultOnSetupAddress, new OnSetupDelegate(AddonItemInspectionResultOnSetupDetour), this);
             AddonItemInspectionResultOnSetupHook.Enable();
+
+            AddonRetainerTaskAskOnSetupHook = new(Address.AddonRetainerTaskAskOnSetupAddress, new OnSetupDelegate(AddonRetainerTaskAskOnSetupDetour), this);
+            AddonRetainerTaskAskOnSetupHook.Enable();
+
+            AddonRetainerTaskResultOnSetupHook = new(Address.AddonRetainerTaskResultOnSetupAddress, new OnSetupDelegate(AddonRetainerTaskResultOnSetupDetour), this);
+            AddonRetainerTaskResultOnSetupHook.Enable();
         }
 
         public void Dispose()
         {
             Interface.CommandManager.RemoveHandler(Command);
-            
+
             AddonSelectYesNoOnSetupHook.Dispose();
             AddonSalvageDialogOnSetupHook.Dispose();
             AddonMaterializeDialogOnSetupHook.Dispose();
             AddonItemInspectionResultOnSetupHook.Dispose();
+            AddonRetainerTaskAskOnSetupHook.Dispose();
+            AddonRetainerTaskResultOnSetupHook.Dispose();
 
             PluginUi.Dispose();
         }
@@ -108,19 +118,15 @@ namespace YesAlready
             return result;
         }
 
-        private IntPtr AddonSalvageDialogOnSetupDetour(IntPtr addon, uint a2, IntPtr dataPtr)
+        private IntPtr AddonNoTextMatchDetour(IntPtr addon, uint a2, IntPtr dataPtr, Hook<OnSetupDelegate> hook, bool enabled, params string[] clicks)
         {
-            PluginLog.Debug($"AddonSalvageDialog.OnSetup");
-            var result = AddonSalvageDialogOnSetupHook.Original(addon, a2, dataPtr);
+            var result = hook.Original(addon, a2, dataPtr);
 
             try
             {
-                if (Configuration.Enabled && Configuration.DesynthDialogEnabled)
-                {
-                    // It doesn't seem to matter if the checkbox is visible or not
-                    Click.SendClick("desynthesize_checkbox");
-                    Click.SendClick("desynthesize");
-                }
+                if (Configuration.Enabled && enabled)
+                    foreach (var click in clicks)
+                        Click.SendClick(click);
             }
             catch (Exception ex)
             {
@@ -128,46 +134,36 @@ namespace YesAlready
             }
 
             return result;
+        }
+
+        private IntPtr AddonSalvageDialogOnSetupDetour(IntPtr addon, uint a2, IntPtr dataPtr)
+        {
+            PluginLog.Debug($"AddonSalvageDialog.OnSetup");
+            return AddonNoTextMatchDetour(addon, a2, dataPtr, AddonSalvageDialogOnSetupHook, Configuration.DesynthDialogEnabled, "desynthesize_checkbox", "desynthesize");
         }
 
         private IntPtr AddonMaterializeDialogOnSetupDetour(IntPtr addon, uint a2, IntPtr dataPtr)
         {
             PluginLog.Debug($"AddonMaterializeDialog.OnSetupDetour");
-            var result = AddonMaterializeDialogOnSetupHook.Original(addon, a2, dataPtr);
-
-            try
-            {
-                if (Configuration.Enabled && Configuration.MaterializeDialogEnabled)
-                {
-                    Click.SendClick("materialize");
-                }
-            }
-            catch (Exception ex)
-            {
-                PluginLog.Error(ex, "Don't crash the game");
-            }
-
-            return result;
+            return AddonNoTextMatchDetour(addon, a2, dataPtr, AddonMaterializeDialogOnSetupHook, Configuration.MaterializeDialogEnabled, "materialize");
         }
 
         private IntPtr AddonItemInspectionResultOnSetupDetour(IntPtr addon, uint a2, IntPtr dataPtr)
         {
             PluginLog.Debug($"AddonItemInspectionResult.OnSetup");
-            var result = AddonItemInspectionResultOnSetupHook.Original(addon, a2, dataPtr);
+            return AddonNoTextMatchDetour(addon, a2, dataPtr, AddonItemInspectionResultOnSetupHook, Configuration.ItemInspectionResultEnabled, "item_inspection_result_next");
+        }
 
-            try
-            {
-                if (Configuration.Enabled && Configuration.ItemInspectionResultEnabled)
-                {
-                    Click.SendClick("item_inspection_result_next");
-                }
-            }
-            catch (Exception ex)
-            {
-                PluginLog.Error(ex, "Don't crash the game");
-            }
+        private IntPtr AddonRetainerTaskAskOnSetupDetour(IntPtr addon, uint a2, IntPtr dataPtr)
+        {
+            PluginLog.Debug($"AddonRetainerTaskAsk.OnSetup");
+            return AddonNoTextMatchDetour(addon, a2, dataPtr, AddonRetainerTaskAskOnSetupHook, Configuration.RetainerTaskAskEnabled, "retainer_venture_ask_assign");
+        }
 
-            return result;
+        private IntPtr AddonRetainerTaskResultOnSetupDetour(IntPtr addon, uint a2, IntPtr dataPtr)
+        {
+            PluginLog.Debug($"AddonRetainerTaskResult.OnSetup");
+            return AddonNoTextMatchDetour(addon, a2, dataPtr, AddonRetainerTaskResultOnSetupHook, Configuration.RetainerTaskResultEnabled, "retainer_venture_result_reassign");
         }
 
         private void OnChatCommand(string command, string arguments)
