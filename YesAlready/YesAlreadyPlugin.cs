@@ -5,6 +5,7 @@ using Dalamud.Plugin;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using System;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 
 namespace YesAlready
 {
@@ -91,6 +92,26 @@ namespace YesAlready
             return System.Text.Encoding.UTF8.GetString(bytes);
         }
 
+        private string ClearStyles(string text)
+        {
+            string clear_text = text;
+            int tries = 0;
+            do
+            {
+                text = clear_text;
+                string pattern = @"\u0002\u001a.{3}(.*?)\u0002\u001a.{3}";
+                clear_text = Regex.Replace(clear_text, pattern, "$1");
+                for (int i = 1; i <= 6; i++)
+                {
+                    pattern = @"\u0002H.{" + i + @"}\u0002I.{" + i + "}(.*)" + @"\u0002I\u0002\u0001\u0003\u0002H\u0002\u0001\u0003";
+                    clear_text = Regex.Replace(clear_text, pattern, "$1");
+                }
+                tries++;
+                if (tries > 1000) break;
+            } while (clear_text != text);
+            return text;
+        }
+
         private IntPtr AddonSelectYesNoOnSetupDetour(IntPtr addon, uint a2, IntPtr dataPtr)
         {
             PluginLog.Debug($"AddonSelectYesNo.OnSetup");
@@ -99,7 +120,7 @@ namespace YesAlready
             try
             {
                 var data = Marshal.PtrToStructure<AddonSelectYesNoOnSetupData>(dataPtr);
-                var text = LastSeenDialogText = PtrToStringUTF8(data.textPtr).Replace('\n', ' ');
+                var text = LastSeenDialogText = ClearStyles(PtrToStringUTF8(data.textPtr).Replace('\n', ' '));
 
                 if (Configuration.Enabled)
                 {
