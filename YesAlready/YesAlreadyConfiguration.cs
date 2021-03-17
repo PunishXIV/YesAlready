@@ -21,7 +21,7 @@ namespace YesAlready
         public bool RetainerTaskResultEnabled = false;
     }
 
-    internal class ConfigTextEntry
+    internal class ConfigTextEntry : ICloneable
     {
         public bool Enabled = false;
         public string Folder = "";
@@ -29,7 +29,7 @@ namespace YesAlready
 
         [JsonIgnore]
         public bool IsRegex => Text.StartsWith("/") && Text.EndsWith("/");
-        
+
         [JsonIgnore]
         public Regex Regex
         {
@@ -44,6 +44,16 @@ namespace YesAlready
                     return null;
                 }
             }
+        }
+
+        public object Clone()
+        {
+            return new ConfigTextEntry
+            {
+                Enabled = Enabled,
+                Folder = Folder,
+                Text = Text,
+            };
         }
     }
 }

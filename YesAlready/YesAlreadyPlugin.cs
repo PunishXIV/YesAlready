@@ -1,10 +1,14 @@
 ﻿using ClickLib;
+using Dalamud.Game.Chat.SeStringHandling;
+using Dalamud.Game.Chat.SeStringHandling.Payloads;
 using Dalamud.Game.Command;
 using Dalamud.Hooking;
 using Dalamud.Plugin;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using System;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace YesAlready
 {
@@ -75,6 +79,10 @@ namespace YesAlready
             PluginUi.Dispose();
         }
 
+        internal void PrintMessage(string message) => Interface.Framework.Gui.Chat.Print(message);
+
+        internal void PrintError(string message) => Interface.Framework.Gui.Chat.PrintError(message);
+
         internal void SaveConfiguration() => Interface.SavePluginConfig(Configuration);
 
         internal string LastSeenDialogText { get; set; } = "";
@@ -93,7 +101,10 @@ namespace YesAlready
             try
             {
                 var data = Marshal.PtrToStructure<AddonSelectYesNoOnSetupData>(dataPtr);
-                var text = LastSeenDialogText = Marshal.PtrToStringAnsi(data.textPtr).Replace('\n', ' ');
+                var bytes = Encoding.Unicode.GetBytes(Marshal.PtrToStringUni(data.textPtr));
+                var sestring = Interface.SeStringManager.Parse(bytes);
+                var pieces = sestring.Payloads.OfType<TextPayload>().Select(t => t.Text);
+                var text = LastSeenDialogText = string.Join("", pieces).Replace('\n', ' ');
 
                 if (Configuration.Enabled)
                 {

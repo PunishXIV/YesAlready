@@ -1,6 +1,9 @@
 ﻿using Dalamud.Interface;
+using Dalamud.Plugin;
 using ImGuiNET;
+using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Text;
@@ -35,6 +38,10 @@ namespace YesAlready
 
         public void UiBuilder_OnOpenConfigUi(object sender, EventArgs args) => IsImguiSetupOpen = true;
 
+        private (string Name, IEnumerable<ConfigTextEntry> Entries) TextFolderOptionsTarget;
+        private ConfigTextEntry TextEntryOptionsTarget = null;
+        private ConfigTextEntry TextEntryQuickDeleteTarget = null;
+
         public void UiBuilder_OnBuildUi()
         {
             if (!IsImguiSetupOpen)
@@ -52,6 +59,8 @@ namespace YesAlready
 
             UiBuilder_TextEntryButtons();
             UiBuilder_TextEntries();
+
+            UiBuilder_FolderOptionsPopup();
             UiBuilder_TextEntryOptionsPopup();
             UiBuilder_TextEntryQuickDelete();
 
@@ -76,6 +85,10 @@ namespace YesAlready
                 plugin.Configuration.TextEntries.Insert(0, new() { Text = plugin.LastSeenDialogText });
                 plugin.SaveConfiguration();
             }
+
+            ImGui.SameLine();
+            if (ImGuiEx.IconButton(FontAwesomeIcon.FileImport, "Import entries from the clipboard"))
+                UiBuilder_ImportText();
 
             var sb = new StringBuilder();
             sb.AppendLine("Enter into the input all or part of the text inside a dialog.");
@@ -113,14 +126,99 @@ namespace YesAlready
                     UiBuilder_TextEntry(entry);
             }
 
-            var groups = plugin.Configuration.TextEntries.Where(entry => entry.Folder != "").GroupBy(entry => entry.Folder);
+            var groups = plugin.Configuration.TextEntries.Where(entry => entry.Folder != "").GroupBy(entry => entry.Folder).OrderBy(g => g.Key);
             foreach (var group in groups)
             {
-                if (ImGui.CollapsingHeader(group.Key))
+                var openedHeader = ImGui.CollapsingHeader(group.Key);
+                if (ImGui.IsItemHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Right))
+                {
+                    TextFolderOptionsTarget = (group.Key, group);
+                    ImGui.OpenPopup("FolderOptions");
+                }
+
+                if (openedHeader)
                 {
                     foreach (var entry in group)
                         UiBuilder_TextEntry(entry);
                 }
+            }
+        }
+
+        private void UiBuilder_ImportText()
+        {
+            var importBase64 = ImGui.GetClipboardText();
+
+            byte[] importBytes;
+            try
+            {
+                importBytes = Convert.FromBase64String(importBase64);
+            }
+            catch (ArgumentNullException ex)
+            {
+                plugin.PrintError("[YesAlready] Clipboard was null");
+                PluginLog.Error(ex, "Error during import");
+                return;
+            }
+            catch (FormatException ex)
+            {
+                plugin.PrintError("[YesAlready] Import text was improperly formatted");
+                PluginLog.Error(ex, "Error during import");
+                return;
+            }
+
+            string importText;
+            try
+            {
+                importText = Encoding.UTF8.GetString(importBytes);
+            }
+            catch (ArgumentException ex)
+            {
+                plugin.PrintError("[YesAlready] Import text had invalid text");
+                PluginLog.Error(ex, "Error during import");
+                return;
+            }
+
+            List<ConfigTextEntry> importEntries;
+            try
+            {
+                importEntries = JsonConvert.DeserializeObject<List<ConfigTextEntry>>(importText);
+            }
+            catch (JsonSerializationException ex)
+            {
+                plugin.PrintError("[YesAlready] Import text was in the wrong format");
+                PluginLog.Error(ex, "Error during import");
+                return;
+            }
+
+            plugin.PrintMessage($"[YesAlready] Imported {importEntries.Count} entries");
+            plugin.Configuration.TextEntries.AddRange(importEntries);
+        }
+
+        private void UiBuilder_FolderOptionsPopup()
+        {
+            if (ImGui.BeginPopupContextItem("FolderOptions"))
+            {
+                var (folderName, entries) = TextFolderOptionsTarget;
+
+                if (ImGui.InputText("Folder", ref folderName, 100))
+                {
+                    foreach (var entry in entries)
+                        entry.Folder = folderName;
+                    plugin.SaveConfiguration();
+                }
+
+                ImGui.SameLine();
+                if (ImGuiEx.IconButton(FontAwesomeIcon.FileExport, "Export folder to the clipboard"))
+                {
+                    var exportEntries = entries.Select(e => (ConfigTextEntry)e.Clone()).ToArray();
+                    foreach (var entry in exportEntries)
+                        entry.Folder = $"Imported {entry.Folder}";
+                    var exportStr = JsonConvert.SerializeObject(exportEntries);
+                    var exportBytes = Encoding.UTF8.GetBytes(exportStr);
+                    var exportBase64 = Convert.ToBase64String(exportBytes);
+                    ImGui.SetClipboardText(exportBase64);
+                }
+                ImGui.EndPopup();
             }
         }
 
@@ -156,13 +254,11 @@ namespace YesAlready
             }
         }
 
-        private ConfigTextEntry TextEntryOptionsTarget = null;
-        private ConfigTextEntry TextEntryQuickDeleteTarget = null;
-
         private void UiBuilder_TextEntry(ConfigTextEntry entry)
         {
             if (ImGui.Checkbox($"###enabled-{entry.GetHashCode()}", ref entry.Enabled))
                 plugin.SaveConfiguration();
+
             if (ImGui.IsItemHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Right))
             {
                 var io = ImGui.GetIO();
