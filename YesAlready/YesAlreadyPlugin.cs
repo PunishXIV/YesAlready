@@ -87,6 +87,22 @@ namespace YesAlready
 
         internal string LastSeenDialogText { get; set; } = "";
 
+        private string GetSeStringText(IntPtr textPtr)
+        {
+            var rawText = Marshal.PtrToStringUni(textPtr);
+            var bytes = Encoding.Unicode.GetBytes(rawText);
+
+            // Unicode expects a \0\0 nul terminated string, it appears as if SE uses a single.
+            var idx = Array.IndexOf<byte>(bytes, 0);
+            if (idx != -1)
+                bytes = bytes.Take(idx).ToArray();
+
+            var sestring = Interface.SeStringManager.Parse(bytes);
+            var pieces = sestring.Payloads.OfType<TextPayload>().Select(t => t.Text);
+            var text = string.Join("", pieces).Replace('\n', ' ');
+            return text;
+        }
+
         [StructLayout(LayoutKind.Explicit, Size = 0x10)]
         private struct AddonSelectYesNoOnSetupData
         {
@@ -101,10 +117,9 @@ namespace YesAlready
             try
             {
                 var data = Marshal.PtrToStructure<AddonSelectYesNoOnSetupData>(dataPtr);
-                var bytes = Encoding.Unicode.GetBytes(Marshal.PtrToStringUni(data.textPtr));
-                var sestring = Interface.SeStringManager.Parse(bytes);
-                var pieces = sestring.Payloads.OfType<TextPayload>().Select(t => t.Text);
-                var text = LastSeenDialogText = string.Join("", pieces).Replace('\n', ' ');
+                var text = LastSeenDialogText = GetSeStringText(data.textPtr);
+
+                PluginLog.Debug($"AddonSelectYesNo text={text}");
 
                 if (Configuration.Enabled)
                 {
@@ -115,6 +130,7 @@ namespace YesAlready
                             if ((item.IsRegex && (item.Regex?.IsMatch(text) ?? false)) ||
                                 (!item.IsRegex && text.Contains(item.Text)))
                             {
+                                PluginLog.Debug($"AddonSelectYesNo: Matched on {item.Text}");
                                 unsafe
                                 {
                                     var addonObj = (AddonSelectYesno*)addon;

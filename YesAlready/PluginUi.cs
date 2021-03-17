@@ -99,6 +99,7 @@ namespace YesAlready
             sb.AppendLine();
             sb.AppendLine("If it matches, the yes button (and checkbox if present) will be clicked.");
             sb.AppendLine();
+            sb.AppendLine("Right click a collapsing group header to view folder options.");
             sb.AppendLine("Right click the enabled button to view options.");
             sb.AppendLine("Ctrl-Shift right click the enabled button to delete that entry.");
             sb.AppendLine();
