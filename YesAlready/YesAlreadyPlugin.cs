@@ -89,13 +89,12 @@ namespace YesAlready
 
         private string GetSeStringText(IntPtr textPtr)
         {
-            var rawText = Marshal.PtrToStringUni(textPtr);
-            var bytes = Encoding.Unicode.GetBytes(rawText);
+            var size = 0;
+            while (Marshal.ReadByte(textPtr, size) != 0)
+                size++;
 
-            // Unicode expects a \0\0 nul terminated string, it appears as if SE uses a single.
-            var idx = Array.IndexOf<byte>(bytes, 0);
-            if (idx != -1)
-                bytes = bytes.Take(idx).ToArray();
+            var bytes = new byte[size];
+            Marshal.Copy(textPtr, bytes, 0, size);
 
             var sestring = Interface.SeStringManager.Parse(bytes);
             var pieces = sestring.Payloads.OfType<TextPayload>().Select(t => t.Text);

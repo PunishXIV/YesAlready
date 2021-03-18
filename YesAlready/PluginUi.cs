@@ -38,7 +38,7 @@ namespace YesAlready
 
         public void UiBuilder_OnOpenConfigUi(object sender, EventArgs args) => IsImguiSetupOpen = true;
 
-        private (string Name, IEnumerable<ConfigTextEntry> Entries) TextFolderOptionsTarget;
+        private IGrouping<string, ConfigTextEntry> TextFolderOptionsTarget;
         private ConfigTextEntry TextEntryOptionsTarget = null;
         private ConfigTextEntry TextEntryQuickDeleteTarget = null;
 
@@ -122,18 +122,18 @@ namespace YesAlready
 
             if (ImGui.CollapsingHeader("Unassigned"))
             {
-                var entries = plugin.Configuration.TextEntries.Where(entry => entry.Folder == "");
+                var entries = plugin.Configuration.TextEntries.Where(entry => string.IsNullOrEmpty(entry.Folder));
                 foreach (var entry in entries)
                     UiBuilder_TextEntry(entry);
             }
 
-            var groups = plugin.Configuration.TextEntries.Where(entry => entry.Folder != "").GroupBy(entry => entry.Folder).OrderBy(g => g.Key);
+            var groups = plugin.Configuration.TextEntries.Where(entry => !string.IsNullOrEmpty(entry.Folder)).GroupBy(entry => entry.Folder).OrderBy(g => g.Key);
             foreach (var group in groups)
             {
                 var openedHeader = ImGui.CollapsingHeader(group.Key);
                 if (ImGui.IsItemHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Right))
                 {
-                    TextFolderOptionsTarget = (group.Key, group);
+                    TextFolderOptionsTarget = group;
                     ImGui.OpenPopup("FolderOptions");
                 }
 
@@ -197,9 +197,11 @@ namespace YesAlready
 
         private void UiBuilder_FolderOptionsPopup()
         {
-            if (ImGui.BeginPopupContextItem("FolderOptions"))
+            var target = TextFolderOptionsTarget;
+
+            if (target != null && ImGui.BeginPopupContextItem("FolderOptions"))
             {
-                var (folderName, entries) = TextFolderOptionsTarget;
+                var (folderName, entries) = (target.Key, target);
 
                 if (ImGui.InputText("Folder", ref folderName, 100))
                 {
@@ -225,17 +227,17 @@ namespace YesAlready
 
         private void UiBuilder_TextEntryOptionsPopup()
         {
-            var entry = TextEntryOptionsTarget;
+            var target = TextEntryOptionsTarget;
 
-            if (ImGui.BeginPopupContextItem("EntryOptions"))
+            if (target != null && ImGui.BeginPopupContextItem("EntryOptions"))
             {
-                if (ImGui.InputText("Folder", ref entry.Folder, 100))
+                if (ImGui.InputText("Folder", ref target.Folder, 100))
                     plugin.SaveConfiguration();
 
                 ImGui.SameLine();
                 if (ImGuiEx.IconButton(FontAwesomeIcon.TrashAlt, "Delete"))
                 {
-                    plugin.Configuration.TextEntries.Remove(entry);
+                    plugin.Configuration.TextEntries.Remove(target);
                     plugin.SaveConfiguration();
                     ImGui.CloseCurrentPopup();
                 }
@@ -245,11 +247,11 @@ namespace YesAlready
 
         private void UiBuilder_TextEntryQuickDelete()
         {
-            var entry = TextEntryQuickDeleteTarget;
+            var target = TextEntryQuickDeleteTarget;
 
-            if (entry != null)
+            if (target != null)
             {
-                plugin.Configuration.TextEntries.Remove(entry);
+                plugin.Configuration.TextEntries.Remove(target);
                 plugin.SaveConfiguration();
                 TextEntryQuickDeleteTarget = null;
             }
