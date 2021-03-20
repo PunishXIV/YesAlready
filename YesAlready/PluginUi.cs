@@ -54,6 +54,10 @@ namespace YesAlready
             if (!ImGui.Begin(plugin.Name, ref IsImguiSetupOpen))
                 return;
 
+#if DEBUG
+            UiBuilder_TestButton();
+#endif
+
             if (ImGui.Checkbox($"Enabled", ref plugin.Configuration.Enabled))
                 plugin.SaveConfiguration();
 
@@ -69,6 +73,31 @@ namespace YesAlready
             ImGui.End();
 
             ImGui.PopStyleColor();
+        }
+
+        private string DebugClickName = "";
+
+        private void UiBuilder_TestButton()
+        {
+            ImGui.InputText("ClickName", ref DebugClickName, 100);
+            ImGui.SameLine();
+            if (ImGuiEx.IconButton(FontAwesomeIcon.Check, "Submit"))
+            {
+                try
+                {
+                    DebugClickName ??= "";
+                    ClickLib.Click.SendClick(DebugClickName.Trim());
+                    plugin.PrintMessage($"Clicked {DebugClickName} successfully.");
+                }
+                catch (ClickLib.ClickNotFoundError ex)
+                {
+                    plugin.PrintError(ex.Message);
+                }
+                catch (ClickLib.InvalidClickException ex)
+                {
+                    plugin.PrintError(ex.Message);
+                }
+            }
         }
 
         private void UiBuilder_TextEntryButtons()
@@ -156,13 +185,13 @@ namespace YesAlready
             }
             catch (ArgumentNullException ex)
             {
-                plugin.PrintError("[YesAlready] Clipboard was null");
+                plugin.PrintError("Clipboard was null");
                 PluginLog.Error(ex, "Error during import");
                 return;
             }
             catch (FormatException ex)
             {
-                plugin.PrintError("[YesAlready] Import text was improperly formatted");
+                plugin.PrintError("Import text was improperly formatted");
                 PluginLog.Error(ex, "Error during import");
                 return;
             }
@@ -174,7 +203,7 @@ namespace YesAlready
             }
             catch (ArgumentException ex)
             {
-                plugin.PrintError("[YesAlready] Import text had invalid text");
+                plugin.PrintError("Import text had invalid text");
                 PluginLog.Error(ex, "Error during import");
                 return;
             }
@@ -186,12 +215,12 @@ namespace YesAlready
             }
             catch (JsonSerializationException ex)
             {
-                plugin.PrintError("[YesAlready] Import text was in the wrong format");
+                plugin.PrintError("Import text was in the wrong format");
                 PluginLog.Error(ex, "Error during import");
                 return;
             }
 
-            plugin.PrintMessage($"[YesAlready] Imported {importEntries.Count} entries");
+            plugin.PrintMessage($"Imported {importEntries.Count} entries");
             plugin.Configuration.TextEntries.AddRange(importEntries);
         }
 
@@ -307,11 +336,11 @@ namespace YesAlready
             {
                 if (ImGui.Checkbox("Desynthesis", ref plugin.Configuration.DesynthDialogEnabled))
                     plugin.SaveConfiguration();
-                ImGuiEx.TextTooltip("Don't blame me when you destroy something important");
+                ImGuiEx.TextTooltip("Don't blame me when you destroy something important.");
 
                 if (ImGui.Checkbox("Materialize", ref plugin.Configuration.MaterializeDialogEnabled))
                     plugin.SaveConfiguration();
-                ImGuiEx.TextTooltip("The dialog that extracts materia from items");
+                ImGuiEx.TextTooltip("The dialog that extracts materia from items.");
 
                 if (ImGui.Checkbox("Item Inspection Result", ref plugin.Configuration.ItemInspectionResultEnabled))
                     plugin.SaveConfiguration();
@@ -324,6 +353,10 @@ namespace YesAlready
                 if (ImGui.Checkbox("Reassign on Retainer Venture Result", ref plugin.Configuration.RetainerTaskResultEnabled))
                     plugin.SaveConfiguration();
                 ImGuiEx.TextTooltip("Where you receive the item and can resend on the same task.");
+
+                if (ImGui.Checkbox("Grand Company Expert Delivery Reward", ref plugin.Configuration.GrandCompanySupplyReward))
+                    plugin.SaveConfiguration();
+                ImGuiEx.TextTooltip("Don't blame me when you give away something important.");
             }
         }
     }

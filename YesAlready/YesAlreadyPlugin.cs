@@ -6,6 +6,7 @@ using Dalamud.Hooking;
 using Dalamud.Plugin;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -22,12 +23,14 @@ namespace YesAlready
         internal PluginAddressResolver Address;
         private PluginUI PluginUi;
 
+        private readonly List<Hook<OnSetupDelegate>> OnSetupHooks = new();
         private Hook<OnSetupDelegate> AddonSelectYesNoOnSetupHook;
         private Hook<OnSetupDelegate> AddonSalvageDialogOnSetupHook;
         private Hook<OnSetupDelegate> AddonMaterializeDialogOnSetupHook;
         private Hook<OnSetupDelegate> AddonItemInspectionResultOnSetupHook;
         private Hook<OnSetupDelegate> AddonRetainerTaskAskOnSetupHook;
         private Hook<OnSetupDelegate> AddonRetainerTaskResultOnSetupHook;
+        private Hook<OnSetupDelegate> AddonGrandCompanySupplyRewardOnSetupHook;
 
         public void Initialize(DalamudPluginInterface pluginInterface)
         {
@@ -46,42 +49,29 @@ namespace YesAlready
 
             Click.Initialize(pluginInterface);
 
-            AddonSelectYesNoOnSetupHook = new(Address.AddonSelectYesNoOnSetupAddress, new OnSetupDelegate(AddonSelectYesNoOnSetupDetour), this);
-            AddonSelectYesNoOnSetupHook.Enable();
+            OnSetupHooks.Add(AddonSelectYesNoOnSetupHook = new(Address.AddonSelectYesNoOnSetupAddress, new OnSetupDelegate(AddonSelectYesNoOnSetupDetour), this));
+            OnSetupHooks.Add(AddonSalvageDialogOnSetupHook = new(Address.AddonSalvageDialongOnSetupAddress, new OnSetupDelegate(AddonSalvageDialogOnSetupDetour), this));
+            OnSetupHooks.Add(AddonMaterializeDialogOnSetupHook = new(Address.AddonMaterializeDialongOnSetupAddress, new OnSetupDelegate(AddonMaterializeDialogOnSetupDetour), this));
+            OnSetupHooks.Add(AddonItemInspectionResultOnSetupHook = new(Address.AddonItemInspectionResultOnSetupAddress, new OnSetupDelegate(AddonItemInspectionResultOnSetupDetour), this));
+            OnSetupHooks.Add(AddonRetainerTaskAskOnSetupHook = new(Address.AddonRetainerTaskAskOnSetupAddress, new OnSetupDelegate(AddonRetainerTaskAskOnSetupDetour), this));
+            OnSetupHooks.Add(AddonRetainerTaskResultOnSetupHook = new(Address.AddonRetainerTaskResultOnSetupAddress, new OnSetupDelegate(AddonRetainerTaskResultOnSetupDetour), this));
+            OnSetupHooks.Add(AddonGrandCompanySupplyRewardOnSetupHook = new(Address.AddonGrandCompanySupplyRewardOnSetupAddress, new OnSetupDelegate(AddonGrandCompanySupplyRewardOnSetupDetour), this));
 
-            AddonSalvageDialogOnSetupHook = new(Address.AddonSalvageDialongOnSetupAddress, new OnSetupDelegate(AddonSalvageDialogOnSetupDetour), this);
-            AddonSalvageDialogOnSetupHook.Enable();
-
-            AddonMaterializeDialogOnSetupHook = new(Address.AddonMaterializeDialongOnSetupAddress, new OnSetupDelegate(AddonMaterializeDialogOnSetupDetour), this);
-            AddonMaterializeDialogOnSetupHook.Enable();
-
-            AddonItemInspectionResultOnSetupHook = new(Address.AddonItemInspectionResultOnSetupAddress, new OnSetupDelegate(AddonItemInspectionResultOnSetupDetour), this);
-            AddonItemInspectionResultOnSetupHook.Enable();
-
-            AddonRetainerTaskAskOnSetupHook = new(Address.AddonRetainerTaskAskOnSetupAddress, new OnSetupDelegate(AddonRetainerTaskAskOnSetupDetour), this);
-            AddonRetainerTaskAskOnSetupHook.Enable();
-
-            AddonRetainerTaskResultOnSetupHook = new(Address.AddonRetainerTaskResultOnSetupAddress, new OnSetupDelegate(AddonRetainerTaskResultOnSetupDetour), this);
-            AddonRetainerTaskResultOnSetupHook.Enable();
+            OnSetupHooks.ForEach(hook => hook.Enable());
         }
 
         public void Dispose()
         {
             Interface.CommandManager.RemoveHandler(Command);
 
-            AddonSelectYesNoOnSetupHook.Dispose();
-            AddonSalvageDialogOnSetupHook.Dispose();
-            AddonMaterializeDialogOnSetupHook.Dispose();
-            AddonItemInspectionResultOnSetupHook.Dispose();
-            AddonRetainerTaskAskOnSetupHook.Dispose();
-            AddonRetainerTaskResultOnSetupHook.Dispose();
+            OnSetupHooks.ForEach(hook => hook.Dispose());
 
             PluginUi.Dispose();
         }
 
-        internal void PrintMessage(string message) => Interface.Framework.Gui.Chat.Print(message);
+        internal void PrintMessage(string message) => Interface.Framework.Gui.Chat.Print($"[YesAlready] {message}");
 
-        internal void PrintError(string message) => Interface.Framework.Gui.Chat.PrintError(message);
+        internal void PrintError(string message) => Interface.Framework.Gui.Chat.PrintError($"[YesAlready] {message}");
 
         internal void SaveConfiguration() => Interface.SavePluginConfig(Configuration);
 
@@ -203,6 +193,12 @@ namespace YesAlready
         {
             PluginLog.Debug($"AddonRetainerTaskResult.OnSetup");
             return AddonNoTextMatchDetour(addon, a2, dataPtr, AddonRetainerTaskResultOnSetupHook, Configuration.RetainerTaskResultEnabled, "retainer_venture_result_reassign");
+        }
+
+        private IntPtr AddonGrandCompanySupplyRewardOnSetupDetour(IntPtr addon, uint a2, IntPtr dataPtr)
+        {
+            PluginLog.Debug($"AddonGrandCompanySupplyReward.OnSetup");
+            return AddonNoTextMatchDetour(addon, a2, dataPtr, AddonGrandCompanySupplyRewardOnSetupHook, Configuration.GrandCompanySupplyReward, "grand_company_expert_delivery_deliver");
         }
 
         private void OnChatCommand(string command, string arguments)

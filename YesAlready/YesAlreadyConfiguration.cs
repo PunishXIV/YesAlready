@@ -19,6 +19,7 @@ namespace YesAlready
         public bool ItemInspectionResultEnabled = false;
         public bool RetainerTaskAskEnabled = false;
         public bool RetainerTaskResultEnabled = false;
+        public bool GrandCompanySupplyReward = false;
     }
 
     internal class ConfigTextEntry : ICloneable
