@@ -208,8 +208,6 @@ namespace YesAlready
         public List<ITalkNode> Children { get; } = new();
     }
 
-
-
     public class ConcreteNodeConverter : JsonConverter
     {
         public override bool CanRead => true;
@@ -222,21 +220,18 @@ namespace YesAlready
             var jType = jObject["$type"].Value<string>();
 
             if (jType == SimpleName(typeof(TextEntryNode)))
-            {
-                var obj = new TextEntryNode();
-                serializer.Populate(jObject.CreateReader(), obj);
-                return obj;
-            }
+                return CreateObject<TextEntryNode>(jObject, serializer);
             else if (jType == SimpleName(typeof(TextFolderNode)))
-            {
-                var obj = new TextFolderNode();
-                serializer.Populate(jObject.CreateReader(), obj);
-                return obj;
-            }
+                return CreateObject<TextFolderNode>(jObject, serializer);
             else
-            {
                 throw new NotSupportedException($"Node type \"{jType}\" is not supported.");
-            }
+        }
+
+        private T CreateObject<T>(JObject jObject, JsonSerializer serializer) where T : new()
+        {
+            var obj = new T();
+            serializer.Populate(jObject.CreateReader(), obj);
+            return obj;
         }
 
         private string SimpleName(Type type)

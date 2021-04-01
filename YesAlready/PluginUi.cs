@@ -163,10 +163,6 @@ namespace YesAlready
                 AddTextNode.Add(new AddTextNodeOperation { Node = newNode, ParentNode = plugin.Configuration.RootFolder, Index = -1 });
             }
 
-            ImGui.SameLine();
-            if (ImGuiEx.IconButton(FontAwesomeIcon.FileImport, "Import entries from the clipboard"))
-                ImportTextNodes();
-
             var sb = new StringBuilder();
             sb.AppendLine("Enter into the input all or part of the text inside a dialog.");
             sb.AppendLine("For example: \"Teleport to \" for the teleport dialog.");
@@ -403,15 +399,6 @@ namespace YesAlready
                         AddTextNode.Add(new AddTextNodeOperation { Node = newNode, ParentNode = folderNode, Index = -1 });
                     }
 
-                    ImGui.SameLine();
-                    if (ImGuiEx.IconButton(FontAwesomeIcon.FileExport, "Export folder to the clipboard"))
-                    {
-                        var exportStr = JsonConvert.SerializeObject(folderNode);
-                        var exportBytes = Encoding.UTF8.GetBytes(exportStr);
-                        var exportBase64 = Convert.ToBase64String(exportBytes);
-                        ImGui.SetClipboardText(exportBase64);
-                    }
-
                     var trashWidth = ImGuiEx.GetIconButtonWidth(FontAwesomeIcon.TrashAlt);
                     ImGui.SameLine(ImGui.GetContentRegionMax().X - trashWidth);
                     if (ImGuiEx.IconButton(FontAwesomeIcon.TrashAlt, "Delete"))
@@ -522,56 +509,6 @@ namespace YesAlready
                 AddTextNode.Clear();
                 plugin.SaveConfiguration();
             }
-        }
-
-        private void ImportTextNodes()
-        {
-            var importBase64 = ImGui.GetClipboardText();
-
-            byte[] importBytes;
-            try
-            {
-                importBytes = Convert.FromBase64String(importBase64);
-            }
-            catch (ArgumentNullException ex)
-            {
-                plugin.PrintError("Clipboard was null");
-                PluginLog.Error(ex, "Error during import");
-                return;
-            }
-            catch (FormatException ex)
-            {
-                plugin.PrintError("Import text was improperly formatted");
-                PluginLog.Error(ex, "Error during import");
-                return;
-            }
-
-            string importText;
-            try
-            {
-                importText = Encoding.UTF8.GetString(importBytes);
-            }
-            catch (ArgumentException ex)
-            {
-                plugin.PrintError("Import text had invalid text");
-                PluginLog.Error(ex, "Error during import");
-                return;
-            }
-
-            TextFolderNode imported;
-            try
-            {
-                imported = JsonConvert.DeserializeObject<TextFolderNode>(importText);
-            }
-            catch (JsonSerializationException ex)
-            {
-                plugin.PrintError("Import text was in the wrong format");
-                PluginLog.Error(ex, "Error during import");
-                return;
-            }
-
-            imported.Name = $"Imported {imported.Name}";
-            plugin.Configuration.RootFolder.Children.Insert(0, imported);
         }
 
         private void UiBuilder_ItemsWithoutText()
