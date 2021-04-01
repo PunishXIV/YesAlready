@@ -1,10 +1,10 @@
 ﻿using ClickLib;
-using Dalamud.Game.Chat.SeStringHandling;
 using Dalamud.Game.Chat.SeStringHandling.Payloads;
 using Dalamud.Game.Command;
 using Dalamud.Hooking;
 using Dalamud.Plugin;
 using FFXIVClientStructs.FFXIV.Client.UI;
+using Lumina.Excel.GeneratedSheets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,6 +18,7 @@ namespace YesAlready
         public string Name => "YesAlready";
         public string Command => "/pyes";
 
+        internal const int CURRENT_CONFIG_VERSION = 2;
         internal YesAlreadyConfiguration Configuration;
         internal DalamudPluginInterface Interface;
         internal PluginAddressResolver Address;
@@ -31,11 +32,20 @@ namespace YesAlready
         private Hook<OnSetupDelegate> AddonRetainerTaskAskOnSetupHook;
         private Hook<OnSetupDelegate> AddonRetainerTaskResultOnSetupHook;
         private Hook<OnSetupDelegate> AddonGrandCompanySupplyRewardOnSetupHook;
+        private Hook<AddonTalkVf46Delegate> AddonTalkVf46Hook;
+
+        internal readonly Dictionary<uint, string> TerritoryNames = new();
 
         public void Initialize(DalamudPluginInterface pluginInterface)
         {
             Interface = pluginInterface ?? throw new ArgumentNullException(nameof(pluginInterface), "DalamudPluginInterface cannot be null");
-            Configuration = pluginInterface.GetPluginConfig() as YesAlreadyConfiguration ?? new YesAlreadyConfiguration();
+
+            Configuration = YesAlreadyConfiguration.Load(pluginInterface);
+            if (Configuration.Version < CURRENT_CONFIG_VERSION)
+            {
+                Configuration.Upgrade();
+                SaveConfiguration();
+            }
 
             Interface.CommandManager.AddHandler(Command, new CommandInfo(OnChatCommand)
             {
@@ -45,6 +55,9 @@ namespace YesAlready
 
             Address = new PluginAddressResolver();
             Address.Setup(pluginInterface.TargetModuleScanner);
+
+            LoadTerritories();
+
             PluginUi = new PluginUI(this);
 
             Click.Initialize(pluginInterface);
@@ -56,8 +69,12 @@ namespace YesAlready
             OnSetupHooks.Add(AddonRetainerTaskAskOnSetupHook = new(Address.AddonRetainerTaskAskOnSetupAddress, new OnSetupDelegate(AddonRetainerTaskAskOnSetupDetour), this));
             OnSetupHooks.Add(AddonRetainerTaskResultOnSetupHook = new(Address.AddonRetainerTaskResultOnSetupAddress, new OnSetupDelegate(AddonRetainerTaskResultOnSetupDetour), this));
             OnSetupHooks.Add(AddonGrandCompanySupplyRewardOnSetupHook = new(Address.AddonGrandCompanySupplyRewardOnSetupAddress, new OnSetupDelegate(AddonGrandCompanySupplyRewardOnSetupDetour), this));
-
             OnSetupHooks.ForEach(hook => hook.Enable());
+
+#if DEBUG
+            AddonTalkVf46Hook = new(Address.AddonTalkVf46Address, new AddonTalkVf46Delegate(AddonTalkVf46Detour), this);
+            AddonTalkVf46Hook.Enable();
+#endif
         }
 
         public void Dispose()
@@ -65,17 +82,35 @@ namespace YesAlready
             Interface.CommandManager.RemoveHandler(Command);
 
             OnSetupHooks.ForEach(hook => hook.Dispose());
+            AddonTalkVf46Hook?.Dispose();
 
             PluginUi.Dispose();
         }
 
-        internal void PrintMessage(string message) => Interface.Framework.Gui.Chat.Print($"[YesAlready] {message}");
+        private void LoadTerritories()
+        {
+            var sheet = Interface.Data.GetExcelSheet<TerritoryType>();
+            foreach (var row in sheet)
+            {
+                var zone = row.PlaceName.Value;
+                if (zone == null)
+                    continue;
 
-        internal void PrintError(string message) => Interface.Framework.Gui.Chat.PrintError($"[YesAlready] {message}");
+                var text = GetSeStringText(zone.Name);
+                if (string.IsNullOrEmpty(text))
+                    continue;
+
+                TerritoryNames.Add(row.RowId, text);
+            }
+        }
+
+        internal void PrintMessage(string message) => Interface.Framework.Gui.Chat.Print($"[{Name}] {message}");
+
+        internal void PrintError(string message) => Interface.Framework.Gui.Chat.PrintError($"[{Name}] {message}");
 
         internal void SaveConfiguration() => Interface.SavePluginConfig(Configuration);
 
-        internal string LastSeenDialogText { get; set; } = "";
+        #region SeString
 
         private string GetSeStringText(IntPtr textPtr)
         {
@@ -86,16 +121,62 @@ namespace YesAlready
             var bytes = new byte[size];
             Marshal.Copy(textPtr, bytes, 0, size);
 
+            return GetSeStringText(bytes);
+        }
+
+        private string GetSeStringText(Lumina.Text.SeString luminaString)
+        {
+            var bytes = Encoding.UTF8.GetBytes(luminaString.RawString);
+            return GetSeStringText(bytes);
+        }
+
+        private string GetSeStringText(byte[] bytes)
+        {
             var sestring = Interface.SeStringManager.Parse(bytes);
             var pieces = sestring.Payloads.OfType<TextPayload>().Select(t => t.Text);
-            var text = string.Join("", pieces).Replace('\n', ' ');
+            var text = string.Join("", pieces).Replace('\n', ' ').Trim();
             return text;
         }
+
+        #endregion
+
+        #region YesNo
+
+        internal string LastSeenDialogText { get; set; } = "";
 
         [StructLayout(LayoutKind.Explicit, Size = 0x10)]
         private struct AddonSelectYesNoOnSetupData
         {
             [FieldOffset(0x8)] public IntPtr textPtr;
+        }
+
+        private bool EntryMatchesText(TextEntryNode node, string text)
+        {
+            return (node.IsTextRegex && (node.TextRegex?.IsMatch(text) ?? false)) ||
+                  (!node.IsTextRegex && text.Contains(node.Text));
+        }
+
+        private bool EntryMatchesZoneName(TextEntryNode node, string zoneName)
+        {
+            return (node.ZoneIsRegex && (node.ZoneRegex?.IsMatch(zoneName) ?? false)) ||
+                  (!node.ZoneIsRegex && zoneName.Contains(node.ZoneText));
+        }
+
+        private void AddonSelectYesNoExecute(IntPtr addon)
+        {
+            unsafe
+            {
+                var addonObj = (AddonSelectYesno*)addon;
+                var yesButton = addonObj->YesButton;
+                if (yesButton != null && !yesButton->IsEnabled)
+                {
+                    PluginLog.Debug($"AddonSelectYesNo: Enabling yes button");
+                    yesButton->AtkComponentBase.OwnerNode->AtkResNode.Flags ^= 1 << 5;
+                }
+            }
+
+            PluginLog.Debug($"AddonSelectYesNo: Selecting yes");
+            Click.SendClick("select_yes");
         }
 
         private IntPtr AddonSelectYesNoOnSetupDetour(IntPtr addon, uint a2, IntPtr dataPtr)
@@ -108,31 +189,39 @@ namespace YesAlready
                 var data = Marshal.PtrToStructure<AddonSelectYesNoOnSetupData>(dataPtr);
                 var text = LastSeenDialogText = GetSeStringText(data.textPtr);
 
-                PluginLog.Debug($"AddonSelectYesNo text={text}");
+                PluginLog.Debug($"AddonSelectYesNo: text={text}");
 
                 if (Configuration.Enabled)
                 {
-                    foreach (var item in Configuration.TextEntries)
+                    var nodes = Configuration.GetAllNodes().OfType<TextEntryNode>();
+                    var zoneWarnOnce = true;
+                    foreach (var node in nodes)
                     {
-                        if (item.Enabled && !string.IsNullOrEmpty(item.Text))
+                        if (node.Enabled && !string.IsNullOrEmpty(node.Text) && EntryMatchesText(node, text))
                         {
-                            if ((item.IsRegex && (item.Regex?.IsMatch(text) ?? false)) ||
-                                (!item.IsRegex && text.Contains(item.Text)))
+                            if (node.ZoneRestricted && !string.IsNullOrEmpty(node.ZoneText))
                             {
-                                PluginLog.Debug($"AddonSelectYesNo: Matched on {item.Text}");
-                                unsafe
+                                if (!TerritoryNames.TryGetValue(Interface.ClientState.TerritoryType, out var zoneName))
                                 {
-                                    var addonObj = (AddonSelectYesno*)addon;
-                                    var yesButton = addonObj->YesButton;
-                                    if (yesButton != null && !yesButton->IsEnabled)
+                                    if (zoneWarnOnce && !(zoneWarnOnce = false))
                                     {
-                                        PluginLog.Debug($"AddonSelectYesNo: Enabling yes button");
-                                        yesButton->AtkComponentBase.OwnerNode->AtkResNode.Flags ^= 1 << 5;
+                                        PluginLog.Debug("Unable to verify Zone Restricted entry, ZoneID was not set yet");
+                                        PrintMessage($"Unable to verify Zone Restricted entry, change zones to update value");
                                     }
+                                    zoneName = "";
                                 }
 
-                                PluginLog.Debug($"AddonSelectYesNo: Selecting yes");
-                                Click.SendClick("select_yes");
+                                if (!string.IsNullOrEmpty(zoneName) && EntryMatchesZoneName(node, zoneName))
+                                {
+                                    PluginLog.Debug($"AddonSelectYesNo: Matched on {node.Text} ({node.ZoneText})");
+                                    AddonSelectYesNoExecute(addon);
+                                    break;
+                                }
+                            }
+                            else
+                            {
+                                PluginLog.Debug($"AddonSelectYesNo: Matched on {node.Text}");
+                                AddonSelectYesNoExecute(addon);
                                 break;
                             }
                         }
@@ -146,6 +235,10 @@ namespace YesAlready
 
             return result;
         }
+
+        #endregion
+
+        #region Non-text matching
 
         private IntPtr AddonNoTextMatchDetour(IntPtr addon, uint a2, IntPtr dataPtr, Hook<OnSetupDelegate> hook, bool enabled, params string[] clicks)
         {
@@ -201,9 +294,75 @@ namespace YesAlready
             return AddonNoTextMatchDetour(addon, a2, dataPtr, AddonGrandCompanySupplyRewardOnSetupHook, Configuration.GrandCompanySupplyReward, "grand_company_expert_delivery_deliver");
         }
 
+        #endregion
+
+        #region Talk
+
+        private delegate byte AddonTalkVf46Delegate(IntPtr addon, long a2, IntPtr dataPtr);
+
+        private byte AddonTalkVf46Detour(IntPtr addon, long a2, IntPtr dataPtr)
+        {
+            PluginLog.Information($"AddonTalk.vf46 {addon.ToInt64():X} {a2:X} {dataPtr.ToInt64():X}");
+
+            var stringPtrPtr = dataPtr + 0x8;
+            var originalStringPtr = IntPtr.Zero;
+            var newStringPtr = IntPtr.Zero;
+
+            try
+            {
+                if (Configuration.Enabled)
+                {
+                    originalStringPtr = Marshal.ReadIntPtr(stringPtrPtr);
+                    var originalText = GetSeStringText(originalStringPtr);
+                    PluginLog.Information($"Original={originalText}");
+
+                    var bytes = Encoding.UTF8.GetBytes($"Skip this text. {new Random().Next(1, 1000)}\0");
+                    newStringPtr = Marshal.AllocHGlobal(bytes.Length);
+                    Marshal.Copy(bytes, 0, newStringPtr, bytes.Length);
+                    Marshal.WriteIntPtr(stringPtrPtr, newStringPtr);
+
+
+                    //var data = Marshal.PtrToStructure<AddonSelectYesNoOnSetupData>(dataPtr);
+                    //var text = LastSeenDialogText = GetSeStringText(data.textPtr);
+
+                    //PluginLog.Debug($"AddonSelectYesNo text={text}");
+                }
+            }
+            catch (Exception ex)
+            {
+                PluginLog.Error(ex, "Don't crash the game");
+            }
+
+            var result = AddonTalkVf46Hook.Original(addon, a2, dataPtr);
+
+            unsafe
+            {
+                var addonObj = (AddonTalk*)addon;
+                //PluginLog.Information($"Talk is visible ? {addonObj->AtkUnitBase.IsVisible}");
+            }
+
+            try
+            {
+                if (originalStringPtr != IntPtr.Zero)
+                    Marshal.WriteIntPtr(stringPtrPtr, originalStringPtr);
+
+                if (newStringPtr != IntPtr.Zero)
+                    Marshal.FreeHGlobal(newStringPtr);
+            }
+            catch (Exception ex)
+            {
+                PluginLog.Error(ex, "Don't crash the game");
+            }
+
+            return result;
+        }
+
+        #endregion
+
         private void OnChatCommand(string command, string arguments)
         {
-            PluginUi.Open();
+            PluginUi.OpenConfig();
         }
+
     }
 }
