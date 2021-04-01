@@ -36,7 +36,7 @@ namespace YesAlready
 #if DEBUG
         private bool IsImguiConfigOpen = true;
 #else
-        private bool IsImguiSetupOpen = false;
+        private bool IsImguiConfigOpen = false;
 #endif
 
         public void OpenConfig() => IsImguiConfigOpen = true;
