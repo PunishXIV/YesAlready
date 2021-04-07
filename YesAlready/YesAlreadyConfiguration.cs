@@ -28,6 +28,7 @@ namespace YesAlready
         public TextFolderNode RootFolder { get; private set; } = new TextFolderNode { Name = "/" };
 
         public bool DesynthDialogEnabled = false;
+        public bool DesynthBulkDialogEnabled = false;
         public bool MaterializeDialogEnabled = false;
         public bool ItemInspectionResultEnabled = false;
         public bool RetainerTaskAskEnabled = false;

@@ -1,9 +1,5 @@
-﻿using Dalamud.Game.Chat.SeStringHandling.Payloads;
-using Dalamud.Interface;
-using Dalamud.Plugin;
+﻿using Dalamud.Interface;
 using ImGuiNET;
-using Lumina.Excel.GeneratedSheets;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -519,6 +515,10 @@ namespace YesAlready
             if (ImGui.Checkbox("Desynthesis", ref plugin.Configuration.DesynthDialogEnabled))
                 plugin.SaveConfiguration();
             ImGuiEx.TextTooltip("Don't blame me when you destroy something important.");
+
+            if (ImGui.Checkbox("Desynthesis (Bulk)", ref plugin.Configuration.DesynthBulkDialogEnabled))
+                plugin.SaveConfiguration();
+            ImGuiEx.TextTooltip("That little checkbox when wanting to bulk desynthesize. The checkbox isn't actually clicked, but it works.");
 
             if (ImGui.Checkbox("Materialize", ref plugin.Configuration.MaterializeDialogEnabled))
                 plugin.SaveConfiguration();
