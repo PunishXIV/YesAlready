@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Authors>daemitus</Authors>
     <Company>-</Company>
-    <Version>1.0.1.0</Version>
+    <Version>1.0.1.1</Version>
     <Description></Description>
     <Copyright></Copyright>
     <PackageProjectUrl>https://github.com/daemitus/YesAlready</PackageProjectUrl>
@@ -55,7 +55,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="DalamudPackager" Version="1.2.0" />
+    <PackageReference Include="DalamudPackager" Version="1.2.1" />
     <PackageReference Include="ILRepack" Version="2.0.18" GeneratePathProperty="true" />
     <ProjectReference Include="$(SolutionDir)lib\FFXIVClientStructs\FFXIVClientStructs.csproj" />
     <ProjectReference Include="..\lib\ClickLib\ClickLib\ClickLib.csproj" />

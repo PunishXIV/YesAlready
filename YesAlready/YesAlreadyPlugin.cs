@@ -1,4 +1,4 @@
-﻿using ClickLib;
+using ClickLib;
 using Dalamud.Game.Chat.SeStringHandling.Payloads;
 using Dalamud.Game.Command;
 using Dalamud.Hooking;
@@ -261,7 +261,32 @@ namespace YesAlready
         private IntPtr AddonSalvageDialogOnSetupDetour(IntPtr addon, uint a2, IntPtr dataPtr)
         {
             PluginLog.Debug($"AddonSalvageDialog.OnSetup");
-            return AddonNoTextMatchDetour(addon, a2, dataPtr, AddonSalvageDialogOnSetupHook, Configuration.DesynthDialogEnabled, "desynthesize_checkbox", "desynthesize");
+
+            var result = AddonSalvageDialogOnSetupHook.Original(addon, a2, dataPtr);
+
+            try
+            {
+                if (Configuration.Enabled && Configuration.DesynthBulkDialogEnabled)
+                {
+                    unsafe
+                    {
+                        ((AddonSalvageDialog*)addon)->BulkDesynthEnabled = true;
+                    }
+                }
+
+                if (Configuration.Enabled && Configuration.DesynthDialogEnabled)
+                {
+                    Click.SendClick("desynthesize_checkbox");
+                    Click.SendClick("desynthesize");
+
+                }
+            }
+            catch (Exception ex)
+            {
+                PluginLog.Error(ex, "Don't crash the game");
+            }
+
+            return result;
         }
 
         private IntPtr AddonMaterializeDialogOnSetupDetour(IntPtr addon, uint a2, IntPtr dataPtr)
