@@ -32,7 +32,6 @@ namespace YesAlready
         private Hook<OnSetupDelegate> AddonRetainerTaskAskOnSetupHook;
         private Hook<OnSetupDelegate> AddonRetainerTaskResultOnSetupHook;
         private Hook<OnSetupDelegate> AddonGrandCompanySupplyRewardOnSetupHook;
-        private Hook<AddonTalkVf46Delegate> AddonTalkVf46Hook;
 
         internal readonly Dictionary<uint, string> TerritoryNames = new();
 
@@ -70,11 +69,6 @@ namespace YesAlready
             OnSetupHooks.Add(AddonRetainerTaskResultOnSetupHook = new(Address.AddonRetainerTaskResultOnSetupAddress, new OnSetupDelegate(AddonRetainerTaskResultOnSetupDetour), this));
             OnSetupHooks.Add(AddonGrandCompanySupplyRewardOnSetupHook = new(Address.AddonGrandCompanySupplyRewardOnSetupAddress, new OnSetupDelegate(AddonGrandCompanySupplyRewardOnSetupDetour), this));
             OnSetupHooks.ForEach(hook => hook.Enable());
-
-#if DEBUG
-            AddonTalkVf46Hook = new(Address.AddonTalkVf46Address, new AddonTalkVf46Delegate(AddonTalkVf46Detour), this);
-            AddonTalkVf46Hook.Enable();
-#endif
         }
 
         public void Dispose()
@@ -82,7 +76,6 @@ namespace YesAlready
             Interface.CommandManager.RemoveHandler(Command);
 
             OnSetupHooks.ForEach(hook => hook.Dispose());
-            AddonTalkVf46Hook?.Dispose();
 
             PluginUi.Dispose();
         }
@@ -317,69 +310,6 @@ namespace YesAlready
         {
             PluginLog.Debug($"AddonGrandCompanySupplyReward.OnSetup");
             return AddonNoTextMatchDetour(addon, a2, dataPtr, AddonGrandCompanySupplyRewardOnSetupHook, Configuration.GrandCompanySupplyReward, "grand_company_expert_delivery_deliver");
-        }
-
-        #endregion
-
-        #region Talk
-
-        private delegate byte AddonTalkVf46Delegate(IntPtr addon, long a2, IntPtr dataPtr);
-
-        private byte AddonTalkVf46Detour(IntPtr addon, long a2, IntPtr dataPtr)
-        {
-            PluginLog.Information($"AddonTalk.vf46 {addon.ToInt64():X} {a2:X} {dataPtr.ToInt64():X}");
-
-            var stringPtrPtr = dataPtr + 0x8;
-            var originalStringPtr = IntPtr.Zero;
-            var newStringPtr = IntPtr.Zero;
-
-            try
-            {
-                if (Configuration.Enabled)
-                {
-                    originalStringPtr = Marshal.ReadIntPtr(stringPtrPtr);
-                    var originalText = GetSeStringText(originalStringPtr);
-                    PluginLog.Information($"Original={originalText}");
-
-                    var bytes = Encoding.UTF8.GetBytes($"Skip this text. {new Random().Next(1, 1000)}\0");
-                    newStringPtr = Marshal.AllocHGlobal(bytes.Length);
-                    Marshal.Copy(bytes, 0, newStringPtr, bytes.Length);
-                    Marshal.WriteIntPtr(stringPtrPtr, newStringPtr);
-
-
-                    //var data = Marshal.PtrToStructure<AddonSelectYesNoOnSetupData>(dataPtr);
-                    //var text = LastSeenDialogText = GetSeStringText(data.textPtr);
-
-                    //PluginLog.Debug($"AddonSelectYesNo text={text}");
-                }
-            }
-            catch (Exception ex)
-            {
-                PluginLog.Error(ex, "Don't crash the game");
-            }
-
-            var result = AddonTalkVf46Hook.Original(addon, a2, dataPtr);
-
-            unsafe
-            {
-                var addonObj = (AddonTalk*)addon;
-                //PluginLog.Information($"Talk is visible ? {addonObj->AtkUnitBase.IsVisible}");
-            }
-
-            try
-            {
-                if (originalStringPtr != IntPtr.Zero)
-                    Marshal.WriteIntPtr(stringPtrPtr, originalStringPtr);
-
-                if (newStringPtr != IntPtr.Zero)
-                    Marshal.FreeHGlobal(newStringPtr);
-            }
-            catch (Exception ex)
-            {
-                PluginLog.Error(ex, "Don't crash the game");
-            }
-
-            return result;
         }
 
         #endregion
