@@ -1,6 +1,6 @@
 using ClickLib;
-using Dalamud.Game.Chat.SeStringHandling.Payloads;
 using Dalamud.Game.Command;
+using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Hooking;
 using Dalamud.Plugin;
 using FFXIVClientStructs.FFXIV.Client.UI;
