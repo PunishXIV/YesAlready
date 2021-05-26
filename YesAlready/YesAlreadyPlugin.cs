@@ -169,7 +169,7 @@ namespace YesAlready
             }
 
             PluginLog.Debug($"AddonSelectYesNo: Selecting yes");
-            Click.SendClick("select_yes");
+            Click.SendClick("select_yes", addon);
         }
 
         private IntPtr AddonSelectYesNoOnSetupDetour(IntPtr addon, uint a2, IntPtr dataPtr)
