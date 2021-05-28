@@ -1,9 +1,11 @@
-using ClickLib;
+﻿using ClickLib;
 using Dalamud.Game.Command;
+using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Hooking;
 using Dalamud.Plugin;
 using FFXIVClientStructs.FFXIV.Client.UI;
+using FFXIVClientStructs.FFXIV.Component.GUI;
 using Lumina.Excel.GeneratedSheets;
 using System;
 using System.Collections.Generic;
@@ -89,7 +91,7 @@ namespace YesAlready
                 if (zone == null)
                     continue;
 
-                var text = GetSeStringText(zone.Name);
+                var text = GetSeStringText(GetSeString(zone.Name));
                 if (string.IsNullOrEmpty(text))
                     continue;
 
@@ -99,13 +101,22 @@ namespace YesAlready
 
         internal void PrintMessage(string message) => Interface.Framework.Gui.Chat.Print($"[{Name}] {message}");
 
+        internal void PrintMessage(SeString message)
+        {
+            message.Payloads.Insert(0, new TextPayload($"[{Name}] "));
+            Interface.Framework.Gui.Chat.Print(message);
+        }
+
+
         internal void PrintError(string message) => Interface.Framework.Gui.Chat.PrintError($"[{Name}] {message}");
 
         internal void SaveConfiguration() => Interface.SavePluginConfig(Configuration);
 
         #region SeString
 
-        private string GetSeStringText(IntPtr textPtr)
+        private unsafe SeString GetSeString(byte* textPtr) => GetSeString((IntPtr)textPtr);
+
+        private SeString GetSeString(IntPtr textPtr)
         {
             var size = 0;
             while (Marshal.ReadByte(textPtr, size) != 0)
@@ -114,18 +125,23 @@ namespace YesAlready
             var bytes = new byte[size];
             Marshal.Copy(textPtr, bytes, 0, size);
 
-            return GetSeStringText(bytes);
+            return GetSeString(bytes);
         }
 
-        private string GetSeStringText(Lumina.Text.SeString luminaString)
+        private SeString GetSeString(Lumina.Text.SeString luminaString)
         {
             var bytes = Encoding.UTF8.GetBytes(luminaString.RawString);
-            return GetSeStringText(bytes);
+            return GetSeString(bytes);
         }
 
-        private string GetSeStringText(byte[] bytes)
+        private SeString GetSeString(byte[] bytes)
         {
-            var sestring = Interface.SeStringManager.Parse(bytes);
+            return Interface.SeStringManager.Parse(bytes);
+
+        }
+
+        private string GetSeStringText(SeString sestring)
+        {
             var pieces = sestring.Payloads.OfType<TextPayload>().Select(t => t.Text);
             var text = string.Join("", pieces).Replace('\n', ' ').Trim();
             return text;
@@ -180,7 +196,7 @@ namespace YesAlready
             try
             {
                 var data = Marshal.PtrToStructure<AddonSelectYesNoOnSetupData>(dataPtr);
-                var text = LastSeenDialogText = GetSeStringText(data.textPtr);
+                var text = LastSeenDialogText = GetSeStringText(GetSeString(data.textPtr));
 
                 PluginLog.Debug($"AddonSelectYesNo: text={text}");
 
@@ -233,10 +249,8 @@ namespace YesAlready
 
         #region Non-text matching
 
-        private IntPtr AddonNoTextMatchDetour(IntPtr addon, uint a2, IntPtr dataPtr, Hook<OnSetupDelegate> hook, bool enabled, params string[] clicks)
+        private void SendClicks(bool enabled, params string[] clicks)
         {
-            var result = hook.Original(addon, a2, dataPtr);
-
             try
             {
                 if (Configuration.Enabled && enabled)
@@ -247,8 +261,6 @@ namespace YesAlready
             {
                 PluginLog.Error(ex, "Don't crash the game");
             }
-
-            return result;
         }
 
         private IntPtr AddonSalvageDialogOnSetupDetour(IntPtr addon, uint a2, IntPtr dataPtr)
@@ -285,31 +297,69 @@ namespace YesAlready
         private IntPtr AddonMaterializeDialogOnSetupDetour(IntPtr addon, uint a2, IntPtr dataPtr)
         {
             PluginLog.Debug($"AddonMaterializeDialog.OnSetupDetour");
-            return AddonNoTextMatchDetour(addon, a2, dataPtr, AddonMaterializeDialogOnSetupHook, Configuration.MaterializeDialogEnabled, "materialize");
+            var result = AddonMaterializeDialogOnSetupHook.Original(addon, a2, dataPtr);
+            SendClicks(Configuration.MaterializeDialogEnabled, "materialize");
+            return result;
         }
 
         private IntPtr AddonItemInspectionResultOnSetupDetour(IntPtr addon, uint a2, IntPtr dataPtr)
         {
             PluginLog.Debug($"AddonItemInspectionResult.OnSetup");
-            return AddonNoTextMatchDetour(addon, a2, dataPtr, AddonItemInspectionResultOnSetupHook, Configuration.ItemInspectionResultEnabled, "item_inspection_result_next");
+
+            var result = AddonItemInspectionResultOnSetupHook.Original(addon, a2, dataPtr);
+
+            if (Configuration.ItemInspectionResultEnabled)
+            {
+                unsafe
+                {
+                    var addonPtr = (AddonItemInspectionResult*)addon;
+
+                    if (addonPtr->AtkUnitBase.ULDData.NodeListCount >= 64)
+                    {
+                        var nameNode = (AtkTextNode*)addonPtr->AtkUnitBase.ULDData.NodeList[64];
+                        var descNode = (AtkTextNode*)addonPtr->AtkUnitBase.ULDData.NodeList[55];
+                        if (nameNode->AtkResNode.IsVisible && descNode->AtkResNode.IsVisible)
+                        {
+                            var nameText = GetSeString(nameNode->NodeText.StringPtr);
+                            var descText = GetSeStringText(GetSeString(descNode->NodeText.StringPtr));
+                            if (descText.Contains("※"))  // This is hackish, but works well enough (for now)
+                            {
+                                nameText.Payloads.Insert(0, new TextPayload("Received: "));
+                                PrintMessage(nameText);
+                            }
+                        }
+                    }
+                }
+            }
+
+            SendClicks(Configuration.ItemInspectionResultEnabled, "item_inspection_result_next");
+
+            return result;
         }
 
         private IntPtr AddonRetainerTaskAskOnSetupDetour(IntPtr addon, uint a2, IntPtr dataPtr)
         {
             PluginLog.Debug($"AddonRetainerTaskAsk.OnSetup");
-            return AddonNoTextMatchDetour(addon, a2, dataPtr, AddonRetainerTaskAskOnSetupHook, Configuration.RetainerTaskAskEnabled, "retainer_venture_ask_assign");
+            var result = AddonRetainerTaskAskOnSetupHook.Original(addon, a2, dataPtr);
+            SendClicks(Configuration.RetainerTaskAskEnabled, "retainer_venture_ask_assign");
+            return result;
+
         }
 
         private IntPtr AddonRetainerTaskResultOnSetupDetour(IntPtr addon, uint a2, IntPtr dataPtr)
         {
             PluginLog.Debug($"AddonRetainerTaskResult.OnSetup");
-            return AddonNoTextMatchDetour(addon, a2, dataPtr, AddonRetainerTaskResultOnSetupHook, Configuration.RetainerTaskResultEnabled, "retainer_venture_result_reassign");
+            var result = AddonRetainerTaskResultOnSetupHook.Original(addon, a2, dataPtr);
+            SendClicks(Configuration.RetainerTaskResultEnabled, "retainer_venture_result_reassign", "retainer_venture_result_reassign");
+            return result;
         }
 
         private IntPtr AddonGrandCompanySupplyRewardOnSetupDetour(IntPtr addon, uint a2, IntPtr dataPtr)
         {
             PluginLog.Debug($"AddonGrandCompanySupplyReward.OnSetup");
-            return AddonNoTextMatchDetour(addon, a2, dataPtr, AddonGrandCompanySupplyRewardOnSetupHook, Configuration.GrandCompanySupplyReward, "grand_company_expert_delivery_deliver");
+            var result = AddonGrandCompanySupplyRewardOnSetupHook.Original(addon, a2, dataPtr);
+            SendClicks(Configuration.GrandCompanySupplyReward, "grand_company_expert_delivery_deliver");
+            return result;
         }
 
         #endregion

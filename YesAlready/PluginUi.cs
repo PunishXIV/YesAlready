@@ -122,7 +122,7 @@ namespace YesAlready
             var agentModule = uiModule + 0xC3E78;
             for (var i = 0; i < 379; i++)
             {
-                var agent = *(IntPtr*)(agentModule + 0x20 + i * 8);
+                var agent = *(IntPtr*)(agentModule + 0x20 + (i * 8));
                 if (agent == IntPtr.Zero)
                     continue;
                 if (*(short*)(agent + 0x20) == id)
@@ -211,8 +211,8 @@ namespace YesAlready
 
         private void UiBuilder_DisplayTextEntryNode(TextEntryNode node)
         {
-            var validRegex = node.IsTextRegex && node.TextRegex != null || !node.IsTextRegex;
-            var validZone = !node.ZoneRestricted || node.ZoneIsRegex && node.ZoneRegex != null || !node.ZoneIsRegex;
+            var validRegex = (node.IsTextRegex && node.TextRegex != null) || !node.IsTextRegex;
+            var validZone = !node.ZoneRestricted || (node.ZoneIsRegex && node.ZoneRegex != null) || !node.ZoneIsRegex;
 
             if (!node.Enabled && (!validRegex || !validZone))
                 ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(.5f, 0, 0, 1));
@@ -648,7 +648,7 @@ namespace YesAlready
         {
             var style = ImGui.GetStyle();
 
-            return GetIconWidth(icon) + style.FramePadding.X * 2;
+            return GetIconWidth(icon) + (style.FramePadding.X * 2);
         }
 
         public static void TextTooltip(string text)
@@ -669,7 +669,7 @@ namespace YesAlready
 
         public static Vector2 Max(Vector2 lhs, Vector2 rhs) => new(lhs.X >= rhs.X ? lhs.X : rhs.X, lhs.Y >= rhs.Y ? lhs.Y : rhs.Y);
 
-        private static Vector2 Rotate(Vector2 v, float cos_a, float sin_a) => new(v.X * cos_a - v.Y * sin_a, v.X * sin_a + v.Y * cos_a);
+        private static Vector2 Rotate(Vector2 v, float cos_a, float sin_a) => new((v.X * cos_a) - (v.Y * sin_a), (v.X * sin_a) + (v.Y * cos_a));
 
         public static void RotateStart()
         {
