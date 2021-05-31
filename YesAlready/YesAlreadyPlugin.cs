@@ -322,7 +322,8 @@ namespace YesAlready
                         {
                             var nameText = GetSeString(nameNode->NodeText.StringPtr);
                             var descText = GetSeStringText(GetSeString(descNode->NodeText.StringPtr));
-                            if (descText.Contains("※"))  // This is hackish, but works well enough (for now)
+                            if (descText.Contains("※")  // This is hackish, but works well enough (for now)
+                                || descText.Contains("liées à Garde-la-Reine"))  // French doesn't have the widget
                             {
                                 nameText.Payloads.Insert(0, new TextPayload("Received: "));
                                 PrintMessage(nameText);
