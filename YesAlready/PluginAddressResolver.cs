@@ -16,6 +16,7 @@ namespace YesAlready
         public IntPtr AddonRetainerTaskAskOnSetupAddress { get; private set; }
         public IntPtr AddonRetainerTaskResultOnSetupAddress { get; private set; }
         public IntPtr AddonGrandCompanySupplyRewardOnSetupAddress { get; private set; }
+        public IntPtr AddonShopCardDialogOnSetupAddress { get; private set; }
         public IntPtr AddonTalkVf46Address { get; private set; }
 
         private const string AddonSelectYesNoOnSetupSignature =  // Client::UI::AddonSelectYesno.OnSetup
@@ -32,6 +33,8 @@ namespace YesAlready
             "48 89 5C 24 ?? 55 56 57 48 83 EC 40 8B F2 49 8B F8 BA ?? ?? ?? ?? 48 8B D9 E8 ?? ?? ?? ??";
         private const string AddonGrandCompanySupplyRewardOnSetupSignature =  // Client::UI::AddonGrandCompanySupplyReward.OnSetup
             "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 41 54 41 55 41 56 41 57 48 83 EC 30 BA ?? ?? ?? ?? 4D 8B E8 4C 8B F9";
+        private const string AddonShopCardDialogOnSetupSignature =  // Client::UI::AddonShopCardDialog.OnSetup
+            "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 48 89 7C 24 ?? 41 54 41 56 41 57 48 83 EC 50 48 8B F9 49 8B F0";
         private const string AddonTalkVf46Signature =  // Client::UI::AddonTalk.vf46
             "4C 8B DC 55 57 41 55 49 8D 6B 98 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4";
 
@@ -44,6 +47,7 @@ namespace YesAlready
             AddonRetainerTaskAskOnSetupAddress = scanner.ScanText(AddonRetainerTaskAskOnSetupSignature);
             AddonRetainerTaskResultOnSetupAddress = scanner.ScanText(AddonRetainerTaskResultOnSetupSignature);
             AddonGrandCompanySupplyRewardOnSetupAddress = scanner.ScanText(AddonGrandCompanySupplyRewardOnSetupSignature);
+            AddonShopCardDialogOnSetupAddress = scanner.ScanText(AddonShopCardDialogOnSetupSignature);
             AddonTalkVf46Address = scanner.ScanText(AddonTalkVf46Signature);
 
             PluginLog.Verbose("===== YES ALREADY =====");
@@ -54,6 +58,7 @@ namespace YesAlready
             PluginLog.Verbose($"{nameof(AddonRetainerTaskAskOnSetupAddress)} {AddonRetainerTaskAskOnSetupAddress.ToInt64():X}");
             PluginLog.Verbose($"{nameof(AddonRetainerTaskResultOnSetupAddress)} {AddonRetainerTaskResultOnSetupAddress.ToInt64():X}");
             PluginLog.Verbose($"{nameof(AddonGrandCompanySupplyRewardOnSetupAddress)} {AddonGrandCompanySupplyRewardOnSetupAddress.ToInt64():X}");
+            PluginLog.Verbose($"{nameof(AddonShopCardDialogOnSetupAddress)} {AddonShopCardDialogOnSetupAddress.ToInt64():X}");
             PluginLog.Verbose($"{nameof(AddonTalkVf46Address)} {AddonTalkVf46Address.ToInt64():X}");
         }
     }

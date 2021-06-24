@@ -34,6 +34,7 @@ namespace YesAlready
         private Hook<OnSetupDelegate> AddonRetainerTaskAskOnSetupHook;
         private Hook<OnSetupDelegate> AddonRetainerTaskResultOnSetupHook;
         private Hook<OnSetupDelegate> AddonGrandCompanySupplyRewardOnSetupHook;
+        private Hook<OnSetupDelegate> AddonShopCardDialogOnSetupHook;
 
         internal readonly Dictionary<uint, string> TerritoryNames = new();
 
@@ -70,6 +71,7 @@ namespace YesAlready
             OnSetupHooks.Add(AddonRetainerTaskAskOnSetupHook = new(Address.AddonRetainerTaskAskOnSetupAddress, new OnSetupDelegate(AddonRetainerTaskAskOnSetupDetour), this));
             OnSetupHooks.Add(AddonRetainerTaskResultOnSetupHook = new(Address.AddonRetainerTaskResultOnSetupAddress, new OnSetupDelegate(AddonRetainerTaskResultOnSetupDetour), this));
             OnSetupHooks.Add(AddonGrandCompanySupplyRewardOnSetupHook = new(Address.AddonGrandCompanySupplyRewardOnSetupAddress, new OnSetupDelegate(AddonGrandCompanySupplyRewardOnSetupDetour), this));
+            OnSetupHooks.Add(AddonShopCardDialogOnSetupHook = new(Address.AddonShopCardDialogOnSetupAddress, new OnSetupDelegate(AddonShopCardDialogOnSetupDetour), this));
             OnSetupHooks.ForEach(hook => hook.Enable());
         }
 
@@ -314,10 +316,10 @@ namespace YesAlready
                 {
                     var addonPtr = (AddonItemInspectionResult*)addon;
 
-                    if (addonPtr->AtkUnitBase.ULDData.NodeListCount >= 64)
+                    if (addonPtr->AtkUnitBase.UldManager.NodeListCount >= 64)
                     {
-                        var nameNode = (AtkTextNode*)addonPtr->AtkUnitBase.ULDData.NodeList[64];
-                        var descNode = (AtkTextNode*)addonPtr->AtkUnitBase.ULDData.NodeList[55];
+                        var nameNode = (AtkTextNode*)addonPtr->AtkUnitBase.UldManager.NodeList[64];
+                        var descNode = (AtkTextNode*)addonPtr->AtkUnitBase.UldManager.NodeList[55];
                         if (nameNode->AtkResNode.IsVisible && descNode->AtkResNode.IsVisible)
                         {
                             var nameText = GetSeString(nameNode->NodeText.StringPtr);
@@ -344,7 +346,6 @@ namespace YesAlready
             var result = AddonRetainerTaskAskOnSetupHook.Original(addon, a2, dataPtr);
             SendClicks(Configuration.RetainerTaskAskEnabled, "retainer_venture_ask_assign");
             return result;
-
         }
 
         private IntPtr AddonRetainerTaskResultOnSetupDetour(IntPtr addon, uint a2, IntPtr dataPtr)
@@ -360,6 +361,14 @@ namespace YesAlready
             PluginLog.Debug($"AddonGrandCompanySupplyReward.OnSetup");
             var result = AddonGrandCompanySupplyRewardOnSetupHook.Original(addon, a2, dataPtr);
             SendClicks(Configuration.GrandCompanySupplyReward, "grand_company_expert_delivery_deliver");
+            return result;
+        }
+
+        private IntPtr AddonShopCardDialogOnSetupDetour(IntPtr addon, uint a2, IntPtr dataPtr)
+        {
+            PluginLog.Debug($"AddonShopCardDialog.OnSetup");
+            var result = AddonShopCardDialogOnSetupHook.Original(addon, a2, dataPtr);
+            SendClicks(Configuration.ShopCardDialog, "sell_triple_triad_card");
             return result;
         }
 

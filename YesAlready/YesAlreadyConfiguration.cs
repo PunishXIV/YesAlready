@@ -34,6 +34,7 @@ namespace YesAlready
         public bool RetainerTaskAskEnabled = false;
         public bool RetainerTaskResultEnabled = false;
         public bool GrandCompanySupplyReward = false;
+        public bool ShopCardDialog = false;
 
         internal void Upgrade()
         {

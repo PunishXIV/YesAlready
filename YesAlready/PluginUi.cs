@@ -539,6 +539,10 @@ namespace YesAlready
             if (ImGui.Checkbox("Grand Company Expert Delivery Reward", ref plugin.Configuration.GrandCompanySupplyReward))
                 plugin.SaveConfiguration();
             ImGuiEx.TextTooltip("Don't blame me when you give away something important.");
+
+            if (ImGui.Checkbox("Shop Card Dialog", ref plugin.Configuration.ShopCardDialog))
+                plugin.SaveConfiguration();
+            ImGuiEx.TextTooltip("When selling Triple Triad cards.");
         }
 
         #region TextNode DragDrop
