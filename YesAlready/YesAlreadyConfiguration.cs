@@ -1,94 +1,129 @@
-using Dalamud.Configuration;
-using Dalamud.Plugin;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
+
+using Dalamud.Configuration;
+using Newtonsoft.Json;
 
 namespace YesAlready
 {
+    /// <summary>
+    /// Plugin configuration.
+    /// </summary>
     internal partial class YesAlreadyConfiguration : IPluginConfiguration
     {
-        public static YesAlreadyConfiguration Load(DalamudPluginInterface pluginInterface)
-        {
-            var pluginConfigPath = pluginInterface.ConfigFile;
-            if (!pluginConfigPath.Exists)
-                return new YesAlreadyConfiguration();
-            else
-                return JsonConvert.DeserializeObject<YesAlreadyConfiguration>(File.ReadAllText(pluginConfigPath.FullName));
-        }
-
+        /// <summary>
+        /// Gets or sets the configuration version.
+        /// </summary>
         public int Version { get; set; } = 1;
 
-        public bool Enabled = true;
+        /// <summary>
+        /// Gets or sets a value indicating whether the plugin functionality is enabled.
+        /// </summary>
+        public bool Enabled { get; set; } = true;
 
+        /// <summary>
+        /// Gets the root folder.
+        /// </summary>
         public TextFolderNode RootFolder { get; private set; } = new TextFolderNode { Name = "/" };
 
-        public bool DesynthDialogEnabled = false;
-        public bool DesynthBulkDialogEnabled = false;
-        public bool MaterializeDialogEnabled = false;
-        public bool ItemInspectionResultEnabled = false;
-        public bool RetainerTaskAskEnabled = false;
-        public bool RetainerTaskResultEnabled = false;
-        public bool GrandCompanySupplyReward = false;
-        public bool ShopCardDialog = false;
+        /// <summary>
+        /// Gets or sets a value indicating whether the desynth dialog setting is enabled.
+        /// </summary>
+        public bool DesynthDialogEnabled { get; set; } = false;
 
-        internal void Upgrade()
+        /// <summary>
+        /// Gets or sets a value indicating whether the desynth bulk dialog setting is enabled.
+        /// </summary>
+        public bool DesynthBulkDialogEnabled { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the materialize dialog setting is enabled.
+        /// </summary>
+        public bool MaterializeDialogEnabled { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the materia retrieve dialog setting is enabled.
+        /// </summary>
+        public bool MateriaRetrieveDialogEnabled { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the item inspection result dialog setting is enabled.
+        /// </summary>
+        public bool ItemInspectionResultEnabled { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the retainer task ask dialog setting is enabled.
+        /// </summary>
+        public bool RetainerTaskAskEnabled { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the retainer task result dialog setting is enabled.
+        /// </summary>
+        public bool RetainerTaskResultEnabled { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the grand company supply reward dialog setting is enabled.
+        /// </summary>
+        public bool GrandCompanySupplyReward { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the shop card dialog setting is enabled.
+        /// </summary>
+        public bool ShopCardDialog { get; set; } = false;
+
+        /// <summary>
+        /// Loads the configuration.
+        /// </summary>
+        /// <param name="configDirectory">Configuration directory.</param>
+        /// <returns>A configuration.</returns>
+        public static YesAlreadyConfiguration Load(DirectoryInfo configDirectory)
         {
-            if (Version == 1)
-                UpgradeV1();
+            var pluginConfigPath = new FileInfo(Path.Combine(configDirectory.Parent!.FullName, $"YesAlready.json"));
+
+            if (!pluginConfigPath.Exists)
+                return new YesAlreadyConfiguration();
+
+            var data = File.ReadAllText(pluginConfigPath.FullName);
+            var conf = JsonConvert.DeserializeObject<YesAlreadyConfiguration>(data);
+            return conf ?? new YesAlreadyConfiguration();
         }
 
-        #region Version1
-
-#pragma warning disable CS0618 // Type or member is obsolete
-#pragma warning disable IDE1006 // Naming Styles
-
-        private void UpgradeV1()
+        /// <summary>
+        /// Upgrade the configuration from a prior version.
+        /// </summary>
+        public void Upgrade()
         {
-            var folders = new Dictionary<string, TextFolderNode> { { RootFolder.Name, RootFolder } };
-
-            foreach (var textEntry in _TextEntriesBacker)
-            {
-                var folderName = string.IsNullOrEmpty(textEntry.Folder) ? RootFolder.Name : textEntry.Folder;
-                if (!folders.TryGetValue(folderName, out var folder))
-                {
-                    folder = new TextFolderNode() { Name = folderName };
-                    folders.Add(folderName, folder);
-                    RootFolder.Children.Add(folder);
-                }
-
-                folder.Children.Add(new TextEntryNode() { Enabled = textEntry.Enabled, Text = textEntry.Text, });
-            }
         }
 
-        [JsonProperty("TextEntries")]
-        [Obsolete("Removed in v2")]
-        public List<ConfigTextEntry> _TextEntries { set => _TextEntriesBacker = value; }
+        /// <summary>
+        /// Save the plugin configuration to disk.
+        /// </summary>
+        public void Save() => Service.Interface.SavePluginConfig(this);
 
-        [JsonIgnore]
-        [Obsolete("Removed in v2")]
-        public List<ConfigTextEntry> _TextEntriesBacker = new();
+        /// <summary>
+        /// Get all nodes in the tree.
+        /// </summary>
+        /// <returns>All the nodes.</returns>
+        public IEnumerable<ITextNode> GetAllNodes()
+        {
+            return new ITextNode[] { this.RootFolder }.Concat(this.GetAllNodes(this.RootFolder.Children));
+        }
 
-#pragma warning restore IDE1006
-#pragma warning restore CS0618
-
-        #endregion
-
-        public IEnumerable<ITextNode> GetAllNodes() => new ITextNode[] { RootFolder }.Concat(GetAllNodes(RootFolder.Children));
-
+        /// <summary>
+        /// Gets all the nodes in this subset of the tree.
+        /// </summary>
+        /// <param name="nodes">Nodes to search.</param>
+        /// <returns>The nodes in the tree.</returns>
         public IEnumerable<ITextNode> GetAllNodes(IEnumerable<ITextNode> nodes)
         {
             foreach (var node in nodes)
             {
                 yield return node;
-                if (node is TextFolderNode)
+                if (node is TextFolderNode folder)
                 {
-                    var children = (node as TextFolderNode).Children;
-                    foreach (var childNode in GetAllNodes(children))
+                    var children = this.GetAllNodes(folder.Children);
+                    foreach (var childNode in children)
                     {
                         yield return childNode;
                     }
@@ -96,9 +131,15 @@ namespace YesAlready
             }
         }
 
-        public bool TryFindParent(ITextNode node, out TextFolderNode parent)
+        /// <summary>
+        /// Tries to find the parent of a node.
+        /// </summary>
+        /// <param name="node">Node to check.</param>
+        /// <param name="parent">Parent of the node or null.</param>
+        /// <returns>A value indicating whether the parent was found.</returns>
+        public bool TryFindParent(ITextNode node, out TextFolderNode? parent)
         {
-            foreach (var candidate in GetAllNodes())
+            foreach (var candidate in this.GetAllNodes())
             {
                 if (candidate is TextFolderNode folder && folder.Children.Contains(node))
                 {
@@ -109,175 +150,6 @@ namespace YesAlready
 
             parent = null;
             return false;
-        }
-    }
-
-    public interface ITextNode
-    {
-        public string Name { get; }
-    }
-
-    public class TextEntryNode : ITextNode
-    {
-        public bool Enabled { get; set; } = true;
-
-        [JsonIgnore]
-        public string Name
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(ZoneText))
-                    return Text;
-                else
-                    return $"{Text} ({ZoneText})";
-            }
-        }
-
-        public string Text { get; set; } = "";
-
-        [JsonIgnore]
-        public bool IsTextRegex => Text.StartsWith("/") && Text.EndsWith("/");
-
-        [JsonIgnore]
-        public Regex TextRegex
-        {
-            get
-            {
-                try
-                {
-                    return new(Text.Trim('/'), RegexOptions.Compiled | RegexOptions.IgnoreCase);
-                }
-                catch
-                {
-                    return null;
-                }
-            }
-        }
-
-        public bool ZoneRestricted { get; set; } = false;
-
-        public string ZoneText { get; set; } = "";
-
-        [JsonIgnore]
-        public bool ZoneIsRegex => ZoneText.StartsWith("/") && ZoneText.EndsWith("/");
-
-        [JsonIgnore]
-        public Regex ZoneRegex
-        {
-            get
-            {
-                try
-                {
-                    return new(ZoneText.Trim('/'), RegexOptions.Compiled | RegexOptions.IgnoreCase);
-                }
-                catch
-                {
-                    return null;
-                }
-            }
-        }
-    }
-
-    public class TextFolderNode : ITextNode
-    {
-        public string Name { get; set; }
-
-        [JsonProperty(ItemConverterType = typeof(ConcreteNodeConverter))]
-        public List<ITextNode> Children { get; } = new();
-    }
-
-    public interface ITalkNode
-    {
-        public string Name { get; }
-    }
-
-    public class TalkEntryNode : ITextNode
-    {
-        public bool Enabled { get; set; } = true;
-
-        public string Name { get; set; } = "";
-
-        public List<string> Text { get; set; } = new();
-
-        public List<string> ReplacmentText { get; set; } = new();
-    }
-
-    public class TalkFolderNode : ITextNode
-    {
-        public string Name { get; set; }
-
-        [JsonProperty(ItemConverterType = typeof(ConcreteNodeConverter))]
-        public List<ITalkNode> Children { get; } = new();
-    }
-
-    public class ConcreteNodeConverter : JsonConverter
-    {
-        public override bool CanRead => true;
-        public override bool CanWrite => false;
-        public override bool CanConvert(Type objectType) => objectType == typeof(ITextNode);
-
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
-        {
-            var jObject = JObject.Load(reader);
-            var jType = jObject["$type"].Value<string>();
-
-            if (jType == SimpleName(typeof(TextEntryNode)))
-                return CreateObject<TextEntryNode>(jObject, serializer);
-            else if (jType == SimpleName(typeof(TextFolderNode)))
-                return CreateObject<TextFolderNode>(jObject, serializer);
-            else
-                throw new NotSupportedException($"Node type \"{jType}\" is not supported.");
-        }
-
-        private T CreateObject<T>(JObject jObject, JsonSerializer serializer) where T : new()
-        {
-            var obj = new T();
-            serializer.Populate(jObject.CreateReader(), obj);
-            return obj;
-        }
-
-        private string SimpleName(Type type)
-        {
-            return $"{type.FullName}, {type.Assembly.GetName().Name}";
-        }
-
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer) => throw new NotImplementedException();
-    }
-
-    [Obsolete("Removed in v2")]
-    internal class ConfigTextEntry : ICloneable
-    {
-        public bool Enabled = false;
-        public string Folder = "";
-        public string Text = "";
-
-        [JsonIgnore]
-        public bool IsRegex => Text.StartsWith("/") && Text.EndsWith("/");
-
-        [JsonIgnore]
-        public Regex Regex
-        {
-            get
-            {
-                try
-                {
-                    return new(Text.Trim('/'), RegexOptions.Compiled | RegexOptions.IgnoreCase);
-                }
-                catch (Exception)
-                {
-                    return null;
-                }
-            }
-        }
-
-        public object Clone()
-        {
-            return new ConfigTextEntry
-            {
-                Enabled = Enabled,
-                Folder = Folder,
-                Text = Text,
-            };
         }
     }
 }
