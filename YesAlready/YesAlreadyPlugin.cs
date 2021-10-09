@@ -69,7 +69,7 @@ namespace YesAlready
             this.onSetupHooks.Add(this.addonSelectYesNoOnSetupHook = new(Service.Address.AddonSelectYesNoOnSetupAddress, this.AddonSelectYesNoOnSetupDetour));
             this.onSetupHooks.Add(this.addonSalvageDialogOnSetupHook = new(Service.Address.AddonSalvageDialongOnSetupAddress, this.AddonSalvageDialogOnSetupDetour));
             this.onSetupHooks.Add(this.addonMaterializeDialogOnSetupHook = new(Service.Address.AddonMaterializeDialongOnSetupAddress, this.AddonMaterializeDialogOnSetupDetour));
-            this.onSetupHooks.Add(this.addonMateriaRetrieveDialogOnSetupHook = new(Service.Address.AddonMateriaRetrieveDialongOnSetupAddress, this.AddonMateriaRetrieveDialogOnSetupHook));
+            this.onSetupHooks.Add(this.addonMateriaRetrieveDialogOnSetupHook = new(Service.Address.AddonMateriaRetrieveDialongOnSetupAddress, this.AddonMateriaRetrieveDialogOnSetupDetour));
             this.onSetupHooks.Add(this.addonItemInspectionResultOnSetupHook = new(Service.Address.AddonItemInspectionResultOnSetupAddress, this.AddonItemInspectionResultOnSetupDetour));
             this.onSetupHooks.Add(this.addonRetainerTaskAskOnSetupHook = new(Service.Address.AddonRetainerTaskAskOnSetupAddress, this.AddonRetainerTaskAskOnSetupDetour));
             this.onSetupHooks.Add(this.addonRetainerTaskResultOnSetupHook = new(Service.Address.AddonRetainerTaskResultOnSetupAddress, this.AddonRetainerTaskResultOnSetupDetour));
@@ -363,6 +363,13 @@ namespace YesAlready
 
             return result;
         }
+
+        [StructLayout(LayoutKind.Explicit, Size = 0x10)]
+        private struct AddonSelectYesNoOnSetupData
+        {
+            [FieldOffset(0x8)]
+            public IntPtr TextPtr;
+        }
     }
 
     /// <summary>
@@ -434,6 +441,9 @@ namespace YesAlready
             return result;
         }
 
+        private int itemInspectionCount = 0;
+        private int itemInspectionLimit = 10;
+
         private IntPtr AddonItemInspectionResultOnSetupDetour(IntPtr addon, uint a2, IntPtr dataPtr)
         {
             PluginLog.Debug($"AddonItemInspectionResult.OnSetup");
@@ -466,7 +476,15 @@ namespace YesAlready
                 }
             }
 
-            this.SendClicks(Service.Configuration.ItemInspectionResultEnabled, "item_inspection_result_next");
+            this.itemInspectionCount++;
+            if (this.itemInspectionCount % this.itemInspectionLimit == 0)
+            {
+                this.PrintMessage("Sanity check, pausing item inspection loop.");
+            }
+            else
+            {
+                this.SendClicks(Service.Configuration.ItemInspectionResultEnabled, "item_inspection_result_next");
+            }
 
             return result;
         }
