@@ -56,9 +56,14 @@ namespace YesAlready
                 Service.Configuration.Save();
             }
 
-            this.UiBuilder_TextNodeButtons();
-            this.UiBuilder_TextNodes();
-            this.UiBuilder_ItemsWithoutText();
+            if (ImGui.BeginTabBar("Settings"))
+            {
+                this.DisplayYesNoOptions();
+                this.DisplayListItemOptions();
+                this.DisplayBotherOptions();
+
+                ImGui.EndTabBar();
+            }
         }
 
         #region Testing
@@ -92,7 +97,185 @@ namespace YesAlready
 
         #endregion
 
-        private void UiBuilder_TextNodeButtons()
+        private void DisplayYesNoOptions()
+        {
+            if (!ImGui.BeginTabItem("Yes No"))
+                return;
+
+            this.DisplayTextNodeButtons();
+            this.DisplayTextNodes();
+
+            ImGui.EndTabItem();
+        }
+
+        private void DisplayListItemOptions()
+        {
+            if (!ImGui.BeginTabItem("List Item"))
+                return;
+
+            // TODO
+
+            ImGui.EndTabItem();
+        }
+
+        private void DisplayBotherOptions()
+        {
+            if (!ImGui.BeginTabItem("Bothers"))
+                return;
+
+            static void IndentedTextColored(Vector4 color, string text)
+            {
+                var indent = 27f * ImGuiHelpers.GlobalScale;
+                ImGui.Indent(indent);
+                ImGui.TextColored(color, text);
+                ImGui.Unindent(indent);
+            }
+
+            #region SalvageDialog
+
+            var desynthDialog = Service.Configuration.DesynthDialogEnabled;
+            if (ImGui.Checkbox("SalvageDialog", ref desynthDialog))
+            {
+                Service.Configuration.DesynthDialogEnabled = desynthDialog;
+                Service.Configuration.Save();
+            }
+
+            IndentedTextColored(this.shadedColor, "Remove the Desynthesis menu confirmation.");
+
+            #endregion
+            #region SalvageDialog (Bulk)
+
+            var desynthBulkDialog = Service.Configuration.DesynthBulkDialogEnabled;
+            if (ImGui.Checkbox("SalvageDialog (Bulk)", ref desynthBulkDialog))
+            {
+                Service.Configuration.DesynthBulkDialogEnabled = desynthBulkDialog;
+                Service.Configuration.Save();
+            }
+
+            IndentedTextColored(this.shadedColor, "Check the bulk desynthesis button when using the SalvageDialog feature.");
+
+            #endregion
+            #region MaterializeDialog
+
+            var materialize = Service.Configuration.MaterializeDialogEnabled;
+            if (ImGui.Checkbox("MaterializeDialog", ref materialize))
+            {
+                Service.Configuration.MaterializeDialogEnabled = materialize;
+                Service.Configuration.Save();
+            }
+
+            IndentedTextColored(this.shadedColor, "Remove the create new materia confirmation.");
+
+            #endregion
+            #region MateriaRetrieveDialog
+
+            var materiaRetrieve = Service.Configuration.MateriaRetrieveDialogEnabled;
+            if (ImGui.Checkbox("MateriaRetrieveDialog", ref materiaRetrieve))
+            {
+                Service.Configuration.MateriaRetrieveDialogEnabled = materiaRetrieve;
+                Service.Configuration.Save();
+            }
+
+            IndentedTextColored(this.shadedColor, "Remove the retrieve materia confirmation.");
+
+            #endregion
+            #region ItemInspectionResult
+
+            var itemInspection = Service.Configuration.ItemInspectionResultEnabled;
+            if (ImGui.Checkbox("ItemInspectionResult", ref itemInspection))
+            {
+                Service.Configuration.ItemInspectionResultEnabled = itemInspection;
+                Service.Configuration.Save();
+            }
+
+            IndentedTextColored(this.shadedColor, "Eureka/Bozja lockboxes, forgotten fragments, and more.\nWarning: this does not check if you are maxed on items.");
+
+            IndentedTextColored(this.shadedColor, "Rate limiter (pause after N items)");
+            ImGui.SameLine();
+
+            ImGui.PushItemWidth(100f * ImGuiHelpers.GlobalScale);
+            var itemInspectionResultLimiter = Service.Configuration.ItemInspectionResultRateLimiter;
+            if (ImGui.InputInt("###itemInspectionResultRateLimiter", ref itemInspectionResultLimiter))
+            {
+                if (itemInspectionResultLimiter < 0)
+                {
+                    itemInspectionResultLimiter = 0;
+                }
+                else
+                {
+                    Service.Configuration.ItemInspectionResultRateLimiter = itemInspectionResultLimiter;
+                    Service.Configuration.Save();
+                }
+            }
+
+            #endregion
+            #region RetainerTaskAsk
+
+            var retainerTaskAsk = Service.Configuration.RetainerTaskAskEnabled;
+            if (ImGui.Checkbox("RetainerTaskAsk", ref retainerTaskAsk))
+            {
+                Service.Configuration.RetainerTaskAskEnabled = retainerTaskAsk;
+                Service.Configuration.Save();
+            }
+
+            IndentedTextColored(this.shadedColor, "Skip the confirmation in the final dialog before sending out a retainer.");
+
+            #endregion
+            #region RetainerTaskResult
+
+            var retainerTaskResult = Service.Configuration.RetainerTaskResultEnabled;
+            if (ImGui.Checkbox("RetainerTaskResult", ref retainerTaskResult))
+            {
+                Service.Configuration.RetainerTaskResultEnabled = retainerTaskResult;
+                Service.Configuration.Save();
+            }
+
+            IndentedTextColored(this.shadedColor, "Automatically send a retainer on the same venture as before when receiving an item.");
+
+            #endregion
+            #region GrandCompanySupplyReward
+
+            var grandCompanySupplyReward = Service.Configuration.GrandCompanySupplyReward;
+            if (ImGui.Checkbox("GrandCompanySupplyReward", ref grandCompanySupplyReward))
+            {
+                Service.Configuration.GrandCompanySupplyReward = grandCompanySupplyReward;
+                Service.Configuration.Save();
+            }
+
+            IndentedTextColored(this.shadedColor, "Skip the confirmation when submitting Grand Company expert delivery items.");
+
+            #endregion
+            #region ShopCardDialog
+
+            var shopCard = Service.Configuration.ShopCardDialog;
+            if (ImGui.Checkbox("ShopCardDialog", ref shopCard))
+            {
+                Service.Configuration.ShopCardDialog = shopCard;
+                Service.Configuration.Save();
+            }
+
+            IndentedTextColored(this.shadedColor, "Automatically confirm selling Triple Triad cards in the saucer.");
+
+            #endregion
+            #region JournalResultComplete
+
+            var journalResultComplete = Service.Configuration.JournalResultCompleteEnabled;
+            if (ImGui.Checkbox("JournalResultComplete", ref journalResultComplete))
+            {
+                Service.Configuration.JournalResultCompleteEnabled = journalResultComplete;
+                Service.Configuration.Save();
+            }
+
+            IndentedTextColored(this.shadedColor, "Automatically confirm quest reward acceptance when there is nothing to choose.");
+
+            #endregion
+
+            ImGui.EndTabItem();
+        }
+
+        // ====================================================================================================
+
+        private void DisplayTextNodeButtons()
         {
             var style = ImGui.GetStyle();
             var newStyle = new Vector2(style.ItemSpacing.X / 2, style.ItemSpacing.Y);
@@ -145,27 +328,24 @@ namespace YesAlready
             ImGui.PopStyleVar(); // ItemSpacing
         }
 
-        private void UiBuilder_TextNodes()
+        private void DisplayTextNodes()
         {
-            if (ImGui.CollapsingHeader("Text Entries"))
+            var root = Service.Configuration.RootFolder;
+            this.TextNodeDragDrop(root);
+
+            if (root.Children.Count == 0)
             {
-                var root = Service.Configuration.RootFolder;
-                this.TextNodeDragDrop(root);
+                root.Children.Add(new TextEntryNode() { Enabled = false, Text = "Add some text here!" });
+                Service.Configuration.Save();
+            }
 
-                if (root.Children.Count == 0)
-                {
-                    root.Children.Add(new TextEntryNode() { Enabled = false, Text = "Add some text here!" });
-                    Service.Configuration.Save();
-                }
-
-                foreach (var node in root.Children.ToArray())
-                {
-                    this.UiBuilder_DisplayTextNode(node);
-                }
+            foreach (var node in root.Children.ToArray())
+            {
+                this.DisplayTextNode(node);
             }
         }
 
-        private void UiBuilder_DisplayTextNode(ITextNode node)
+        private void DisplayTextNode(ITextNode node)
         {
             if (node is TextFolderNode folderNode)
             {
@@ -173,11 +353,11 @@ namespace YesAlready
             }
             else if (node is TextEntryNode macroNode)
             {
-                this.UiBuilder_DisplayTextEntryNode(macroNode);
+                this.DisplayTextEntryNode(macroNode);
             }
         }
 
-        private void UiBuilder_DisplayTextEntryNode(TextEntryNode node)
+        private void DisplayTextEntryNode(TextEntryNode node)
         {
             var validRegex = (node.IsTextRegex && node.TextRegex != null) || !node.IsTextRegex;
             var validZone = !node.ZoneRestricted || (node.ZoneIsRegex && node.ZoneRegex != null) || !node.ZoneIsRegex;
@@ -267,7 +447,7 @@ namespace YesAlready
             {
                 foreach (var childNode in node.Children.ToArray())
                 {
-                    this.UiBuilder_DisplayTextNode(childNode);
+                    this.DisplayTextNode(childNode);
                 }
 
                 ImGui.TreePop();
@@ -289,6 +469,15 @@ namespace YesAlready
                     if (ImGui.Checkbox("Enabled", ref enabled))
                     {
                         entryNode.Enabled = enabled;
+                        Service.Configuration.Save();
+                    }
+
+                    ImGui.SameLine(100f);
+                    var isYes = entryNode.IsYes;
+                    var title = isYes ? "Click Yes" : "Click No";
+                    if (ImGui.Button(title))
+                    {
+                        entryNode.IsYes = !isYes;
                         Service.Configuration.Save();
                     }
 
@@ -467,101 +656,6 @@ namespace YesAlready
 
                 ImGui.EndDragDropTarget();
             }
-        }
-
-        private void UiBuilder_ItemsWithoutText()
-        {
-            if (!ImGui.CollapsingHeader("Non-text Matching"))
-                return;
-
-            static void IndentedTextColored(Vector4 color, string text)
-            {
-                var indent = 27f * ImGuiHelpers.GlobalScale;
-                ImGui.Indent(indent);
-                ImGui.TextColored(color, text);
-                ImGui.Unindent(indent);
-            }
-
-            var desynthDialog = Service.Configuration.DesynthDialogEnabled;
-            if (ImGui.Checkbox("SalvageDialog", ref desynthDialog))
-            {
-                Service.Configuration.DesynthDialogEnabled = desynthDialog;
-                Service.Configuration.Save();
-            }
-
-            IndentedTextColored(this.shadedColor, "Remove the Desynthesis menu confirmation.");
-
-            var desynthBulkDialog = Service.Configuration.DesynthBulkDialogEnabled;
-            if (ImGui.Checkbox("SalvageDialog (Bulk)", ref desynthBulkDialog))
-            {
-                Service.Configuration.DesynthBulkDialogEnabled = desynthBulkDialog;
-                Service.Configuration.Save();
-            }
-
-            IndentedTextColored(this.shadedColor, "Check the bulk desynthesis button when using the SalvageDialog feature.");
-
-            var materialize = Service.Configuration.MaterializeDialogEnabled;
-            if (ImGui.Checkbox("MaterializeDialog", ref materialize))
-            {
-                Service.Configuration.MaterializeDialogEnabled = materialize;
-                Service.Configuration.Save();
-            }
-
-            IndentedTextColored(this.shadedColor, "Remove the create new materia confirmation.");
-
-            var materiaRetrieve = Service.Configuration.MateriaRetrieveDialogEnabled;
-            if (ImGui.Checkbox("MateriaRetrieveDialog", ref materiaRetrieve))
-            {
-                Service.Configuration.MateriaRetrieveDialogEnabled = materiaRetrieve;
-                Service.Configuration.Save();
-            }
-
-            IndentedTextColored(this.shadedColor, "Remove the retrieve materia confirmation.");
-
-            var itemInspection = Service.Configuration.ItemInspectionResultEnabled;
-            if (ImGui.Checkbox("ItemInspectionResult", ref itemInspection))
-            {
-                Service.Configuration.ItemInspectionResultEnabled = itemInspection;
-                Service.Configuration.Save();
-            }
-
-            IndentedTextColored(this.shadedColor, "Eureka/Bozja lockboxes, forgotten fragments, and more.\nWarning: this does not check if you are maxed on items.");
-
-            var retainerTaskAsk = Service.Configuration.RetainerTaskAskEnabled;
-            if (ImGui.Checkbox("RetainerTaskAsk", ref retainerTaskAsk))
-            {
-                Service.Configuration.RetainerTaskAskEnabled = retainerTaskAsk;
-                Service.Configuration.Save();
-            }
-
-            IndentedTextColored(this.shadedColor, "Skip the confirmation in the final dialog before sending out a retainer.");
-
-            var retainerTaskResult = Service.Configuration.RetainerTaskResultEnabled;
-            if (ImGui.Checkbox("RetainerTaskResult", ref retainerTaskResult))
-            {
-                Service.Configuration.RetainerTaskResultEnabled = retainerTaskResult;
-                Service.Configuration.Save();
-            }
-
-            IndentedTextColored(this.shadedColor, "Automatically send a retainer on the same venture as before when receiving an item.");
-
-            var grandCompanySupplyReward = Service.Configuration.GrandCompanySupplyReward;
-            if (ImGui.Checkbox("GrandCompanySupplyReward", ref grandCompanySupplyReward))
-            {
-                Service.Configuration.GrandCompanySupplyReward = grandCompanySupplyReward;
-                Service.Configuration.Save();
-            }
-
-            IndentedTextColored(this.shadedColor, "Skip the confirmation when submitting Grand Company expert delivery items.");
-
-            var shopCard = Service.Configuration.ShopCardDialog;
-            if (ImGui.Checkbox("ShopCardDialog", ref shopCard))
-            {
-                Service.Configuration.ShopCardDialog = shopCard;
-                Service.Configuration.Save();
-            }
-
-            IndentedTextColored(this.shadedColor, "Automatically confirm selling Triple Triad cards in the saucer.");
         }
     }
 }

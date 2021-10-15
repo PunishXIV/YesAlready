@@ -37,7 +37,7 @@ namespace YesAlready
             get
             {
                 return !string.IsNullOrEmpty(this.ZoneText)
-                    ? $"{this.Text} ({this.ZoneText})"
+                    ? $"({this.ZoneText}) {this.Text}"
                     : this.Text;
             }
         }
@@ -106,6 +106,11 @@ namespace YesAlready
                 }
             }
         }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether yes should be pressed instead of no.
+        /// </summary>
+        public bool IsYes { get; set; } = true;
     }
 
     /// <summary>

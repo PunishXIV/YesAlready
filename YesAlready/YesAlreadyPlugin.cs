@@ -42,6 +42,7 @@ namespace YesAlready
         private readonly Hook<OnSetupDelegate> addonRetainerTaskResultOnSetupHook;
         private readonly Hook<OnSetupDelegate> addonGrandCompanySupplyRewardOnSetupHook;
         private readonly Hook<OnSetupDelegate> addonShopCardDialogOnSetupHook;
+        private readonly Hook<OnSetupDelegate> addonJournalResultOnSetupHook;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="YesAlreadyPlugin"/> class.
@@ -64,7 +65,7 @@ namespace YesAlready
             Service.Address.Setup();
 
             this.LoadTerritories();
-            Click.Initialize(pluginInterface);
+            Click.Initialize();
 
             this.onSetupHooks.Add(this.addonSelectYesNoOnSetupHook = new(Service.Address.AddonSelectYesNoOnSetupAddress, this.AddonSelectYesNoOnSetupDetour));
             this.onSetupHooks.Add(this.addonSalvageDialogOnSetupHook = new(Service.Address.AddonSalvageDialongOnSetupAddress, this.AddonSalvageDialogOnSetupDetour));
@@ -75,6 +76,7 @@ namespace YesAlready
             this.onSetupHooks.Add(this.addonRetainerTaskResultOnSetupHook = new(Service.Address.AddonRetainerTaskResultOnSetupAddress, this.AddonRetainerTaskResultOnSetupDetour));
             this.onSetupHooks.Add(this.addonGrandCompanySupplyRewardOnSetupHook = new(Service.Address.AddonGrandCompanySupplyRewardOnSetupAddress, this.AddonGrandCompanySupplyRewardOnSetupDetour));
             this.onSetupHooks.Add(this.addonShopCardDialogOnSetupHook = new(Service.Address.AddonShopCardDialogOnSetupAddress, this.AddonShopCardDialogOnSetupDetour));
+            this.onSetupHooks.Add(this.addonJournalResultOnSetupHook = new(Service.Address.AddonJournalResultOnSetupAddress, this.AddonJournalResultOnSetupDetour));
             this.onSetupHooks.ForEach(hook => hook.Enable());
 
             this.configWindow = new();
@@ -289,9 +291,9 @@ namespace YesAlready
                   (!node.ZoneIsRegex && zoneName.Contains(node.ZoneText));
         }
 
-        private void AddonSelectYesNoExecute(IntPtr addon)
+        private unsafe void AddonSelectYesNoExecute(IntPtr addon, bool yes)
         {
-            unsafe
+            if (yes)
             {
                 var addonObj = (AddonSelectYesno*)addon;
                 var yesButton = addonObj->YesButton;
@@ -300,10 +302,15 @@ namespace YesAlready
                     PluginLog.Debug($"AddonSelectYesNo: Enabling yes button");
                     yesButton->AtkComponentBase.OwnerNode->AtkResNode.Flags ^= 1 << 5;
                 }
-            }
 
-            PluginLog.Debug($"AddonSelectYesNo: Selecting yes");
-            Click.SendClick("select_yes", addon);
+                PluginLog.Debug($"AddonSelectYesNo: Selecting yes");
+                ClickSelectYesNo.Using(addon).Yes();
+            }
+            else
+            {
+                PluginLog.Debug($"AddonSelectYesNo: Selecting no");
+                ClickSelectYesNo.Using(addon).No();
+            }
         }
 
         private IntPtr AddonSelectYesNoOnSetupDetour(IntPtr addon, uint a2, IntPtr dataPtr)
@@ -311,55 +318,51 @@ namespace YesAlready
             PluginLog.Debug($"AddonSelectYesNo.OnSetup");
             var result = this.addonSelectYesNoOnSetupHook.Original(addon, a2, dataPtr);
 
-            try
+            this.SafelyNow(() =>
             {
                 var data = Marshal.PtrToStructure<AddonSelectYesNoOnSetupData>(dataPtr);
                 var text = this.LastSeenDialogText = this.GetSeStringText(this.GetSeString(data.TextPtr));
 
                 PluginLog.Debug($"AddonSelectYesNo: text={text}");
 
-                if (Service.Configuration.Enabled)
+                var zoneWarnOnce = true;
+                var nodes = Service.Configuration.GetAllNodes().OfType<TextEntryNode>();
+                foreach (var node in nodes)
                 {
-                    var nodes = Service.Configuration.GetAllNodes().OfType<TextEntryNode>();
-                    var zoneWarnOnce = true;
-                    foreach (var node in nodes)
+                    if (!node.Enabled || string.IsNullOrEmpty(node.Text))
+                        continue;
+
+                    if (!this.EntryMatchesText(node, text))
+                        continue;
+
+                    if (node.ZoneRestricted && !string.IsNullOrEmpty(node.ZoneText))
                     {
-                        if (node.Enabled && !string.IsNullOrEmpty(node.Text) && this.EntryMatchesText(node, text))
+                        if (!this.TerritoryNames.TryGetValue(Service.ClientState.TerritoryType, out var zoneName))
                         {
-                            if (node.ZoneRestricted && !string.IsNullOrEmpty(node.ZoneText))
+                            if (zoneWarnOnce && !(zoneWarnOnce = false))
                             {
-                                if (!this.TerritoryNames.TryGetValue(Service.ClientState.TerritoryType, out var zoneName))
-                                {
-                                    if (zoneWarnOnce && !(zoneWarnOnce = false))
-                                    {
-                                        PluginLog.Debug("Unable to verify Zone Restricted entry, ZoneID was not set yet");
-                                        this.PrintMessage($"Unable to verify Zone Restricted entry, change zones to update value");
-                                    }
-
-                                    zoneName = string.Empty;
-                                }
-
-                                if (!string.IsNullOrEmpty(zoneName) && this.EntryMatchesZoneName(node, zoneName))
-                                {
-                                    PluginLog.Debug($"AddonSelectYesNo: Matched on {node.Text} ({node.ZoneText})");
-                                    this.AddonSelectYesNoExecute(addon);
-                                    break;
-                                }
+                                PluginLog.Debug("Unable to verify Zone Restricted entry, ZoneID was not set yet");
+                                this.PrintMessage($"Unable to verify Zone Restricted entry, change zones to update value");
                             }
-                            else
-                            {
-                                PluginLog.Debug($"AddonSelectYesNo: Matched on {node.Text}");
-                                this.AddonSelectYesNoExecute(addon);
-                                break;
-                            }
+
+                            zoneName = string.Empty;
+                        }
+
+                        if (!string.IsNullOrEmpty(zoneName) && this.EntryMatchesZoneName(node, zoneName))
+                        {
+                            PluginLog.Debug($"AddonSelectYesNo: Matched on {node.Text} ({node.ZoneText})");
+                            this.AddonSelectYesNoExecute(addon, node.IsYes);
+                            break;
                         }
                     }
+                    else
+                    {
+                        PluginLog.Debug($"AddonSelectYesNo: Matched on {node.Text}");
+                        this.AddonSelectYesNoExecute(addon, node.IsYes);
+                        break;
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                PluginLog.Error(ex, "Don't crash the game");
-            }
+            });
 
             return result;
         }
@@ -377,17 +380,16 @@ namespace YesAlready
     /// </summary>
     public sealed partial class YesAlreadyPlugin
     {
-        private void SendClicks(bool enabled, params string[] clicks)
+        private int itemInspectionCount = 0;
+
+        private void SafelyNow(Action action)
         {
+            if (!Service.Configuration.Enabled)
+                return;
+
             try
             {
-                if (Service.Configuration.Enabled && enabled)
-                {
-                    foreach (var click in clicks)
-                    {
-                        Click.SendClick(click);
-                    }
-                }
+                action.Invoke();
             }
             catch (Exception ex)
             {
@@ -395,41 +397,42 @@ namespace YesAlready
             }
         }
 
-        private IntPtr AddonSalvageDialogOnSetupDetour(IntPtr addon, uint a2, IntPtr dataPtr)
+        private unsafe IntPtr AddonSalvageDialogOnSetupDetour(IntPtr addon, uint a2, IntPtr dataPtr)
         {
-            PluginLog.Debug($"AddonSalvageDialog.OnSetup");
-
+            PluginLog.Debug("AddonSalvageDialog.OnSetup");
             var result = this.addonSalvageDialogOnSetupHook.Original(addon, a2, dataPtr);
 
-            try
+            this.SafelyNow(() =>
             {
-                if (Service.Configuration.Enabled && Service.Configuration.DesynthBulkDialogEnabled)
+                if (Service.Configuration.DesynthBulkDialogEnabled)
                 {
-                    unsafe
-                    {
-                        ((AddonSalvageDialog*)addon)->BulkDesynthEnabled = true;
-                    }
+                    ((AddonSalvageDialog*)addon)->BulkDesynthEnabled = true;
                 }
 
-                if (Service.Configuration.Enabled && Service.Configuration.DesynthDialogEnabled)
+                if (Service.Configuration.DesynthDialogEnabled)
                 {
-                    Click.SendClick("desynthesize_checkbox");
-                    Click.SendClick("desynthesize");
+                    var clickAddon = ClickSalvageDialog.Using(addon);
+                    clickAddon.CheckBox();
+                    clickAddon.Desynthesize();
                 }
-            }
-            catch (Exception ex)
-            {
-                PluginLog.Error(ex, "Don't crash the game");
-            }
+            });
 
             return result;
         }
 
         private IntPtr AddonMaterializeDialogOnSetupDetour(IntPtr addon, uint a2, IntPtr dataPtr)
         {
-            PluginLog.Debug($"AddonMaterializeDialog.OnSetupDetour");
+            PluginLog.Debug("AddonMaterializeDialog.OnSetupDetour");
             var result = this.addonMaterializeDialogOnSetupHook.Original(addon, a2, dataPtr);
-            this.SendClicks(Service.Configuration.MaterializeDialogEnabled, "materialize");
+
+            this.SafelyNow(() =>
+            {
+                if (!Service.Configuration.MaterializeDialogEnabled)
+                    return;
+
+                ClickMaterializeDialog.Using(addon).Materialize();
+            });
+
             return result;
         }
 
@@ -437,87 +440,144 @@ namespace YesAlready
         {
             PluginLog.Debug("AddonMateriaRetrieveDialog.OnSetupDetour");
             var result = this.addonMateriaRetrieveDialogOnSetupHook.Original(addon, a2, dataPtr);
-            this.SendClicks(Service.Configuration.MateriaRetrieveDialogEnabled, "retrieve_materia");
+
+            this.SafelyNow(() =>
+            {
+                if (!Service.Configuration.MateriaRetrieveDialogEnabled)
+                    return;
+
+                ClickMateriaRetrieveDialog.Using(addon).Begin();
+            });
+
             return result;
         }
 
-        private int itemInspectionCount = 0;
-        private int itemInspectionLimit = 10;
-
-        private IntPtr AddonItemInspectionResultOnSetupDetour(IntPtr addon, uint a2, IntPtr dataPtr)
+        private unsafe IntPtr AddonItemInspectionResultOnSetupDetour(IntPtr addon, uint a2, IntPtr dataPtr)
         {
-            PluginLog.Debug($"AddonItemInspectionResult.OnSetup");
-
+            PluginLog.Debug("AddonItemInspectionResult.OnSetup");
             var result = this.addonItemInspectionResultOnSetupHook.Original(addon, a2, dataPtr);
 
-            if (Service.Configuration.ItemInspectionResultEnabled)
+            this.SafelyNow(() =>
             {
-                unsafe
+                if (!Service.Configuration.ItemInspectionResultEnabled)
+                    return;
+
+                var addonPtr = (AddonItemInspectionResult*)addon;
+                if (addonPtr->AtkUnitBase.UldManager.NodeListCount < 64)
+                    return;
+
+                var nameNode = (AtkTextNode*)addonPtr->AtkUnitBase.UldManager.NodeList[64];
+                var descNode = (AtkTextNode*)addonPtr->AtkUnitBase.UldManager.NodeList[55];
+                if (!nameNode->AtkResNode.IsVisible || !descNode->AtkResNode.IsVisible)
+                    return;
+
+                var nameText = this.GetSeString(nameNode->NodeText.StringPtr);
+                var descText = this.GetSeStringText(this.GetSeString(descNode->NodeText.StringPtr));
+                // This is hackish, but works well enough (for now).
+                // Languages that dont contain the magic character will need special handling.
+                if (descText.Contains("※") || descText.Contains("liées à Garde-la-Reine"))
                 {
-                    var addonPtr = (AddonItemInspectionResult*)addon;
-
-                    if (addonPtr->AtkUnitBase.UldManager.NodeListCount >= 64)
-                    {
-                        var nameNode = (AtkTextNode*)addonPtr->AtkUnitBase.UldManager.NodeList[64];
-                        var descNode = (AtkTextNode*)addonPtr->AtkUnitBase.UldManager.NodeList[55];
-                        if (nameNode->AtkResNode.IsVisible && descNode->AtkResNode.IsVisible)
-                        {
-                            var nameText = this.GetSeString(nameNode->NodeText.StringPtr);
-                            var descText = this.GetSeStringText(this.GetSeString(descNode->NodeText.StringPtr));
-                            // This is hackish, but works well enough (for now)
-                            // French doesn't have the widget
-                            if (descText.Contains("※") || descText.Contains("liées à Garde-la-Reine"))
-                            {
-                                nameText.Payloads.Insert(0, new TextPayload("Received: "));
-                                this.PrintMessage(nameText);
-                            }
-                        }
-                    }
+                    nameText.Payloads.Insert(0, new TextPayload("Received: "));
+                    this.PrintMessage(nameText);
                 }
-            }
 
-            this.itemInspectionCount++;
-            if (this.itemInspectionCount % this.itemInspectionLimit == 0)
-            {
-                this.PrintMessage("Sanity check, pausing item inspection loop.");
-            }
-            else
-            {
-                this.SendClicks(Service.Configuration.ItemInspectionResultEnabled, "item_inspection_result_next");
-            }
+                this.itemInspectionCount++;
+                var rateLimiter = Service.Configuration.ItemInspectionResultRateLimiter;
+                if (rateLimiter != 0 && this.itemInspectionCount % rateLimiter == 0)
+                {
+                    this.itemInspectionCount = 0;
+                    this.PrintMessage("Rate limited, pausing item inspection loop.");
+                    return;
+                }
+
+                ClickItemInspectionResult.Using(addon).Next();
+            });
 
             return result;
         }
 
         private IntPtr AddonRetainerTaskAskOnSetupDetour(IntPtr addon, uint a2, IntPtr dataPtr)
         {
-            PluginLog.Debug($"AddonRetainerTaskAsk.OnSetup");
+            PluginLog.Debug("AddonRetainerTaskAsk.OnSetup");
             var result = this.addonRetainerTaskAskOnSetupHook.Original(addon, a2, dataPtr);
-            this.SendClicks(Service.Configuration.RetainerTaskAskEnabled, "retainer_venture_ask_assign");
+
+            this.SafelyNow(() =>
+            {
+                if (!Service.Configuration.RetainerTaskAskEnabled)
+                    return;
+
+                ClickRetainerTaskAsk.Using(addon).Assign();
+            });
+
             return result;
         }
 
         private IntPtr AddonRetainerTaskResultOnSetupDetour(IntPtr addon, uint a2, IntPtr dataPtr)
         {
-            PluginLog.Debug($"AddonRetainerTaskResult.OnSetup");
+            PluginLog.Debug("AddonRetainerTaskResult.OnSetup");
             var result = this.addonRetainerTaskResultOnSetupHook.Original(addon, a2, dataPtr);
-            this.SendClicks(Service.Configuration.RetainerTaskResultEnabled, "retainer_venture_result_reassign", "retainer_venture_result_reassign");
+
+            this.SafelyNow(() =>
+            {
+                if (!Service.Configuration.RetainerTaskResultEnabled)
+                    return;
+
+                ClickRetainerTaskResult.Using(addon).Reassign();
+            });
+
             return result;
         }
 
         private IntPtr AddonGrandCompanySupplyRewardOnSetupDetour(IntPtr addon, uint a2, IntPtr dataPtr)
         {
-            PluginLog.Debug($"AddonGrandCompanySupplyReward.OnSetup");
+            PluginLog.Debug("AddonGrandCompanySupplyReward.OnSetup");
             var result = this.addonGrandCompanySupplyRewardOnSetupHook.Original(addon, a2, dataPtr);
-            this.SendClicks(Service.Configuration.GrandCompanySupplyReward, "grand_company_expert_delivery_deliver");
+
+            this.SafelyNow(() =>
+            {
+                if (!Service.Configuration.GrandCompanySupplyReward)
+                    return;
+
+                ClickGrandCompanySupplyReward.Using(addon).Deliver();
+            });
+
             return result;
         }
 
         private IntPtr AddonShopCardDialogOnSetupDetour(IntPtr addon, uint a2, IntPtr dataPtr)
         {
-            PluginLog.Debug($"AddonShopCardDialog.OnSetup");
+            PluginLog.Debug("AddonShopCardDialog.OnSetup");
             var result = this.addonShopCardDialogOnSetupHook.Original(addon, a2, dataPtr);
-            this.SendClicks(Service.Configuration.ShopCardDialog, "sell_triple_triad_card");
+
+            this.SafelyNow(() =>
+            {
+                if (!Service.Configuration.ShopCardDialog)
+                    return;
+
+                ClickShopCardDialog.Using(addon).Sell();
+            });
+
+            return result;
+        }
+
+        private unsafe IntPtr AddonJournalResultOnSetupDetour(IntPtr addon, uint a2, IntPtr dataPtr)
+        {
+            PluginLog.Debug("AddonJournalResultComplete.OnSetup");
+            var result = this.addonJournalResultOnSetupHook.Original(addon, a2, dataPtr);
+
+            this.SafelyNow(() =>
+            {
+                if (!Service.Configuration.JournalResultCompleteEnabled)
+                    return;
+
+                var addonPtr = (AddonJournalResult*)addon;
+                var completeButton = addonPtr->CompleteButton;
+                if (!addonPtr->CompleteButton->IsEnabled)
+                    return;
+
+                ClickJournalResult.Using(addon).Complete();
+            });
+
             return result;
         }
     }

@@ -53,6 +53,11 @@ namespace YesAlready
         public bool ItemInspectionResultEnabled { get; set; } = false;
 
         /// <summary>
+        /// Gets or sets the item inspection result limit, where the inspection loop will pause after that many items.
+        /// </summary>
+        public int ItemInspectionResultRateLimiter { get; set; } = 0;
+
+        /// <summary>
         /// Gets or sets a value indicating whether the retainer task ask dialog setting is enabled.
         /// </summary>
         public bool RetainerTaskAskEnabled { get; set; } = false;
@@ -71,6 +76,11 @@ namespace YesAlready
         /// Gets or sets a value indicating whether the shop card dialog setting is enabled.
         /// </summary>
         public bool ShopCardDialog { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the journal result complete setting is enabled.
+        /// </summary>
+        public bool JournalResultCompleteEnabled { get; set; } = false;
 
         /// <summary>
         /// Loads the configuration.
