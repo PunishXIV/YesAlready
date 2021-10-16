@@ -43,6 +43,7 @@ namespace YesAlready
         private readonly Hook<OnSetupDelegate> addonGrandCompanySupplyRewardOnSetupHook;
         private readonly Hook<OnSetupDelegate> addonShopCardDialogOnSetupHook;
         private readonly Hook<OnSetupDelegate> addonJournalResultOnSetupHook;
+        private readonly Hook<OnSetupDelegate> addonContentsFinderConfirmOnSetupHook;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="YesAlreadyPlugin"/> class.
@@ -77,6 +78,7 @@ namespace YesAlready
             this.onSetupHooks.Add(this.addonGrandCompanySupplyRewardOnSetupHook = new(Service.Address.AddonGrandCompanySupplyRewardOnSetupAddress, this.AddonGrandCompanySupplyRewardOnSetupDetour));
             this.onSetupHooks.Add(this.addonShopCardDialogOnSetupHook = new(Service.Address.AddonShopCardDialogOnSetupAddress, this.AddonShopCardDialogOnSetupDetour));
             this.onSetupHooks.Add(this.addonJournalResultOnSetupHook = new(Service.Address.AddonJournalResultOnSetupAddress, this.AddonJournalResultOnSetupDetour));
+            this.onSetupHooks.Add(this.addonContentsFinderConfirmOnSetupHook = new(Service.Address.AddonContentsFinderConfirmOnSetupAddress, this.AddonContentsFinderConfirmOnSetupDetour));
             this.onSetupHooks.ForEach(hook => hook.Enable());
 
             this.configWindow = new();
@@ -576,6 +578,22 @@ namespace YesAlready
                     return;
 
                 ClickJournalResult.Using(addon).Complete();
+            });
+
+            return result;
+        }
+
+        private IntPtr AddonContentsFinderConfirmOnSetupDetour(IntPtr addon, uint a2, IntPtr dataPtr)
+        {
+            PluginLog.Debug("AddonContentsFinderConfirm.OnSetup");
+            var result = this.addonContentsFinderConfirmOnSetupHook.Original(addon, a2, dataPtr);
+
+            this.SafelyNow(() =>
+            {
+                if (!Service.Configuration.ContentsFinderConfirmEnabled)
+                    return;
+
+                ClickContentsFinderConfirm.Using(addon).Commence();
             });
 
             return result;

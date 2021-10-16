@@ -269,6 +269,18 @@ namespace YesAlready
             IndentedTextColored(this.shadedColor, "Automatically confirm quest reward acceptance when there is nothing to choose.");
 
             #endregion
+            #region ContentFinderConfirm
+
+            var contentsFinderConfirm = Service.Configuration.ContentsFinderConfirmEnabled;
+            if (ImGui.Checkbox("ContentsFinderConfirm", ref contentsFinderConfirm))
+            {
+                Service.Configuration.ContentsFinderConfirmEnabled = contentsFinderConfirm;
+                Service.Configuration.Save();
+            }
+
+            IndentedTextColored(this.shadedColor, "Automatically commence duties when ready.");
+
+            #endregion
 
             ImGui.EndTabItem();
         }

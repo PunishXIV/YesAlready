@@ -49,6 +49,9 @@ namespace YesAlready
         private const string AddonJournalResultOnSetupSignature = // Client::UI::AddonJournalResult.OnSetup
             "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 48 83 EC 30 8B EA 49 8B F0 BA ?? ?? ?? ?? 48 8B F9";
 
+        private const string AddonContentsFinderConfirmOnSetupSignature = // Client::UI::ContentsFinderConfirm.OnSetup
+            "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 41 56 41 57 48 83 EC 30 44 8B F2 49 8B E8 BA ?? ?? ?? ?? 48 8B D9";
+
         /// <summary>
         /// Gets the address of the SelectYesNo addon's OnSetup method.
         /// </summary>
@@ -99,6 +102,11 @@ namespace YesAlready
         /// </summary>
         public IntPtr AddonJournalResultOnSetupAddress { get; private set; }
 
+        /// <summary>
+        /// Gets the address of the ContentsFinderConfirm addon's OnSetup method.
+        /// </summary>
+        public IntPtr AddonContentsFinderConfirmOnSetupAddress { get; private set; }
+
         /// <inheritdoc/>
         protected override void Setup64Bit(SigScanner scanner)
         {
@@ -112,6 +120,7 @@ namespace YesAlready
             this.AddonGrandCompanySupplyRewardOnSetupAddress = scanner.ScanText(AddonGrandCompanySupplyRewardOnSetupSignature);
             this.AddonShopCardDialogOnSetupAddress = scanner.ScanText(AddonShopCardDialogOnSetupSignature);
             this.AddonJournalResultOnSetupAddress = scanner.ScanText(AddonJournalResultOnSetupSignature);
+            this.AddonContentsFinderConfirmOnSetupAddress = scanner.ScanText(AddonContentsFinderConfirmOnSetupSignature);
 
             PluginLog.Verbose("===== YES ALREADY =====");
             PluginLog.Verbose($"{nameof(this.AddonSelectYesNoOnSetupAddress)} {this.AddonSelectYesNoOnSetupAddress:X}");
@@ -124,6 +133,7 @@ namespace YesAlready
             PluginLog.Verbose($"{nameof(this.AddonGrandCompanySupplyRewardOnSetupAddress)} {this.AddonGrandCompanySupplyRewardOnSetupAddress:X}");
             PluginLog.Verbose($"{nameof(this.AddonShopCardDialogOnSetupAddress)} {this.AddonShopCardDialogOnSetupAddress:X}");
             PluginLog.Verbose($"{nameof(this.AddonJournalResultOnSetupAddress)} {this.AddonJournalResultOnSetupAddress:X}");
+            PluginLog.Verbose($"{nameof(this.AddonContentsFinderConfirmOnSetupAddress)} {this.AddonContentsFinderConfirmOnSetupAddress:X}");
         }
     }
 }

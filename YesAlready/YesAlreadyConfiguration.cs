@@ -83,13 +83,18 @@ namespace YesAlready
         public bool JournalResultCompleteEnabled { get; set; } = false;
 
         /// <summary>
+        /// Gets or sets a value indicating whether the duty finder accept setting is enabled.
+        /// </summary>
+        public bool ContentsFinderConfirmEnabled { get; set; } = false;
+
+        /// <summary>
         /// Loads the configuration.
         /// </summary>
         /// <param name="configDirectory">Configuration directory.</param>
         /// <returns>A configuration.</returns>
         public static YesAlreadyConfiguration Load(DirectoryInfo configDirectory)
         {
-            var pluginConfigPath = new FileInfo(Path.Combine(configDirectory.Parent!.FullName, $"YesAlready.json"));
+            var pluginConfigPath = new FileInfo(Path.Combine(configDirectory.Parent!.FullName, "YesAlready.json"));
 
             if (!pluginConfigPath.Exists)
                 return new YesAlreadyConfiguration();
