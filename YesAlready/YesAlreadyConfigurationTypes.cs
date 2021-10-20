@@ -114,6 +114,149 @@ namespace YesAlready
     }
 
     /// <summary>
+    /// List entry node type.
+    /// </summary>
+    public class ListEntryNode : ITextNode
+    {
+        /// <summary>
+        /// Gets or sets a value indicating whether the node is enabled.
+        /// </summary>
+        public bool Enabled { get; set; } = true;
+
+        /// <summary>
+        /// Gets the name of the node.
+        /// </summary>
+        [JsonIgnore]
+        public string Name
+        {
+            get
+            {
+                return !string.IsNullOrEmpty(this.TargetText)
+                    ? $"({this.TargetText}) {this.Text}"
+                    : this.Text;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the matching text.
+        /// </summary>
+        public string Text { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Gets a value indicating whether the matching text is a regex.
+        /// </summary>
+        [JsonIgnore]
+        public bool IsTextRegex => this.Text.StartsWith("/") && this.Text.EndsWith("/");
+
+        /// <summary>
+        /// Gets the matching text as a compiled regex.
+        /// </summary>
+        [JsonIgnore]
+        public Regex? TextRegex
+        {
+            get
+            {
+                try
+                {
+                    return new(this.Text.Trim('/'), RegexOptions.Compiled | RegexOptions.IgnoreCase);
+                }
+                catch
+                {
+                    return null;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this entry should be target restricted.
+        /// </summary>
+        public bool TargetRestricted { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets the matching target name.
+        /// </summary>
+        public string TargetText { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Gets a value indicating whether the matching target text is a regex.
+        /// </summary>
+        [JsonIgnore]
+        public bool TargetIsRegex => this.TargetText.StartsWith("/") && this.TargetText.EndsWith("/");
+
+        /// <summary>
+        /// Gets the matching target text as a compiled regex.
+        /// </summary>
+        [JsonIgnore]
+        public Regex? TargetRegex
+        {
+            get
+            {
+                try
+                {
+                    return new(this.TargetText.Trim('/'), RegexOptions.Compiled | RegexOptions.IgnoreCase);
+                }
+                catch
+                {
+                    return null;
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Talk entry node type.
+    /// </summary>
+    public class TalkEntryNode : ITextNode
+    {
+        /// <summary>
+        /// Gets or sets a value indicating whether the node is enabled.
+        /// </summary>
+        public bool Enabled { get; set; } = true;
+
+        /// <summary>
+        /// Gets the name of the node.
+        /// </summary>
+        [JsonIgnore]
+        public string Name
+        {
+            get
+            {
+                return this.TargetText;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the matching target name.
+        /// </summary>
+        public string TargetText { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Gets a value indicating whether the matching target text is a regex.
+        /// </summary>
+        [JsonIgnore]
+        public bool TargetIsRegex => this.TargetText.StartsWith("/") && this.TargetText.EndsWith("/");
+
+        /// <summary>
+        /// Gets the matching target text as a compiled regex.
+        /// </summary>
+        [JsonIgnore]
+        public Regex? TargetRegex
+        {
+            get
+            {
+                try
+                {
+                    return new(this.TargetText.Trim('/'), RegexOptions.Compiled | RegexOptions.IgnoreCase);
+                }
+                catch
+                {
+                    return null;
+                }
+            }
+        }
+    }
+
+    /// <summary>
     /// Folder node type.
     /// </summary>
     public class TextFolderNode : ITextNode
@@ -151,6 +294,14 @@ namespace YesAlready
             if (jType == this.SimpleName(typeof(TextEntryNode)))
             {
                 return this.CreateObject<TextEntryNode>(jObject, serializer);
+            }
+            else if (jType == this.SimpleName(typeof(ListEntryNode)))
+            {
+                return this.CreateObject<ListEntryNode>(jObject, serializer);
+            }
+            else if (jType == this.SimpleName(typeof(TalkEntryNode)))
+            {
+                return this.CreateObject<TalkEntryNode>(jObject, serializer);
             }
             else if (jType == this.SimpleName(typeof(TextFolderNode)))
             {

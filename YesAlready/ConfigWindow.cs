@@ -30,6 +30,10 @@ namespace YesAlready
 
         private static TextFolderNode RootFolder => Service.Configuration.RootFolder;
 
+        private static TextFolderNode ListRootFolder => Service.Configuration.ListRootFolder;
+
+        private static TextFolderNode TalkRootFolder => Service.Configuration.TalkRootFolder;
+
         /// <inheritdoc/>
         public override void PreDraw()
         {
@@ -50,7 +54,7 @@ namespace YesAlready
 #endif
 
             var enabled = Service.Configuration.Enabled;
-            if (ImGui.Checkbox($"Enabled", ref enabled))
+            if (ImGui.Checkbox("Enabled", ref enabled))
             {
                 Service.Configuration.Enabled = enabled;
                 Service.Configuration.Save();
@@ -58,8 +62,9 @@ namespace YesAlready
 
             if (ImGui.BeginTabBar("Settings"))
             {
-                this.DisplayYesNoOptions();
-                this.DisplayListItemOptions();
+                this.DisplayTextOptions();
+                this.DisplayListOptions();
+                this.DisplayTalkOptions();
                 this.DisplayBotherOptions();
 
                 ImGui.EndTabBar();
@@ -97,23 +102,49 @@ namespace YesAlready
 
         #endregion
 
-        private void DisplayYesNoOptions()
+        // ====================================================================================================
+
+        private void DisplayTextOptions()
         {
-            if (!ImGui.BeginTabItem("Yes No"))
+            if (!ImGui.BeginTabItem("YesNo"))
                 return;
 
-            this.DisplayTextNodeButtons();
+            ImGui.PushID("TextOptions");
+
+            this.DisplayTextButtons();
             this.DisplayTextNodes();
+
+            ImGui.PopID();
 
             ImGui.EndTabItem();
         }
 
-        private void DisplayListItemOptions()
+        private void DisplayListOptions()
         {
-            if (!ImGui.BeginTabItem("List Item"))
+            if (!ImGui.BeginTabItem("Lists"))
                 return;
 
-            // TODO
+            ImGui.PushID("ListOptions");
+
+            this.DisplayListButtons();
+            this.DisplayListNodes();
+
+            ImGui.PopID();
+
+            ImGui.EndTabItem();
+        }
+
+        private void DisplayTalkOptions()
+        {
+            if (!ImGui.BeginTabItem("Talk"))
+                return;
+
+            ImGui.PushID("TalkOptions");
+
+            this.DisplayTalkButtons();
+            this.DisplayTalkNodes();
+
+            ImGui.PopID();
 
             ImGui.EndTabItem();
         }
@@ -130,6 +161,8 @@ namespace YesAlready
                 ImGui.TextColored(color, text);
                 ImGui.Unindent(indent);
             }
+
+            ImGui.PushID("BotherOptions");
 
             #region SalvageDialog
 
@@ -282,12 +315,14 @@ namespace YesAlready
 
             #endregion
 
+            ImGui.PopID();
+
             ImGui.EndTabItem();
         }
 
         // ====================================================================================================
 
-        private void DisplayTextNodeButtons()
+        private void DisplayTextButtons()
         {
             var style = ImGui.GetStyle();
             var newStyle = new Vector2(style.ItemSpacing.X / 2, style.ItemSpacing.Y);
@@ -331,8 +366,6 @@ namespace YesAlready
             sb.AppendLine();
             sb.AppendLine("Currently supported text addons:");
             sb.AppendLine("  - SelectYesNo");
-            sb.AppendLine();
-            sb.AppendLine("Non-text addons are each listed separately in the lower config section.");
 
             ImGui.SameLine();
             ImGuiEx.IconButton(FontAwesomeIcon.QuestionCircle, sb.ToString());
@@ -342,7 +375,7 @@ namespace YesAlready
 
         private void DisplayTextNodes()
         {
-            var root = Service.Configuration.RootFolder;
+            var root = RootFolder;
             this.TextNodeDragDrop(root);
 
             if (root.Children.Count == 0)
@@ -353,19 +386,173 @@ namespace YesAlready
 
             foreach (var node in root.Children.ToArray())
             {
-                this.DisplayTextNode(node);
+                this.DisplayTextNode(node, root);
             }
         }
 
-        private void DisplayTextNode(ITextNode node)
+        // ====================================================================================================
+
+        private void DisplayListButtons()
+        {
+            var style = ImGui.GetStyle();
+            var newStyle = new Vector2(style.ItemSpacing.X / 2, style.ItemSpacing.Y);
+            ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, newStyle);
+
+            if (ImGuiEx.IconButton(FontAwesomeIcon.Plus, "Add new entry"))
+            {
+                var newNode = new ListEntryNode { Enabled = false, Text = "Your text goes here" };
+                ListRootFolder.Children.Add(newNode);
+                Service.Configuration.Save();
+            }
+
+            ImGui.SameLine();
+            if (ImGuiEx.IconButton(FontAwesomeIcon.SearchPlus, "Add last selected as new entry"))
+            {
+                var newNode = new ListEntryNode { Enabled = true, Text = Service.Plugin.LastSeenListSelection, TargetRestricted = true, TargetText = Service.Plugin.LastSeenListTarget };
+                ListRootFolder.Children.Add(newNode);
+                Service.Configuration.Save();
+            }
+
+            ImGui.SameLine();
+            if (ImGuiEx.IconButton(FontAwesomeIcon.FolderPlus, "Add folder"))
+            {
+                var newNode = new TextFolderNode { Name = "Untitled folder" };
+                ListRootFolder.Children.Add(newNode);
+                Service.Configuration.Save();
+            }
+
+            var sb = new StringBuilder();
+            sb.AppendLine("Enter into the input all or part of the text inside a line in a list dialog.");
+            sb.AppendLine("For example: \"Purchase a Mini Cactpot ticket\" in the Gold Saucer.");
+            sb.AppendLine();
+            sb.AppendLine("Alternatively, wrap your text in forward slashes to use as a regex.");
+            sb.AppendLine("As such: \"/Purchase a .*? ticket/\"");
+            sb.AppendLine();
+            sb.AppendLine("If any line in the list matches, then that line will be chosen.");
+            sb.AppendLine();
+            sb.AppendLine("Right click a line to view options.");
+            sb.AppendLine("Double click an entry for quick enable/disable.");
+            sb.AppendLine("Ctrl-Shift right click a line to delete it and any children.");
+            sb.AppendLine();
+            sb.AppendLine("Currently supported list addons:");
+            sb.AppendLine("  - SelectString");
+            sb.AppendLine("  - SelectIconString");
+
+            ImGui.SameLine();
+            ImGuiEx.IconButton(FontAwesomeIcon.QuestionCircle, sb.ToString());
+
+            ImGui.PopStyleVar(); // ItemSpacing
+        }
+
+        private void DisplayListNodes()
+        {
+            var root = ListRootFolder;
+            this.TextNodeDragDrop(root);
+
+            if (root.Children.Count == 0)
+            {
+                root.Children.Add(new ListEntryNode() { Enabled = false, Text = "Add some text here!" });
+                Service.Configuration.Save();
+            }
+
+            foreach (var node in root.Children.ToArray())
+            {
+                this.DisplayTextNode(node, root);
+            }
+        }
+
+        // ====================================================================================================
+
+        private void DisplayTalkButtons()
+        {
+            var style = ImGui.GetStyle();
+            var newStyle = new Vector2(style.ItemSpacing.X / 2, style.ItemSpacing.Y);
+            ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, newStyle);
+
+            if (ImGuiEx.IconButton(FontAwesomeIcon.Plus, "Add new entry"))
+            {
+                var newNode = new TalkEntryNode { Enabled = false, TargetText = "Your text goes here" };
+                TalkRootFolder.Children.Add(newNode);
+                Service.Configuration.Save();
+            }
+
+            ImGui.SameLine();
+            if (ImGuiEx.IconButton(FontAwesomeIcon.SearchPlus, "Add current target as a new entry"))
+            {
+                var target = Service.TargetManager.Target;
+                var targetName = Service.Plugin.LastSeenTalkTarget = target != null
+                    ? Service.Plugin.GetSeStringText(target.Name)
+                    : string.Empty;
+
+                var newNode = new TalkEntryNode { Enabled = true, TargetText = targetName };
+                TalkRootFolder.Children.Add(newNode);
+                Service.Configuration.Save();
+            }
+
+            ImGui.SameLine();
+            if (ImGuiEx.IconButton(FontAwesomeIcon.FolderPlus, "Add folder"))
+            {
+                var newNode = new TextFolderNode { Name = "Untitled folder" };
+                TalkRootFolder.Children.Add(newNode);
+                Service.Configuration.Save();
+            }
+
+            var sb = new StringBuilder();
+            sb.AppendLine("Enter into the input all or part of the selected taret name while in a talk dialog.");
+            sb.AppendLine("For example: \"Moyce\" in the Crystarium.");
+            sb.AppendLine();
+            sb.AppendLine("Alternatively, wrap your text in forward slashes to use as a regex.");
+            sb.AppendLine("As such: \"/(Moyce|Eirikur)/\"");
+            sb.AppendLine();
+            sb.AppendLine("Right click a line to view options.");
+            sb.AppendLine("Double click an entry for quick enable/disable.");
+            sb.AppendLine("Ctrl-Shift right click a line to delete it and any children.");
+            sb.AppendLine();
+            sb.AppendLine("Currently supported list addons:");
+            sb.AppendLine("  - Talk");
+
+            ImGui.SameLine();
+            ImGuiEx.IconButton(FontAwesomeIcon.QuestionCircle, sb.ToString());
+
+            ImGui.PopStyleVar(); // ItemSpacing
+        }
+
+        private void DisplayTalkNodes()
+        {
+            var root = TalkRootFolder;
+            this.TextNodeDragDrop(root);
+
+            if (root.Children.Count == 0)
+            {
+                root.Children.Add(new TalkEntryNode() { Enabled = false, TargetText = "Add some text here!" });
+                Service.Configuration.Save();
+            }
+
+            foreach (var node in root.Children.ToArray())
+            {
+                this.DisplayTextNode(node, root);
+            }
+        }
+
+        // ====================================================================================================
+
+        private void DisplayTextNode(ITextNode node, TextFolderNode rootNode)
         {
             if (node is TextFolderNode folderNode)
             {
-                this.DisplayTextFolderNode(folderNode);
+                this.DisplayFolderNode(folderNode, rootNode);
             }
-            else if (node is TextEntryNode macroNode)
+            else if (node is TextEntryNode textNode)
             {
-                this.DisplayTextEntryNode(macroNode);
+                this.DisplayTextEntryNode(textNode);
+            }
+            else if (node is ListEntryNode listNode)
+            {
+                this.DisplayListEntryNode(listNode);
+            }
+            else if (node is TalkEntryNode talkNode)
+            {
+                this.DisplayTalkEntryNode(talkNode);
             }
         }
 
@@ -426,7 +613,116 @@ namespace YesAlready
             this.TextNodeDragDrop(node);
         }
 
-        private void DisplayTextFolderNode(TextFolderNode node)
+        private void DisplayListEntryNode(ListEntryNode node)
+        {
+            var validRegex = (node.IsTextRegex && node.TextRegex != null) || !node.IsTextRegex;
+            var validTarget = !node.TargetRestricted || (node.TargetIsRegex && node.TargetRegex != null) || !node.TargetIsRegex;
+
+            if (!node.Enabled && (!validRegex || !validTarget))
+                ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(.5f, 0, 0, 1));
+            else if (!node.Enabled)
+                ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(.5f, .5f, .5f, 1));
+            else if (!validRegex || !validTarget)
+                ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1, 0, 0, 1));
+
+            ImGui.TreeNodeEx($"{node.Name}##{node.Name}-tree", ImGuiTreeNodeFlags.Leaf);
+            ImGui.TreePop();
+
+            if (!node.Enabled || !validRegex || !validTarget)
+                ImGui.PopStyleColor();
+
+            if (!validRegex && !validTarget)
+                ImGuiEx.TextTooltip("Invalid Text and Target Regex");
+            else if (!validRegex)
+                ImGuiEx.TextTooltip("Invalid Text Regex");
+            else if (!validTarget)
+                ImGuiEx.TextTooltip("Invalid Target Regex");
+
+            if (ImGui.IsItemHovered())
+            {
+                if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
+                {
+                    node.Enabled = !node.Enabled;
+                    Service.Configuration.Save();
+                    return;
+                }
+                else if (ImGui.IsMouseClicked(ImGuiMouseButton.Right))
+                {
+                    var io = ImGui.GetIO();
+                    if (io.KeyCtrl && io.KeyShift)
+                    {
+                        if (Service.Configuration.TryFindParent(node, out var parent))
+                        {
+                            parent!.Children.Remove(node);
+                            Service.Configuration.Save();
+                        }
+
+                        return;
+                    }
+                    else
+                    {
+                        ImGui.OpenPopup($"{node.GetHashCode()}-popup");
+                    }
+                }
+            }
+
+            this.TextNodePopup(node);
+            this.TextNodeDragDrop(node);
+        }
+
+        private void DisplayTalkEntryNode(TalkEntryNode node)
+        {
+            var validTarget = (node.TargetIsRegex && node.TargetRegex != null) || !node.TargetIsRegex;
+
+            if (!node.Enabled && !validTarget)
+                ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(.5f, 0, 0, 1));
+            else if (!node.Enabled)
+                ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(.5f, .5f, .5f, 1));
+            else if (!validTarget)
+                ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1, 0, 0, 1));
+
+            ImGui.TreeNodeEx($"{node.Name}##{node.Name}-tree", ImGuiTreeNodeFlags.Leaf);
+            ImGui.TreePop();
+
+            if (!node.Enabled || !validTarget)
+                ImGui.PopStyleColor();
+
+            if (!validTarget)
+                ImGuiEx.TextTooltip("Invalid Target Regex");
+
+            if (ImGui.IsItemHovered())
+            {
+                if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
+                {
+                    node.Enabled = !node.Enabled;
+                    Service.Configuration.Save();
+                    return;
+                }
+                else if (ImGui.IsMouseClicked(ImGuiMouseButton.Right))
+                {
+                    var io = ImGui.GetIO();
+                    if (io.KeyCtrl && io.KeyShift)
+                    {
+                        if (Service.Configuration.TryFindParent(node, out var parent))
+                        {
+                            parent!.Children.Remove(node);
+                            Service.Configuration.Save();
+                        }
+
+                        return;
+                    }
+                    else
+                    {
+                        ImGui.OpenPopup($"{node.GetHashCode()}-popup");
+                    }
+                }
+            }
+
+            this.TextNodePopup(node);
+            this.TextNodeDragDrop(node);
+        }
+
+        private void DisplayFolderNode(TextFolderNode node, TextFolderNode root)
         {
             var expanded = ImGui.TreeNodeEx($"{node.Name}##{node.GetHashCode()}-tree");
 
@@ -452,21 +748,21 @@ namespace YesAlready
                 }
             }
 
-            this.TextNodePopup(node);
+            this.TextNodePopup(node, root);
             this.TextNodeDragDrop(node);
 
             if (expanded)
             {
                 foreach (var childNode in node.Children.ToArray())
                 {
-                    this.DisplayTextNode(childNode);
+                    this.DisplayTextNode(childNode, root);
                 }
 
                 ImGui.TreePop();
             }
         }
 
-        private void TextNodePopup(ITextNode node)
+        private void TextNodePopup(ITextNode node, TextFolderNode? root = null)
         {
             var style = ImGui.GetStyle();
             var newItemSpacing = new Vector2(style.ItemSpacing.X / 2, style.ItemSpacing.Y);
@@ -493,7 +789,9 @@ namespace YesAlready
                         Service.Configuration.Save();
                     }
 
-                    ImGui.SameLine(ImGui.GetContentRegionMax().X - ImGuiEx.GetIconButtonWidth(FontAwesomeIcon.TrashAlt));
+                    var trashAltWidth = ImGuiEx.GetIconButtonWidth(FontAwesomeIcon.TrashAlt);
+
+                    ImGui.SameLine(ImGui.GetContentRegionMax().X - trashAltWidth);
                     if (ImGuiEx.IconButton(FontAwesomeIcon.TrashAlt, "Delete"))
                     {
                         if (Service.Configuration.TryFindParent(node, out var parentNode))
@@ -533,10 +831,12 @@ namespace YesAlready
                         if (Service.Plugin.TerritoryNames.TryGetValue(currentID, out var zoneName))
                         {
                             entryNode.ZoneText = zoneName;
+                            Service.Configuration.Save();
                         }
                         else
                         {
                             entryNode.ZoneText = "Could not find name";
+                            Service.Configuration.Save();
                         }
                     }
 
@@ -550,23 +850,161 @@ namespace YesAlready
                     }
                 }
 
+                if (node is ListEntryNode listNode)
+                {
+                    ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, newItemSpacing);
+
+                    var enabled = listNode.Enabled;
+                    if (ImGui.Checkbox("Enabled", ref enabled))
+                    {
+                        listNode.Enabled = enabled;
+                        Service.Configuration.Save();
+                    }
+
+                    var trashAltWidth = ImGuiEx.GetIconButtonWidth(FontAwesomeIcon.TrashAlt);
+
+                    ImGui.SameLine(ImGui.GetContentRegionMax().X - trashAltWidth);
+                    if (ImGuiEx.IconButton(FontAwesomeIcon.TrashAlt, "Delete"))
+                    {
+                        if (Service.Configuration.TryFindParent(node, out var parentNode))
+                        {
+                            parentNode!.Children.Remove(node);
+                            Service.Configuration.Save();
+                        }
+                    }
+
+                    var matchText = listNode.Text;
+                    if (ImGui.InputText($"##{node.Name}-matchText", ref matchText, 100, ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EnterReturnsTrue))
+                    {
+                        listNode.Text = matchText;
+                        Service.Configuration.Save();
+                    }
+
+                    var targetRestricted = listNode.TargetRestricted;
+                    if (ImGui.Checkbox("Target Restricted", ref targetRestricted))
+                    {
+                        listNode.TargetRestricted = targetRestricted;
+                        Service.Configuration.Save();
+                    }
+
+                    var searchPlusWidth = ImGuiEx.GetIconButtonWidth(FontAwesomeIcon.SearchPlus);
+
+                    ImGui.SameLine(ImGui.GetContentRegionMax().X - searchPlusWidth);
+                    if (ImGuiEx.IconButton(FontAwesomeIcon.SearchPlus, "Fill with current target"))
+                    {
+                        var target = Service.TargetManager.Target;
+                        var name = target?.Name?.TextValue ?? string.Empty;
+
+                        if (!string.IsNullOrEmpty(name))
+                        {
+                            listNode.TargetText = name;
+                            Service.Configuration.Save();
+                        }
+                        else
+                        {
+                            listNode.TargetText = "Could not find target";
+                            Service.Configuration.Save();
+                        }
+                    }
+
+                    ImGui.PopStyleVar(); // ItemSpacing
+
+                    var targetText = listNode.TargetText;
+                    if (ImGui.InputText($"##{node.Name}-targetText", ref targetText, 100, ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EnterReturnsTrue))
+                    {
+                        listNode.TargetText = targetText;
+                        Service.Configuration.Save();
+                    }
+                }
+
+                if (node is TalkEntryNode talkNode)
+                {
+                    ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, newItemSpacing);
+
+                    var enabled = talkNode.Enabled;
+                    if (ImGui.Checkbox("Enabled", ref enabled))
+                    {
+                        talkNode.Enabled = enabled;
+                        Service.Configuration.Save();
+                    }
+
+                    var trashAltWidth = ImGuiEx.GetIconButtonWidth(FontAwesomeIcon.TrashAlt);
+
+                    ImGui.SameLine(ImGui.GetContentRegionMax().X - trashAltWidth);
+                    if (ImGuiEx.IconButton(FontAwesomeIcon.TrashAlt, "Delete"))
+                    {
+                        if (Service.Configuration.TryFindParent(node, out var parentNode))
+                        {
+                            parentNode!.Children.Remove(node);
+                            Service.Configuration.Save();
+                        }
+                    }
+
+                    var searchPlusWidth = ImGuiEx.GetIconButtonWidth(FontAwesomeIcon.SearchPlus);
+
+                    ImGui.SameLine(ImGui.GetContentRegionMax().X - searchPlusWidth - trashAltWidth - newItemSpacing.X);
+                    if (ImGuiEx.IconButton(FontAwesomeIcon.SearchPlus, "Fill with current target"))
+                    {
+                        var target = Service.TargetManager.Target;
+                        var name = target?.Name?.TextValue ?? string.Empty;
+
+                        if (!string.IsNullOrEmpty(name))
+                        {
+                            talkNode.TargetText = name;
+                            Service.Configuration.Save();
+                        }
+                        else
+                        {
+                            talkNode.TargetText = "Could not find target";
+                            Service.Configuration.Save();
+                        }
+                    }
+
+                    ImGui.PopStyleVar(); // ItemSpacing
+
+                    var targetText = talkNode.TargetText;
+                    if (ImGui.InputText($"##{node.Name}-targetText", ref targetText, 100, ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EnterReturnsTrue))
+                    {
+                        talkNode.TargetText = targetText;
+                        Service.Configuration.Save();
+                    }
+                }
+
                 if (node is TextFolderNode folderNode)
                 {
                     ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, newItemSpacing);
 
                     if (ImGuiEx.IconButton(FontAwesomeIcon.Plus, "Add entry"))
                     {
-                        var newNode = new TextEntryNode { Enabled = false, Text = "Your text goes here" };
-                        folderNode.Children.Add(newNode);
+                        if (root == RootFolder)
+                        {
+                            var newNode = new TextEntryNode { Enabled = false, Text = "Your text goes here" };
+                            folderNode.Children.Add(newNode);
+                        }
+                        else if (root == ListRootFolder)
+                        {
+                            var newNode = new ListEntryNode { Enabled = false, Text = "Your text goes here" };
+                            folderNode.Children.Add(newNode);
+                        }
+
                         Service.Configuration.Save();
                     }
 
                     ImGui.SameLine();
                     if (ImGuiEx.IconButton(FontAwesomeIcon.SearchPlus, "Add last seen as new entry"))
                     {
-                        var newNode = new TextEntryNode() { Enabled = true, Text = Service.Plugin.LastSeenDialogText };
-                        folderNode.Children.Add(newNode);
-                        Service.Configuration.Save();
+                        if (root == RootFolder)
+                        {
+                            var newNode = new TextEntryNode() { Enabled = true, Text = Service.Plugin.LastSeenDialogText };
+                            folderNode.Children.Add(newNode);
+                            Service.Configuration.Save();
+                        }
+                        else if (root == ListRootFolder)
+                        {
+                            var newNode = new ListEntryNode() { Enabled = true, Text = Service.Plugin.LastSeenListSelection, TargetRestricted = true, TargetText = Service.Plugin.LastSeenListTarget };
+                            folderNode.Children.Add(newNode);
+                            Service.Configuration.Save();
+                        }
                     }
 
                     ImGui.SameLine();
@@ -604,7 +1042,7 @@ namespace YesAlready
 
         private void TextNodeDragDrop(ITextNode node)
         {
-            if (node != Service.Configuration.RootFolder && ImGui.BeginDragDropSource())
+            if (node != RootFolder && node != ListRootFolder && node != TalkRootFolder && ImGui.BeginDragDropSource())
             {
                 this.draggedNode = node;
 

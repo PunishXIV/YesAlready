@@ -23,9 +23,19 @@ namespace YesAlready
         public bool Enabled { get; set; } = true;
 
         /// <summary>
-        /// Gets the root folder.
+        /// Gets the text root folder.
         /// </summary>
         public TextFolderNode RootFolder { get; private set; } = new TextFolderNode { Name = "/" };
+
+        /// <summary>
+        /// Gets the list root folder.
+        /// </summary>
+        public TextFolderNode ListRootFolder { get; private set; } = new TextFolderNode { Name = "/" };
+
+        /// <summary>
+        /// Gets the talk root folder.
+        /// </summary>
+        public TextFolderNode TalkRootFolder { get; private set; } = new TextFolderNode { Name = "/" };
 
         /// <summary>
         /// Gets or sets a value indicating whether the desynth dialog setting is enabled.
@@ -122,7 +132,15 @@ namespace YesAlready
         /// <returns>All the nodes.</returns>
         public IEnumerable<ITextNode> GetAllNodes()
         {
-            return new ITextNode[] { this.RootFolder }.Concat(this.GetAllNodes(this.RootFolder.Children));
+            return new ITextNode[]
+            {
+                this.RootFolder,
+                this.ListRootFolder,
+                this.TalkRootFolder,
+            }
+            .Concat(this.GetAllNodes(this.RootFolder.Children))
+            .Concat(this.GetAllNodes(this.ListRootFolder.Children))
+            .Concat(this.GetAllNodes(this.TalkRootFolder.Children));
         }
 
         /// <summary>

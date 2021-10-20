@@ -1,6 +1,8 @@
 using Dalamud.Data;
 using Dalamud.Game;
 using Dalamud.Game.ClientState;
+using Dalamud.Game.ClientState.Keys;
+using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.Command;
 using Dalamud.Game.Gui;
 using Dalamud.IoC;
@@ -75,5 +77,17 @@ namespace YesAlready
         /// </summary>
         [PluginService]
         internal static SigScanner Scanner { get; private set; } = null!;
+
+        /// <summary>
+        /// Gets the Dalamud keystate manager.
+        /// </summary>
+        [PluginService]
+        internal static KeyState KeyState { get; private set; } = null!;
+
+        /// <summary>
+        /// Gets the Dalamud target manager.
+        /// </summary>
+        [PluginService]
+        internal static TargetManager TargetManager { get; private set; } = null!;
     }
 }
