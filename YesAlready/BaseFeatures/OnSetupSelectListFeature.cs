@@ -51,8 +51,6 @@ namespace YesAlready.BaseFeatures
         protected unsafe void CompareNodesToEntryTexts(IntPtr addon, PopupMenu* popupMenu)
         {
             var millisSinceLastEscape = (DateTime.Now - Service.Plugin.EscapeLastPressed).TotalMilliseconds;
-            if (millisSinceLastEscape < 1000)
-                return;
 
             var target = Service.TargetManager.Target;
             var targetName = target != null
@@ -66,6 +64,9 @@ namespace YesAlready.BaseFeatures
                 if (!node.Enabled || string.IsNullOrEmpty(node.Text))
                     continue;
 
+                if (millisSinceLastEscape < 1000 && node == Service.Plugin.LastSelectedListNode)
+                    continue;
+
                 var (matched, index) = this.EntryMatchesTexts(node, texts);
                 if (!matched)
                     continue;
@@ -75,6 +76,7 @@ namespace YesAlready.BaseFeatures
                     if (!string.IsNullOrEmpty(targetName) && this.EntryMatchesTargetName(node, targetName))
                     {
                         PluginLog.Debug($"OnSetupSelectListFeature: Matched on {node.Text} ({node.TargetText})");
+                        Service.Plugin.LastSelectedListNode = node;
                         this.SelectItemExecute(addon, index);
                         return;
                     }
@@ -82,6 +84,7 @@ namespace YesAlready.BaseFeatures
                 else
                 {
                     PluginLog.Debug($"OnSetupSelectListFeature: Matched on {node.Text}");
+                    Service.Plugin.LastSelectedListNode = node;
                     this.SelectItemExecute(addon, index);
                     return;
                 }

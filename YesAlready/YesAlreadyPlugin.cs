@@ -122,6 +122,11 @@ namespace YesAlready
         /// </summary>
         internal DateTime EscapeLastPressed { get; private set; } = DateTime.MinValue;
 
+        /// <summary>
+        /// Gets or sets the last selected list node, so the escape only skips that specific one.
+        /// </summary>
+        internal ListEntryNode LastSelectedListNode { get; set; } = new();
+
         /// <inheritdoc/>
         public void Dispose()
         {
