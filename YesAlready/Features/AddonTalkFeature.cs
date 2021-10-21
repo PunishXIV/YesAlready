@@ -13,6 +13,9 @@ namespace YesAlready.Features
     /// </summary>
     internal class AddonTalkFeature : UpdateFeature
     {
+        private ClickTalk? clickTalk = null;
+        private IntPtr lastTalkAddon = IntPtr.Zero;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="AddonTalkFeature"/> class.
         /// </summary>
@@ -46,31 +49,12 @@ namespace YesAlready.Features
                 if (!matched)
                     continue;
 
+                if (this.clickTalk == null || this.lastTalkAddon != addon)
+                    this.clickTalk = ClickTalk.Using(this.lastTalkAddon = addon);
+
                 PluginLog.Debug("AddonTalk: Advancing");
-                ClickTalk.Using(addon).Click();
+                this.clickTalk.Click();
                 return;
-            }
-        }
-
-        private unsafe void AddonSelectYesNoExecute(IntPtr addon, bool yes)
-        {
-            if (yes)
-            {
-                var addonPtr = (AddonSelectYesno*)addon;
-                var yesButton = addonPtr->YesButton;
-                if (yesButton != null && !yesButton->IsEnabled)
-                {
-                    PluginLog.Debug("AddonSelectYesNo: Enabling yes button");
-                    yesButton->AtkComponentBase.OwnerNode->AtkResNode.Flags ^= 1 << 5;
-                }
-
-                PluginLog.Debug("AddonSelectYesNo: Selecting yes");
-                ClickSelectYesNo.Using(addon).Yes();
-            }
-            else
-            {
-                PluginLog.Debug("AddonSelectYesNo: Selecting no");
-                ClickSelectYesNo.Using(addon).No();
             }
         }
 
