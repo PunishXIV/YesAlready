@@ -30,7 +30,6 @@ namespace YesAlready
         private readonly WindowSystem windowSystem;
         private readonly ConfigWindow configWindow;
         private readonly ZoneListWindow zoneListWindow;
-
         private readonly List<IBaseFeature> features = new();
 
         /// <summary>

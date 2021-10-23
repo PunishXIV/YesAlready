@@ -1,8 +1,6 @@
-﻿using System;
+using System;
 using System.Linq;
 
-using Dalamud.Game;
-using Dalamud.Game.ClientState.Keys;
 using Dalamud.Hooking;
 using Dalamud.Logging;
 using FFXIVClientStructs.FFXIV.Client.UI;
