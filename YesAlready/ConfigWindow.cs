@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Numerics;
+using System.Reflection;
 using System.Text;
 
 using Dalamud.Interface;
@@ -13,6 +14,8 @@ namespace YesAlready
     /// </summary>
     internal class ConfigWindow : Window
     {
+        private static readonly string AssemblyVersion = Assembly.GetAssembly(typeof(YesAlreadyPlugin))!.GetName().Version!.ToString();
+
         private readonly Vector4 shadedColor = new(0.68f, 0.68f, 0.68f, 1.0f);
 
         private ITextNode? draggedNode = null;
@@ -22,7 +25,7 @@ namespace YesAlready
         /// Initializes a new instance of the <see cref="ConfigWindow"/> class.
         /// </summary>
         public ConfigWindow()
-            : base("Yes Already Setup")
+            : base($"Yes Already {AssemblyVersion}")
         {
             this.Size = new Vector2(525, 600);
             this.SizeCondition = ImGuiCond.FirstUseEver;

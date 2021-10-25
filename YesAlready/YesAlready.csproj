@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Authors>daemitus</Authors>
     <Company>-</Company>
-    <Version>1.2.0.2</Version>
+    <Version>1.2.0.3</Version>
     <Description></Description>
     <Copyright></Copyright>
     <PackageProjectUrl>https://github.com/daemitus/YesAlready</PackageProjectUrl>
@@ -59,6 +59,7 @@
     <Reference Include="Lumina" Private="False" />
     <Reference Include="Lumina.Excel" Private="False" />
     <Reference Include="Newtonsoft.Json" Private="False" />
+    <Reference Include="Reloaded.Memory" Private="False" />
   </ItemGroup>
 
   <Target Name="ILRepack" AfterTargets="Build">
