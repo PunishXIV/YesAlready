@@ -54,11 +54,11 @@
     </PackageReference>
     <ProjectReference Include="..\lib\ClickLib\ClickLib\ClickLib.csproj" />
     <ProjectReference Include="..\lib\FFXIVClientStructs\FFXIVClientStructs\FFXIVClientStructs.csproj" />
-    <Reference Include="Newtonsoft.Json" Private="False" />
     <Reference Include="Dalamud" Private="False" />
     <Reference Include="ImGui.NET" Private="False" />
     <Reference Include="Lumina" Private="False" />
     <Reference Include="Lumina.Excel" Private="False" />
+    <Reference Include="Newtonsoft.Json" Private="False" />
   </ItemGroup>
 
   <Target Name="ILRepack" AfterTargets="Build">
