@@ -73,6 +73,6 @@ jobs:
 #        name: PluginRepoZip
 #        path: PluginArtifact
 #    - uses: daemitus/DalamudPluginPR@master
-#      with: 
+#      with:
 #        token: ${{ secrets.PAT }}
-#        artifact_path: ${{ steps.download-artifact.outputs.download-path }}  
+#        artifact_path: ${{ steps.download-artifact.outputs.download-path }}

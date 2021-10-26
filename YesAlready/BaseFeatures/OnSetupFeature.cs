@@ -59,6 +59,9 @@ namespace YesAlready.BaseFeatures
             if (!Service.Configuration.Enabled)
                 return result;
 
+            if (addon == IntPtr.Zero)
+                return result;
+
             try
             {
                 this.OnSetupImpl(addon, a2, data);

@@ -112,6 +112,9 @@ namespace YesAlready.BaseFeatures
 
         private unsafe byte OnItemSelectedDetour(IntPtr popupMenu, uint index, IntPtr a3, IntPtr a4)
         {
+            if (popupMenu == IntPtr.Zero)
+                return this.onItemSelectedHook!.Original(popupMenu, index, a3, a4);
+
             try
             {
                 var popupMenuPtr = (PopupMenu*)popupMenu;
