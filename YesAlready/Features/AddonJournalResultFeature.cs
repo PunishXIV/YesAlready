@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 using ClickLib.Clicks;
 using FFXIVClientStructs.FFXIV.Client.UI;

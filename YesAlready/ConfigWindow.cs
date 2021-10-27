@@ -1008,6 +1008,12 @@ namespace YesAlready
                             folderNode.Children.Add(newNode);
                             Service.Configuration.Save();
                         }
+                        else if (root == TalkRootFolder)
+                        {
+                            var newNode = new TalkEntryNode() { Enabled = true, TargetText = Service.Plugin.LastSeenTalkTarget };
+                            folderNode.Children.Add(newNode);
+                            Service.Configuration.Save();
+                        }
                     }
 
                     ImGui.SameLine();
