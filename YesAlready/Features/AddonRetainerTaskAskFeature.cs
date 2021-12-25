@@ -1,6 +1,7 @@
 ﻿using System;
 
 using ClickLib.Clicks;
+using FFXIVClientStructs.FFXIV.Client.UI;
 using YesAlready.BaseFeatures;
 
 namespace YesAlready.Features
@@ -25,6 +26,10 @@ namespace YesAlready.Features
         protected unsafe override void OnSetupImpl(IntPtr addon, uint a2, IntPtr data)
         {
             if (!Service.Configuration.RetainerTaskAskEnabled)
+                return;
+
+            var addonPtr = (AddonRetainerTaskAsk*)addon;
+            if (!addonPtr->AssignButton->IsEnabled)
                 return;
 
             ClickRetainerTaskAsk.Using(addon).Assign();
