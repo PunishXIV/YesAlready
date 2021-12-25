@@ -56,7 +56,7 @@ namespace YesAlready.BaseFeatures
             // PluginLog.Debug($"Addon{this.AddonName}.Update");
             this.updateHook.Original(addon, a2, a3);
 
-            if (!Service.Configuration.Enabled)
+            if (!Service.Configuration.Enabled || Service.Plugin.DisableKeyPressed)
                 return;
 
             if (addon == IntPtr.Zero)

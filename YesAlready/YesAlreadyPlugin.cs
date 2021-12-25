@@ -122,6 +122,11 @@ namespace YesAlready
         internal DateTime EscapeLastPressed { get; private set; } = DateTime.MinValue;
 
         /// <summary>
+        /// Gets a value indicating whether the disable hotkey is pressed.
+        /// </summary>
+        internal bool DisableKeyPressed { get; private set; } = false;
+
+        /// <summary>
         /// Gets or sets the last selected list node, so the escape only skips that specific one.
         /// </summary>
         internal ListEntryNode LastSelectedListNode { get; set; } = new();
@@ -244,6 +249,9 @@ namespace YesAlready
 
         private void FrameworkUpdate(Framework framework)
         {
+            if (Service.Configuration.DisableKey != VirtualKey.NO_KEY)
+                this.DisableKeyPressed = Service.KeyState[Service.Configuration.DisableKey];
+
             if (Service.KeyState[VirtualKey.ESCAPE])
                 this.EscapeLastPressed = DateTime.Now;
         }
@@ -289,12 +297,12 @@ namespace YesAlready
         {
             var sb = new StringBuilder();
             sb.AppendLine("Help menu");
-            sb.AppendLine($"{Command}           - Toggle the config window.");
-            sb.AppendLine($"{Command} toggle    - Toggle the plugin on/off.");
-            sb.AppendLine($"{Command} last      - Add the last seen YesNo dialog.");
+            sb.AppendLine($"{Command} - Toggle the config window.");
+            sb.AppendLine($"{Command} toggle - Toggle the plugin on/off.");
+            sb.AppendLine($"{Command} last - Add the last seen YesNo dialog.");
             sb.AppendLine($"{Command} last zone - Add the last seen YesNo dialog with the current zone name.");
-            sb.AppendLine($"{Command} lastlist  - Add the last selected list dialog with the target at the time.");
-            sb.AppendLine($"{Command} lastlist  - Add the last seen target during a Talk dialog.");
+            sb.AppendLine($"{Command} lastlist - Add the last selected list dialog with the target at the time.");
+            sb.AppendLine($"{Command} lasttalk - Add the last seen target during a Talk dialog.");
             this.PrintMessage(sb.ToString());
         }
 

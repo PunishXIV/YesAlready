@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Linq;
 using System.Numerics;
 using System.Reflection;
 using System.Text;
 
+using Dalamud.Game.ClientState.Keys;
 using Dalamud.Interface;
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
@@ -167,6 +169,42 @@ namespace YesAlready
 
             ImGui.PushID("BotherOptions");
 
+            #region Disable hotkey
+
+            var disableHotkeyChoices = new[]
+            {
+                "None",
+                "Control",
+                "Alt",
+                "Shift",
+            };
+
+            var disableHotkeyValues = new[]
+            {
+                VirtualKey.NO_KEY,
+                VirtualKey.CONTROL,
+                VirtualKey.MENU,
+                VirtualKey.SHIFT,
+            };
+
+            if (!disableHotkeyValues.Contains(Service.Configuration.DisableKey))
+            {
+                Service.Configuration.DisableKey = VirtualKey.NO_KEY;
+                Service.Configuration.Save();
+            }
+
+            var disableHotkeyIndex = Array.IndexOf(disableHotkeyValues, Service.Configuration.DisableKey);
+
+            ImGui.SetNextItemWidth(100);
+            if (ImGui.Combo("Disable Hotkey", ref disableHotkeyIndex, disableHotkeyChoices, disableHotkeyChoices.Length))
+            {
+                Service.Configuration.DisableKey = disableHotkeyValues[disableHotkeyIndex];
+                Service.Configuration.Save();
+            }
+
+            IndentedTextColored(this.shadedColor, "While this key is held, the plugin is disabled.");
+
+            #endregion
             #region SalvageDialog
 
             var desynthDialog = Service.Configuration.DesynthDialogEnabled;

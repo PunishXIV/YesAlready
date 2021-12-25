@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 
 using Dalamud.Configuration;
+using Dalamud.Game.ClientState.Keys;
 using Newtonsoft.Json;
 
 namespace YesAlready
@@ -21,6 +22,11 @@ namespace YesAlready
         /// Gets or sets a value indicating whether the plugin functionality is enabled.
         /// </summary>
         public bool Enabled { get; set; } = true;
+
+        /// <summary>
+        /// Gets or sets the hotkey to disable all functionality.
+        /// </summary>
+        public VirtualKey DisableKey { get; set; } = VirtualKey.NO_KEY;
 
         /// <summary>
         /// Gets the text root folder.
