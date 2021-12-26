@@ -122,6 +122,11 @@ namespace YesAlready
         internal DateTime EscapeLastPressed { get; private set; } = DateTime.MinValue;
 
         /// <summary>
+        /// Gets a value indicating whether the forced yes hotkey is pressed.
+        /// </summary>
+        internal bool ForcedYesKeyPressed { get; private set; } = false;
+
+        /// <summary>
         /// Gets a value indicating whether the disable hotkey is pressed.
         /// </summary>
         internal bool DisableKeyPressed { get; private set; } = false;
@@ -249,8 +254,23 @@ namespace YesAlready
 
         private void FrameworkUpdate(Framework framework)
         {
-            if (Service.Configuration.DisableKey != VirtualKey.NO_KEY)
+            if (Service.Configuration.DisableKey != (int)VirtualKey.NO_KEY)
+            {
                 this.DisableKeyPressed = Service.KeyState[Service.Configuration.DisableKey];
+            }
+            else
+            {
+                this.DisableKeyPressed = false;
+            }
+
+            if (Service.Configuration.ForcedYesKey != (int)VirtualKey.NO_KEY)
+            {
+                this.ForcedYesKeyPressed = Service.KeyState[Service.Configuration.ForcedYesKey];
+            }
+            else
+            {
+                this.ForcedYesKeyPressed = false;
+            }
 
             if (Service.KeyState[VirtualKey.ESCAPE])
                 this.EscapeLastPressed = DateTime.Now;

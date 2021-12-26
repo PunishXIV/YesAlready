@@ -35,6 +35,13 @@ namespace YesAlready.Features
             var text = Service.Plugin.LastSeenDialogText = Service.Plugin.GetSeStringText(dataPtr->TextPtr);
             PluginLog.Debug($"AddonSelectYesNo: text={text}");
 
+            if (Service.Plugin.ForcedYesKeyPressed)
+            {
+                PluginLog.Debug($"AddonSelectYesNo: Forced yes hotkey pressed");
+                this.AddonSelectYesNoExecute(addon, true);
+                return;
+            }
+
             var zoneWarnOnce = true;
             var nodes = Service.Configuration.GetAllNodes().OfType<TextEntryNode>();
             foreach (var node in nodes)

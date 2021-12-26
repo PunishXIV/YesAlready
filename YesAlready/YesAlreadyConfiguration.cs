@@ -24,6 +24,11 @@ namespace YesAlready
         public bool Enabled { get; set; } = true;
 
         /// <summary>
+        /// Gets or sets the hotkey to always click yes.
+        /// </summary>
+        public VirtualKey ForcedYesKey { get; set; } = VirtualKey.NO_KEY;
+
+        /// <summary>
         /// Gets or sets the hotkey to disable all functionality.
         /// </summary>
         public VirtualKey DisableKey { get; set; } = VirtualKey.NO_KEY;

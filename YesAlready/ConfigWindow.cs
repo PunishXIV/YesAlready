@@ -20,6 +20,22 @@ namespace YesAlready
 
         private readonly Vector4 shadedColor = new(0.68f, 0.68f, 0.68f, 1.0f);
 
+        private readonly string[] hotkeyChoices = new[]
+        {
+            "None",
+            "Control",
+            "Alt",
+            "Shift",
+        };
+
+        private readonly VirtualKey[] hotkeyValues = new[]
+        {
+            VirtualKey.NO_KEY,
+            VirtualKey.CONTROL,
+            VirtualKey.MENU,
+            VirtualKey.SHIFT,
+        };
+
         private ITextNode? draggedNode = null;
         private string debugClickName = string.Empty;
 
@@ -163,7 +179,9 @@ namespace YesAlready
             {
                 var indent = 27f * ImGuiHelpers.GlobalScale;
                 ImGui.Indent(indent);
-                ImGui.TextColored(color, text);
+                ImGui.PushStyleColor(ImGuiCol.Text, color);
+                ImGui.TextWrapped(text);
+                ImGui.PopStyleColor();
                 ImGui.Unindent(indent);
             }
 
@@ -171,38 +189,42 @@ namespace YesAlready
 
             #region Disable hotkey
 
-            var disableHotkeyChoices = new[]
-            {
-                "None",
-                "Control",
-                "Alt",
-                "Shift",
-            };
-
-            var disableHotkeyValues = new[]
-            {
-                VirtualKey.NO_KEY,
-                VirtualKey.CONTROL,
-                VirtualKey.MENU,
-                VirtualKey.SHIFT,
-            };
-
-            if (!disableHotkeyValues.Contains(Service.Configuration.DisableKey))
+            if (!this.hotkeyValues.Contains(Service.Configuration.DisableKey))
             {
                 Service.Configuration.DisableKey = VirtualKey.NO_KEY;
                 Service.Configuration.Save();
             }
 
-            var disableHotkeyIndex = Array.IndexOf(disableHotkeyValues, Service.Configuration.DisableKey);
+            var disableHotkeyIndex = Array.IndexOf(this.hotkeyValues, Service.Configuration.DisableKey);
 
-            ImGui.SetNextItemWidth(100);
-            if (ImGui.Combo("Disable Hotkey", ref disableHotkeyIndex, disableHotkeyChoices, disableHotkeyChoices.Length))
+            ImGui.SetNextItemWidth(85);
+            if (ImGui.Combo("Disable Hotkey", ref disableHotkeyIndex, this.hotkeyChoices, this.hotkeyChoices.Length))
             {
-                Service.Configuration.DisableKey = disableHotkeyValues[disableHotkeyIndex];
+                Service.Configuration.DisableKey = this.hotkeyValues[disableHotkeyIndex];
                 Service.Configuration.Save();
             }
 
-            IndentedTextColored(this.shadedColor, "While this key is held, the plugin is disabled.");
+            IndentedTextColored(this.shadedColor, $"While this key is held, the plugin is disabled.");
+
+            #endregion
+            #region Forced Yes hotkey
+
+            if (!this.hotkeyValues.Contains(Service.Configuration.ForcedYesKey))
+            {
+                Service.Configuration.ForcedYesKey = VirtualKey.NO_KEY;
+                Service.Configuration.Save();
+            }
+
+            var forcedYesHotkeyIndex = Array.IndexOf(this.hotkeyValues, Service.Configuration.ForcedYesKey);
+
+            ImGui.SetNextItemWidth(85);
+            if (ImGui.Combo("Forced Yes Hotkey", ref forcedYesHotkeyIndex, this.hotkeyChoices, this.hotkeyChoices.Length))
+            {
+                Service.Configuration.ForcedYesKey = this.hotkeyValues[forcedYesHotkeyIndex];
+                Service.Configuration.Save();
+            }
+
+            IndentedTextColored(this.shadedColor, $"While this key is held, any Yes/No prompt will always default to yes. Be careful.");
 
             #endregion
             #region SalvageDialog
