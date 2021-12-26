@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Numerics;
 using System.Reflection;
@@ -397,7 +397,8 @@ namespace YesAlready
             sb.AppendLine("For example: \"Teleport to \" for the teleport dialog.");
             sb.AppendLine();
             sb.AppendLine("Alternatively, wrap your text in forward slashes to use as a regex.");
-            sb.AppendLine("As such: \"/Teleport to .*? for \\d+ gil\\?/\"");
+            sb.AppendLine("As such: \"/Teleport to .*? for \\d+(,\\d+)? gil\\?/\"");
+            sb.AppendLine("Or simpler: \"/Teleport to .*?/\" (and hope it doesn't match something unexpected)");
             sb.AppendLine();
             sb.AppendLine("If it matches, the yes button (and checkbox if present) will be clicked.");
             sb.AppendLine();

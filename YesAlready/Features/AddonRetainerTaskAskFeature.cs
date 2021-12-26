@@ -1,8 +1,6 @@
 ﻿using System;
 
 using ClickLib.Clicks;
-using Dalamud.Logging;
-using FFXIVClientStructs.FFXIV.Client.UI;
 using YesAlready.BaseFeatures;
 
 namespace YesAlready.Features
@@ -29,17 +27,6 @@ namespace YesAlready.Features
             if (!Service.Configuration.RetainerTaskAskEnabled)
                 return;
 
-            //var addonPtr = (AddonRetainerTaskAsk*)addon;
-            //var flags = addonPtr->AssignButton->AtkComponentBase.OwnerNode->AtkResNode.Flags;
-            //PluginLog.Information($"{flags} {(flags & (1 << 5)) != 0}");
-
-            //if (!addonPtr->AssignButton->IsEnabled)
-            //{
-            //    PluginLog.Information($"BUTTON NOT ENABLED :(");
-            //    return;
-            //}
-
-            //PluginLog.Information($"ASSIGN");
             ClickRetainerTaskAsk.Using(addon).Assign();
         }
     }
