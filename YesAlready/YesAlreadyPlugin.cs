@@ -298,6 +298,9 @@ namespace YesAlready
                 case "last":
                     this.CommandAddNode(false);
                     break;
+                case "last no":
+                    this.CommandAddNode(false, false, true);
+                    break;
                 case "last zone":
                     this.CommandAddNode(true);
                     break;
@@ -329,6 +332,7 @@ namespace YesAlready
             sb.AppendLine($"{Command} - Toggle the config window.");
             sb.AppendLine($"{Command} toggle - Toggle the plugin on/off.");
             sb.AppendLine($"{Command} last - Add the last seen YesNo dialog.");
+            sb.AppendLine($"{Command} last no - Add the last seen YesNo dialog as a no.");
             sb.AppendLine($"{Command} last zone - Add the last seen YesNo dialog with the current zone name.");
             sb.AppendLine($"{Command} last zoneno - Add the last seen YesNo dialog with the current zone name as a no.");
             sb.AppendLine($"{Command} last zonefolder - Add the last seen YesNo dialog with the current zone name in a folder with the current zone name.");
