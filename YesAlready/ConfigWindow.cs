@@ -401,8 +401,67 @@ namespace YesAlready
             ImGui.SameLine();
             if (ImGuiEx.IconButton(FontAwesomeIcon.SearchPlus, "Add last seen as new entry"))
             {
-                var newNode = new TextEntryNode { Enabled = true, Text = Service.Plugin.LastSeenDialogText };
-                RootFolder.Children.Add(newNode);
+                var newNode = new TextEntryNode() { Enabled = true, Text = Service.Plugin.LastSeenDialogText };
+
+                var chosenFolder = RootFolder;
+
+                bool newFolder = false;
+
+                var io = ImGui.GetIO();
+
+                if (io.KeyShift)
+                {
+                    var currentID = Service.ClientState.TerritoryType;
+                    if (!Service.Plugin.TerritoryNames.TryGetValue(currentID, out var zoneName))
+                    {
+                        return;
+                    }
+
+                    newNode.ZoneRestricted = true;
+                    newNode.ZoneText = zoneName;
+
+                    var selectedFolder = RootFolder.Children.Find(x => x is TextFolderNode && x.Name == zoneName);
+
+                    if (selectedFolder is not null)
+                    {
+                        chosenFolder = (TextFolderNode)selectedFolder;
+                    }
+                    else
+                    {
+                        newFolder = true;
+                    }
+                }
+                else if (io.KeyCtrl)
+                {
+                    var currentID = Service.ClientState.TerritoryType;
+                    if (!Service.Plugin.TerritoryNames.TryGetValue(currentID, out var zoneName))
+                    {
+                        return;
+                    }
+
+                    newNode.ZoneRestricted = true;
+                    newNode.ZoneText = zoneName;
+                }
+
+                if (io.KeyAlt) newNode.IsYes = false;
+
+                if (newFolder)
+                {
+                    var currentID = Service.ClientState.TerritoryType;
+                    if (!Service.Plugin.TerritoryNames.TryGetValue(currentID, out var zoneName))
+                    {
+                        return;
+                    }
+
+                    var newFolderNode = new TextFolderNode { Name = zoneName };
+                    newFolderNode.Children.Add(newNode);
+                    RootFolder.Children.Add(newFolderNode);
+                }
+                else
+                {
+                    chosenFolder.Children.Add(newNode);
+                }
+
                 Service.Configuration.Save();
             }
 
@@ -427,6 +486,11 @@ namespace YesAlready
             sb.AppendLine("Right click a line to view options.");
             sb.AppendLine("Double click an entry for quick enable/disable.");
             sb.AppendLine("Ctrl-Shift right click a line to delete it and any children.");
+            sb.AppendLine();
+            sb.AppendLine("Shift-Click \"Add Last Seen as New Entry\" to add to a folder with the current zone name, restricted to that zone.");
+            sb.AppendLine("Ctrl-Click to create a entry restricted to the current zone, without a named folder.");
+            sb.AppendLine("Alt-Click to create a \"Select No\" entry instead of \"Select Yes\"");
+            sb.AppendLine("Alt-Click can be combined with Shift/Ctrl-Click.");
             sb.AppendLine();
             sb.AppendLine("Currently supported text addons:");
             sb.AppendLine("  - SelectYesNo");
@@ -1060,7 +1124,66 @@ namespace YesAlready
                         if (root == RootFolder)
                         {
                             var newNode = new TextEntryNode() { Enabled = true, Text = Service.Plugin.LastSeenDialogText };
-                            folderNode.Children.Add(newNode);
+
+                            var chosenFolder = folderNode;
+
+                            bool newFolder = false;
+
+                            var io = ImGui.GetIO();
+
+                            if (io.KeyShift)
+                            {
+                                var currentID = Service.ClientState.TerritoryType;
+                                if (!Service.Plugin.TerritoryNames.TryGetValue(currentID, out var zoneName))
+                                {
+                                    return;
+                                }
+
+                                newNode.ZoneRestricted = true;
+                                newNode.ZoneText = zoneName;
+
+                                var selectedFolder = folderNode.Children.Find(x => x is TextFolderNode && x.Name == zoneName);
+
+                                if (selectedFolder is not null)
+                                {
+                                    chosenFolder = (TextFolderNode)selectedFolder;
+                                }
+                                else
+                                {
+                                    newFolder = true;
+                                }
+                            }
+                            else if (io.KeyCtrl)
+                            {
+                                var currentID = Service.ClientState.TerritoryType;
+                                if (!Service.Plugin.TerritoryNames.TryGetValue(currentID, out var zoneName))
+                                {
+                                    return;
+                                }
+
+                                newNode.ZoneRestricted = true;
+                                newNode.ZoneText = zoneName;
+                            }
+
+                            if (io.KeyAlt) newNode.IsYes = false;
+
+                            if (newFolder)
+                            {
+                                var currentID = Service.ClientState.TerritoryType;
+                                if (!Service.Plugin.TerritoryNames.TryGetValue(currentID, out var zoneName))
+                                {
+                                    return;
+                                }
+
+                                var newFolderNode = new TextFolderNode { Name = zoneName };
+                                newFolderNode.Children.Add(newNode);
+                                folderNode.Children.Add(newFolderNode);
+                            }
+                            else
+                            {
+                                chosenFolder.Children.Add(newNode);
+                            }
+
                             Service.Configuration.Save();
                         }
                         else if (root == ListRootFolder)

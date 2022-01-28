@@ -301,6 +301,15 @@ namespace YesAlready
                 case "last zone":
                     this.CommandAddNode(true);
                     break;
+                case "last zoneno":
+                    this.CommandAddNode(true, false, true);
+                    break;
+                case "last zonefolder":
+                    this.CommandAddNode(true, true);
+                    break;
+                case "last zonefolderno":
+                    this.CommandAddNode(true, true, true);
+                    break;
                 case "lastlist":
                     this.CommandAddListNode();
                     break;
@@ -321,14 +330,19 @@ namespace YesAlready
             sb.AppendLine($"{Command} toggle - Toggle the plugin on/off.");
             sb.AppendLine($"{Command} last - Add the last seen YesNo dialog.");
             sb.AppendLine($"{Command} last zone - Add the last seen YesNo dialog with the current zone name.");
+            sb.AppendLine($"{Command} last zoneno - Add the last seen YesNo dialog with the current zone name as a no.");
+            sb.AppendLine($"{Command} last zonefolder - Add the last seen YesNo dialog with the current zone name in a folder with the current zone name.");
+            sb.AppendLine($"{Command} last zonefolderno - Add the last seen YesNo dialog with the current zone name in a folder with the current zone name as a no.");
             sb.AppendLine($"{Command} lastlist - Add the last selected list dialog with the target at the time.");
             sb.AppendLine($"{Command} lasttalk - Add the last seen target during a Talk dialog.");
             this.PrintMessage(sb.ToString());
         }
 
-        private void CommandAddNode(bool zoneRestricted)
+        private void CommandAddNode(bool zoneRestricted, bool folder = false, bool no = false)
         {
             var text = this.LastSeenDialogText;
+
+            bool newFolder = false;
 
             if (text.IsNullOrEmpty())
             {
@@ -338,7 +352,32 @@ namespace YesAlready
 
             var newNode = new TextEntryNode { Enabled = true, Text = text };
 
-            if (zoneRestricted)
+            var parent = Service.Configuration.RootFolder;
+
+            if (folder)
+            {
+                var currentID = Service.ClientState.TerritoryType;
+                if (!Service.Plugin.TerritoryNames.TryGetValue(currentID, out var zoneName))
+                {
+                    this.PrintError("Could not find zone name.");
+                    return;
+                }
+
+                newNode.ZoneRestricted = true;
+                newNode.ZoneText = zoneName;
+
+                var selectedFolder = parent.Children.Find(x => x is TextFolderNode && x.Name == zoneName);
+
+                if (selectedFolder is not null)
+                {
+                    parent = (TextFolderNode)selectedFolder;
+                }
+                else
+                {
+                    newFolder = true;
+                }
+            }
+            else if (zoneRestricted)
             {
                 var currentID = Service.ClientState.TerritoryType;
                 if (!Service.Plugin.TerritoryNames.TryGetValue(currentID, out var zoneName))
@@ -351,8 +390,26 @@ namespace YesAlready
                 newNode.ZoneText = zoneName;
             }
 
-            var parent = Service.Configuration.RootFolder;
-            parent.Children.Add(newNode);
+            if (no) newNode.IsYes = false;
+
+            if (newFolder)
+            {
+                var currentID = Service.ClientState.TerritoryType;
+                if (!Service.Plugin.TerritoryNames.TryGetValue(currentID, out var zoneName))
+                {
+                    this.PrintError("Could not find zone name.");
+                    return;
+                }
+
+                var newFolderNode = new TextFolderNode { Name = zoneName };
+                newFolderNode.Children.Add(newNode);
+                parent.Children.Add(newFolderNode);
+            }
+            else
+            {
+                parent.Children.Add(newNode);
+            }
+
             Service.Configuration.Save();
 
             this.PrintMessage("Added a new text entry.");
