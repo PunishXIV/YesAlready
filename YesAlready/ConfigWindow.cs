@@ -371,10 +371,25 @@ namespace YesAlready
             if (ImGui.Checkbox("ContentsFinderConfirm", ref contentsFinderConfirm))
             {
                 Service.Configuration.ContentsFinderConfirmEnabled = contentsFinderConfirm;
+                if (Service.Configuration.ContentsFinderOneTimeConfirmEnabled && !contentsFinderConfirm) Service.Configuration.ContentsFinderOneTimeConfirmEnabled = false;
                 Service.Configuration.Save();
             }
 
             IndentedTextColored(this.shadedColor, "Automatically commence duties when ready.");
+
+            #endregion
+
+            #region ContentFinderOneTimeConfirm
+
+            var contentsFinderOneTimeConfirm = Service.Configuration.ContentsFinderOneTimeConfirmEnabled;
+            if (ImGui.Checkbox("ContentsFinderOneTimeConfirm", ref contentsFinderOneTimeConfirm))
+            {
+                Service.Configuration.ContentsFinderOneTimeConfirmEnabled = contentsFinderOneTimeConfirm;
+                if (!Service.Configuration.ContentsFinderConfirmEnabled && contentsFinderOneTimeConfirm) Service.Configuration.ContentsFinderConfirmEnabled = true;
+                Service.Configuration.Save();
+            }
+
+            IndentedTextColored(this.shadedColor, "Automatically commence duties when ready, but only once.\nRequires Contents Finder Confirm, and disables both after activation.");
 
             #endregion
 

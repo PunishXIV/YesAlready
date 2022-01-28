@@ -319,6 +319,12 @@ namespace YesAlready
                 case "lasttalk":
                     this.CommandAddTalkNode();
                     break;
+                case "onetimeconfirm":
+                    this.OneTimeConfirm();
+                    break;
+                case "dutyconfirm":
+                    this.ToggleDutyConfirm();
+                    break;
                 default:
                     this.PrintError("I didn't quite understand that.");
                     return;
@@ -339,6 +345,8 @@ namespace YesAlready
             sb.AppendLine($"{Command} last zonefolderno - Add the last seen YesNo dialog with the current zone name in a folder with the current zone name as a no.");
             sb.AppendLine($"{Command} lastlist - Add the last selected list dialog with the target at the time.");
             sb.AppendLine($"{Command} lasttalk - Add the last seen target during a Talk dialog.");
+            sb.AppendLine($"{Command} dutyconfirm - Toggle duty confirm.");
+            sb.AppendLine($"{Command} onetimeconfirm - Toggles duty confirm as well as one-time confirm.");
             this.PrintMessage(sb.ToString());
         }
 
@@ -462,6 +470,23 @@ namespace YesAlready
             Service.Configuration.Save();
 
             this.PrintMessage("Added a new talk entry.");
+        }
+
+        private void OneTimeConfirm()
+        {
+            Service.Configuration.ContentsFinderOneTimeConfirmEnabled ^= true;
+            Service.Configuration.ContentsFinderConfirmEnabled = Service.Configuration.ContentsFinderOneTimeConfirmEnabled;
+            Service.Configuration.Save();
+
+            this.PrintMessage($"One Time Confirm {(Service.Configuration.ContentsFinderOneTimeConfirmEnabled ? "enabled" : "disabled")}.");
+        }
+
+        private void ToggleDutyConfirm()
+        {
+            Service.Configuration.ContentsFinderConfirmEnabled ^= true;
+            Service.Configuration.Save();
+
+            this.PrintMessage($"Duty Confirm {(Service.Configuration.ContentsFinderConfirmEnabled ? "enabled" : "disabled")}.");
         }
 
         #endregion
