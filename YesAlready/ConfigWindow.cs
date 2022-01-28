@@ -568,6 +568,8 @@ namespace YesAlready
             sb.AppendLine("Alternatively, wrap your text in forward slashes to use as a regex.");
             sb.AppendLine("As such: \"/(Moyce|Eirikur)/\"");
             sb.AppendLine();
+            sb.AppendLine("To skip your retainers, add the summoning bell.");
+            sb.AppendLine();
             sb.AppendLine("Right click a line to view options.");
             sb.AppendLine("Double click an entry for quick enable/disable.");
             sb.AppendLine("Ctrl-Shift right click a line to delete it and any children.");
