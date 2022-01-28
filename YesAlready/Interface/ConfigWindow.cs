@@ -9,7 +9,7 @@ using Dalamud.Interface;
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
 
-namespace YesAlready
+namespace YesAlready.Interface
 {
     /// <summary>
     /// Plugin configuration window.

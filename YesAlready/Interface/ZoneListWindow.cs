@@ -1,10 +1,10 @@
-﻿using System.Linq;
+using System.Linq;
 using System.Numerics;
 
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
 
-namespace YesAlready
+namespace YesAlready.Interface
 {
     /// <summary>
     /// Zone list window.

@@ -1,7 +1,7 @@
-﻿using Dalamud.Interface;
+using Dalamud.Interface;
 using ImGuiNET;
 
-namespace YesAlready
+namespace YesAlready.Interface
 {
     /// <summary>
     /// ImGui wrappers.
