@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 using ClickLib;
 using Dalamud.Game;
@@ -16,6 +15,7 @@ using Dalamud.Plugin;
 using Dalamud.Utility;
 using YesAlready.BaseFeatures;
 using YesAlready.Features;
+using YesAlready.Interface;
 
 namespace YesAlready
 {
@@ -296,10 +296,22 @@ namespace YesAlready
                     Service.Configuration.Save();
                     break;
                 case "last":
-                    this.CommandAddNode(false);
+                    this.CommandAddNode(false, false, false);
+                    break;
+                case "last no":
+                    this.CommandAddNode(false, false, true);
                     break;
                 case "last zone":
-                    this.CommandAddNode(true);
+                    this.CommandAddNode(true, false, false);
+                    break;
+                case "last zone no":
+                    this.CommandAddNode(true, false, true);
+                    break;
+                case "last zone folder":
+                    this.CommandAddNode(true, true, false);
+                    break;
+                case "last zone folder no":
+                    this.CommandAddNode(true, true, true);
                     break;
                 case "lastlist":
                     this.CommandAddListNode();
@@ -320,13 +332,17 @@ namespace YesAlready
             sb.AppendLine($"{Command} - Toggle the config window.");
             sb.AppendLine($"{Command} toggle - Toggle the plugin on/off.");
             sb.AppendLine($"{Command} last - Add the last seen YesNo dialog.");
+            sb.AppendLine($"{Command} last no - Add the last seen YesNo dialog as a no.");
             sb.AppendLine($"{Command} last zone - Add the last seen YesNo dialog with the current zone name.");
+            sb.AppendLine($"{Command} last zone no - Add the last seen YesNo dialog with the current zone name as a no.");
+            sb.AppendLine($"{Command} last zone folder - Add the last seen YesNo dialog with the current zone name in a folder with the current zone name.");
+            sb.AppendLine($"{Command} last zone folder no - Add the last seen YesNo dialog with the current zone name in a folder with the current zone name as a no.");
             sb.AppendLine($"{Command} lastlist - Add the last selected list dialog with the target at the time.");
             sb.AppendLine($"{Command} lasttalk - Add the last seen target during a Talk dialog.");
             this.PrintMessage(sb.ToString());
         }
 
-        private void CommandAddNode(bool zoneRestricted)
+        private void CommandAddNode(bool zoneRestricted, bool createFolder, bool selectNo)
         {
             var text = this.LastSeenDialogText;
 
@@ -336,23 +352,7 @@ namespace YesAlready
                 return;
             }
 
-            var newNode = new TextEntryNode { Enabled = true, Text = text };
-
-            if (zoneRestricted)
-            {
-                var currentID = Service.ClientState.TerritoryType;
-                if (!Service.Plugin.TerritoryNames.TryGetValue(currentID, out var zoneName))
-                {
-                    this.PrintError("Could not find zone name.");
-                    return;
-                }
-
-                newNode.ZoneRestricted = true;
-                newNode.ZoneText = zoneName;
-            }
-
-            var parent = Service.Configuration.RootFolder;
-            parent.Children.Add(newNode);
+            Service.Configuration.CreateTextNode(Service.Configuration.RootFolder, zoneRestricted, createFolder, selectNo);
             Service.Configuration.Save();
 
             this.PrintMessage("Added a new text entry.");

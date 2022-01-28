@@ -406,6 +406,17 @@ namespace YesAlready.Interface
                 Service.Configuration.Save();
             }
 
+            if (ImGuiEx.IconButton(FontAwesomeIcon.SearchPlus, "Add last seen as new entry"))
+            {
+                var io = ImGui.GetIO();
+                var zoneRestricted = io.KeyShift;
+                var createFolder = io.KeyCtrl;
+                var selectNo = io.KeyShift;
+
+                Service.Configuration.CreateTextNode(RootFolder, zoneRestricted, createFolder, selectNo);
+                Service.Configuration.Save();
+            }
+
             ImGui.SameLine();
             if (ImGuiEx.IconButton(FontAwesomeIcon.FolderPlus, "Add folder"))
             {
@@ -427,6 +438,12 @@ namespace YesAlready.Interface
             sb.AppendLine("Right click a line to view options.");
             sb.AppendLine("Double click an entry for quick enable/disable.");
             sb.AppendLine("Ctrl-Shift right click a line to delete it and any children.");
+            sb.AppendLine();
+            sb.AppendLine("\"Add last seen as new entry\" button modifiers:");
+            sb.AppendLine("   Shift-Click to add to a new or first existing folder with the current zone name, restricted to that zone.");
+            sb.AppendLine("   Ctrl-Click to create a entry restricted to the current zone, without a named folder.");
+            sb.AppendLine("   Alt-Click to create a \"Select No\" entry instead of \"Select Yes\"");
+            sb.AppendLine("   Alt-Click can be combined with Shift/Ctrl-Click.");
             sb.AppendLine();
             sb.AppendLine("Currently supported text addons:");
             sb.AppendLine("  - SelectYesNo");
@@ -1061,8 +1078,12 @@ namespace YesAlready.Interface
                     {
                         if (root == RootFolder)
                         {
-                            var newNode = new TextEntryNode() { Enabled = true, Text = Service.Plugin.LastSeenDialogText };
-                            folderNode.Children.Add(newNode);
+                            var io = ImGui.GetIO();
+                            var zoneRestricted = io.KeyShift;
+                            var createFolder = io.KeyCtrl;
+                            var selectNo = io.KeyShift;
+
+                            Service.Configuration.CreateTextNode(folderNode, zoneRestricted, createFolder, selectNo);
                             Service.Configuration.Save();
                         }
                         else if (root == ListRootFolder)

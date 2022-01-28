@@ -195,5 +195,47 @@ namespace YesAlready
             parent = null;
             return false;
         }
+
+        /// <summary>
+        /// Create a new node with various options.
+        /// </summary>
+        /// <param name="folder">Folder to place the node in.</param>
+        /// <param name="zoneRestricted">Create the node restricted to the current zone.</param>
+        /// <param name="createFolder">Create a zone named subfolder.</param>
+        /// <param name="selectNo">Select no instead.</param>
+        public void CreateTextNode(TextFolderNode folder, bool zoneRestricted, bool createFolder, bool selectNo)
+        {
+            var newNode = new TextEntryNode() { Enabled = true, Text = Service.Plugin.LastSeenDialogText };
+            var chosenFolder = folder;
+
+            if (zoneRestricted || createFolder)
+            {
+                var currentID = Service.ClientState.TerritoryType;
+                if (!Service.Plugin.TerritoryNames.TryGetValue(currentID, out var zoneName))
+                    return;
+
+                newNode.ZoneRestricted = true;
+                newNode.ZoneText = zoneName;
+            }
+
+            if (createFolder)
+            {
+                var zoneName = newNode.ZoneText;
+
+                chosenFolder = folder.Children.OfType<TextFolderNode>().FirstOrDefault(node => node.Name == zoneName);
+                if (chosenFolder == default)
+                {
+                    chosenFolder = new TextFolderNode { Name = zoneName };
+                    folder.Children.Add(chosenFolder);
+                }
+            }
+
+            if (selectNo)
+            {
+                newNode.IsYes = false;
+            }
+
+            chosenFolder.Children.Add(newNode);
+        }
     }
 }
