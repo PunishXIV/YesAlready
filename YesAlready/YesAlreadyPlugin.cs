@@ -484,6 +484,7 @@ namespace YesAlready
         private void ToggleDutyConfirm()
         {
             Service.Configuration.ContentsFinderConfirmEnabled ^= true;
+            Service.Configuration.ContentsFinderOneTimeConfirmEnabled = false;
             Service.Configuration.Save();
 
             this.PrintMessage($"Duty Confirm {(Service.Configuration.ContentsFinderConfirmEnabled ? "enabled" : "disabled")}.");
