@@ -421,13 +421,6 @@ namespace YesAlready.Interface
             ImGui.SameLine();
             if (ImGuiEx.IconButton(FontAwesomeIcon.SearchPlus, "Add last seen as new entry"))
             {
-                var newNode = new TextEntryNode { Enabled = true, Text = Service.Plugin.LastSeenDialogText };
-                RootFolder.Children.Add(newNode);
-                Service.Configuration.Save();
-            }
-
-            if (ImGuiEx.IconButton(FontAwesomeIcon.SearchPlus, "Add last seen as new entry"))
-            {
                 var io = ImGui.GetIO();
                 var zoneRestricted = io.KeyShift;
                 var createFolder = io.KeyCtrl;
