@@ -422,9 +422,9 @@ namespace YesAlready.Interface
             if (ImGuiEx.IconButton(FontAwesomeIcon.SearchPlus, "Add last seen as new entry"))
             {
                 var io = ImGui.GetIO();
-                var zoneRestricted = io.KeyShift;
-                var createFolder = io.KeyCtrl;
-                var selectNo = io.KeyShift;
+                var zoneRestricted = io.KeyCtrl;
+                var createFolder = io.KeyShift;
+                var selectNo = io.KeyAlt;
 
                 Service.Configuration.CreateTextNode(RootFolder, zoneRestricted, createFolder, selectNo);
                 Service.Configuration.Save();
@@ -1092,9 +1092,9 @@ namespace YesAlready.Interface
                         if (root == RootFolder)
                         {
                             var io = ImGui.GetIO();
-                            var zoneRestricted = io.KeyShift;
-                            var createFolder = io.KeyCtrl;
-                            var selectNo = io.KeyShift;
+                            var zoneRestricted = io.KeyCtrl;
+                            var createFolder = io.KeyShift;
+                            var selectNo = io.KeyAlt;
 
                             Service.Configuration.CreateTextNode(folderNode, zoneRestricted, createFolder, selectNo);
                             Service.Configuration.Save();
