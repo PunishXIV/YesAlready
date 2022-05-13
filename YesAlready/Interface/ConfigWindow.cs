@@ -260,7 +260,7 @@ namespace YesAlready.Interface
                 Service.Configuration.Save();
             }
 
-            IndentedTextColored(this.shadedColor, "Remove the create new materia confirmation.");
+            IndentedTextColored(this.shadedColor, "Remove the create new (extract) materia confirmation.");
 
             #endregion
             #region MateriaRetrieveDialog
