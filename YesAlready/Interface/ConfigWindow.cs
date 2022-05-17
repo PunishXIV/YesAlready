@@ -898,7 +898,7 @@ namespace YesAlready.Interface
                     }
 
                     var matchText = entryNode.Text;
-                    if (ImGui.InputText($"##{node.Name}-matchText", ref matchText, 100, ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EnterReturnsTrue))
+                    if (ImGui.InputText($"##{node.Name}-matchText", ref matchText, 10_000, ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EnterReturnsTrue))
                     {
                         entryNode.Text = matchText;
                         Service.Configuration.Save();
@@ -939,7 +939,7 @@ namespace YesAlready.Interface
                     ImGui.PopStyleVar(); // ItemSpacing
 
                     var zoneText = entryNode.ZoneText;
-                    if (ImGui.InputText($"##{node.Name}-zoneText", ref zoneText, 100, ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EnterReturnsTrue))
+                    if (ImGui.InputText($"##{node.Name}-zoneText", ref zoneText, 10_000, ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EnterReturnsTrue))
                     {
                         entryNode.ZoneText = zoneText;
                         Service.Configuration.Save();
@@ -970,7 +970,7 @@ namespace YesAlready.Interface
                     }
 
                     var matchText = listNode.Text;
-                    if (ImGui.InputText($"##{node.Name}-matchText", ref matchText, 100, ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EnterReturnsTrue))
+                    if (ImGui.InputText($"##{node.Name}-matchText", ref matchText, 10_000, ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EnterReturnsTrue))
                     {
                         listNode.Text = matchText;
                         Service.Configuration.Save();
@@ -1006,7 +1006,7 @@ namespace YesAlready.Interface
                     ImGui.PopStyleVar(); // ItemSpacing
 
                     var targetText = listNode.TargetText;
-                    if (ImGui.InputText($"##{node.Name}-targetText", ref targetText, 100, ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EnterReturnsTrue))
+                    if (ImGui.InputText($"##{node.Name}-targetText", ref targetText, 10_000, ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EnterReturnsTrue))
                     {
                         listNode.TargetText = targetText;
                         Service.Configuration.Save();
@@ -1059,7 +1059,7 @@ namespace YesAlready.Interface
                     ImGui.PopStyleVar(); // ItemSpacing
 
                     var targetText = talkNode.TargetText;
-                    if (ImGui.InputText($"##{node.Name}-targetText", ref targetText, 100, ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EnterReturnsTrue))
+                    if (ImGui.InputText($"##{node.Name}-targetText", ref targetText, 10_000, ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EnterReturnsTrue))
                     {
                         talkNode.TargetText = targetText;
                         Service.Configuration.Save();
@@ -1135,7 +1135,7 @@ namespace YesAlready.Interface
                     ImGui.PopStyleVar(); // ItemSpacing
 
                     var folderName = folderNode.Name;
-                    if (ImGui.InputText($"##{node.Name}-rename", ref folderName, 100, ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EnterReturnsTrue))
+                    if (ImGui.InputText($"##{node.Name}-rename", ref folderName, 10_000, ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EnterReturnsTrue))
                     {
                         folderNode.Name = folderName;
                         Service.Configuration.Save();
