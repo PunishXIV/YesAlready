@@ -3,31 +3,30 @@
 using ClickLib.Clicks;
 using YesAlready.BaseFeatures;
 
-namespace YesAlready.Features
+namespace YesAlready.Features;
+
+/// <summary>
+/// AddonMateriaRetrieveDialog feature.
+/// </summary>
+internal class AddonMateriaRetrieveDialogFeature : OnSetupFeature
 {
     /// <summary>
-    /// AddonMateriaRetrieveDialog feature.
+    /// Initializes a new instance of the <see cref="AddonMateriaRetrieveDialogFeature"/> class.
     /// </summary>
-    internal class AddonMateriaRetrieveDialogFeature : OnSetupFeature
+    public AddonMateriaRetrieveDialogFeature()
+        : base("48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC 30 8B FA 49 8B D8 BA ?? ?? ?? ?? 48 8B F1 E8 ?? ?? ?? ?? 48 8B C8")
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AddonMateriaRetrieveDialogFeature"/> class.
-        /// </summary>
-        public AddonMateriaRetrieveDialogFeature()
-            : base(Service.Address.AddonMateriaRetrieveDialongOnSetupAddress)
-        {
-        }
+    }
 
-        /// <inheritdoc/>
-        protected override string AddonName => "MateriaRetrieveDialog";
+    /// <inheritdoc/>
+    protected override string AddonName => "MateriaRetrieveDialog";
 
-        /// <inheritdoc/>
-        protected unsafe override void OnSetupImpl(IntPtr addon, uint a2, IntPtr data)
-        {
-            if (!Service.Configuration.MateriaRetrieveDialogEnabled)
-                return;
+    /// <inheritdoc/>
+    protected unsafe override void OnSetupImpl(IntPtr addon, uint a2, IntPtr data)
+    {
+        if (!Service.Configuration.MateriaRetrieveDialogEnabled)
+            return;
 
-            ClickMateriaRetrieveDialog.Using(addon).Begin();
-        }
+        ClickMateriaRetrieveDialog.Using(addon).Begin();
     }
 }
