@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Authors>daemitus</Authors>
     <Company>-</Company>
-    <Version>1.2.2.2</Version>
+    <Version>1.2.2.3</Version>
     <Description></Description>
     <Copyright></Copyright>
     <PackageProjectUrl>https://github.com/daemitus/YesAlready</PackageProjectUrl>
@@ -47,7 +47,7 @@
 
   <ItemGroup>
     <!--<PackageReference Include="DalamudLinter" Version="1.0.3" />-->
-    <PackageReference Include="DalamudPackager" Version="2.1.6" />
+    <PackageReference Include="DalamudPackager" Version="2.1.8" />
     <PackageReference Include="ILRepack" Version="2.0.18" GeneratePathProperty="true" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.333">
       <PrivateAssets>all</PrivateAssets>

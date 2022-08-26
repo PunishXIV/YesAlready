@@ -19,7 +19,7 @@ internal abstract class OnSetupFeature : IBaseFeature
     public OnSetupFeature(string onSetupSig)
     {
         this.HookAddress = Service.Scanner.ScanText(onSetupSig);
-        this.onSetupHook = new Hook<OnSetupDelegate>(this.HookAddress, this.OnSetupDetour);
+        this.onSetupHook = Hook<OnSetupDelegate>.FromAddress(this.HookAddress, this.OnSetupDetour);
         this.onSetupHook.Enable();
     }
 
