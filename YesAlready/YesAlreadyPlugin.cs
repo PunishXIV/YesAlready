@@ -14,7 +14,6 @@ using Dalamud.Memory;
 using Dalamud.Plugin;
 using Dalamud.Utility;
 using YesAlready.BaseFeatures;
-using YesAlready.Features;
 using YesAlready.Interface;
 
 namespace YesAlready;
