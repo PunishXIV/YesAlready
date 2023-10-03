@@ -19,7 +19,7 @@ internal abstract class UpdateFeature : IBaseFeature
     public UpdateFeature(string updateSig)
     {
         this.HookAddress = Service.Scanner.ScanText(updateSig);
-        this.updateHook = Hook<UpdateDelegate>.FromAddress(this.HookAddress, this.UpdateDetour);
+        this.updateHook = Service.Hook.HookFromAddress<UpdateDelegate>(this.HookAddress, this.UpdateDetour);
         this.updateHook.Enable();
     }
 

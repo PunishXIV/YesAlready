@@ -7,6 +7,7 @@ using Dalamud.Game.Command;
 using Dalamud.Game.Gui;
 using Dalamud.IoC;
 using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 
 namespace YesAlready;
 
@@ -35,53 +36,55 @@ internal class Service
     /// Gets the Dalamud chat gui.
     /// </summary>
     [PluginService]
-    internal static ChatGui ChatGui { get; private set; } = null!;
+    internal static IChatGui ChatGui { get; private set; } = null!;
 
     /// <summary>
     /// Gets the Dalamud client state.
     /// </summary>
     [PluginService]
-    internal static ClientState ClientState { get; private set; } = null!;
+    internal static IClientState ClientState { get; private set; } = null!;
 
     /// <summary>
     /// Gets the Dalamud command manager.
     /// </summary>
     [PluginService]
-    internal static CommandManager CommandManager { get; private set; } = null!;
+    internal static ICommandManager CommandManager { get; private set; } = null!;
 
     /// <summary>
     /// Gets the Dalamud data manager.
     /// </summary>
     [PluginService]
-    internal static DataManager DataManager { get; private set; } = null!;
+    internal static IDataManager DataManager { get; private set; } = null!;
 
     /// <summary>
     /// Gets the Dalamud framework.
     /// </summary>
     [PluginService]
-    internal static Framework Framework { get; private set; } = null!;
+    internal static IFramework Framework { get; private set; } = null!;
 
     /// <summary>
     /// Gets the Dalamud game gui.
     /// </summary>
     [PluginService]
-    internal static GameGui GameGui { get; private set; } = null!;
+    internal static IGameGui GameGui { get; private set; } = null!;
 
     /// <summary>
     /// Gets the Dalamud signature scanner.
     /// </summary>
     [PluginService]
-    internal static SigScanner Scanner { get; private set; } = null!;
+    internal static ISigScanner Scanner { get; private set; } = null!;
 
     /// <summary>
     /// Gets the Dalamud keystate manager.
     /// </summary>
     [PluginService]
-    internal static KeyState KeyState { get; private set; } = null!;
+    internal static IKeyState KeyState { get; private set; } = null!;
 
     /// <summary>
     /// Gets the Dalamud target manager.
     /// </summary>
     [PluginService]
-    internal static TargetManager TargetManager { get; private set; } = null!;
+    internal static ITargetManager TargetManager { get; private set; } = null!;
+    [PluginService]
+    internal static IGameInteropProvider Hook { get; private set; } = null!;
 }

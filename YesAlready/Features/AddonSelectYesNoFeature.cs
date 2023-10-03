@@ -90,7 +90,8 @@ internal class AddonSelectYesNoFeature : OnSetupFeature
             if (yesButton != null && !yesButton->IsEnabled)
             {
                 PluginLog.Debug("AddonSelectYesNo: Enabling yes button");
-                yesButton->AtkComponentBase.OwnerNode->AtkResNode.Flags ^= 1 << 5;
+                var flagsPtr = (ushort*)&yesButton->AtkComponentBase.OwnerNode->AtkResNode.NodeFlags;
+                *flagsPtr ^= 1 << 5;
             }
 
             PluginLog.Debug("AddonSelectYesNo: Selecting yes");

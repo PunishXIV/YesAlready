@@ -25,7 +25,7 @@ internal class AddonInclusionShopFeature : OnSetupFeature, IDisposable
     public AddonInclusionShopFeature()
         : base("85 D2 0F 8E ?? ?? ?? ?? 4C 8B DC 55 53 41 54")
     {
-        SignatureHelper.Initialise(this);
+        Service.Hook.InitializeFromAttributes(this);
 
         this.agentReceiveEventHook.Enable();
     }

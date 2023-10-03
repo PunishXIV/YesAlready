@@ -106,7 +106,7 @@ internal abstract class OnSetupSelectListFeature : OnSetupFeature, IDisposable
             return;
 
         var onItemSelectedAddress = (IntPtr)popupMenu->AtkEventListener.vfunc[3];
-        this.onItemSelectedHook = Hook<OnItemSelectedDelegate>.FromAddress(onItemSelectedAddress, this.OnItemSelectedDetour);
+        this.onItemSelectedHook = Service.Hook.HookFromAddress<OnItemSelectedDelegate>(onItemSelectedAddress, this.OnItemSelectedDetour);
         this.onItemSelectedHook.Enable();
     }
 

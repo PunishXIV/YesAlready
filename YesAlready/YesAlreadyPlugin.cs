@@ -241,7 +241,7 @@ public sealed partial class YesAlreadyPlugin : IDalamudPlugin
         }
     }
 
-    private void FrameworkUpdate(Framework framework)
+    private void FrameworkUpdate(object framework)
     {
         if (Service.Configuration.DisableKey != VirtualKey.NO_KEY)
         {
