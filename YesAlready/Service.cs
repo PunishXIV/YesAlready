@@ -87,4 +87,6 @@ internal class Service
     internal static ITargetManager TargetManager { get; private set; } = null!;
     [PluginService]
     internal static IGameInteropProvider Hook { get; private set; } = null!;
+    [PluginService]
+    public static IDtrBar DtrBar { get; private set; } = null!;
 }

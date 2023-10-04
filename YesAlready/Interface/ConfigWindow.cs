@@ -89,6 +89,7 @@ internal class ConfigWindow : Window
             this.DisplayListOptions();
             this.DisplayTalkOptions();
             this.DisplayBotherOptions();
+            this.DisplaySettings();
 
             ImGui.EndTabBar();
         }
@@ -409,6 +410,41 @@ internal class ConfigWindow : Window
         }
 
         IndentedTextColored(this.shadedColor, "Remember the last panel visited on the scrip exchange window.");
+
+        #endregion
+
+        ImGui.PopID();
+
+        ImGui.EndTabItem();
+    }
+
+    private void DisplaySettings()
+    {
+        if (!ImGui.BeginTabItem("Settings"))
+            return;
+
+        static void IndentedTextColored(Vector4 color, string text)
+        {
+            var indent = 27f * ImGuiHelpers.GlobalScale;
+            ImGui.Indent(indent);
+            ImGui.PushStyleColor(ImGuiCol.Text, color);
+            ImGui.TextWrapped(text);
+            ImGui.PopStyleColor();
+            ImGui.Unindent(indent);
+        }
+
+        ImGui.PushID("Settings");
+
+        #region Enable DTR
+
+        var dtrSupport = Service.Configuration.DTRSupport;
+        if (ImGui.Checkbox("DTR Support", ref dtrSupport))
+        {
+            Service.Configuration.DTRSupport = dtrSupport;
+            Service.Configuration.Save();
+        }
+
+        IndentedTextColored(this.shadedColor, "Shows the status of YesAlready in the DTR bar, with the ability to quick toggle the plugin.");
 
         #endregion
 

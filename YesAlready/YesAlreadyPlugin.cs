@@ -7,11 +7,13 @@ using ClickLib;
 using Dalamud.Game;
 using Dalamud.Game.ClientState.Keys;
 using Dalamud.Game.Command;
+using Dalamud.Game.Gui.Dtr;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Interface.Windowing;
 using Dalamud.Memory;
 using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using Dalamud.Utility;
 using YesAlready.BaseFeatures;
 using YesAlready.Interface;
@@ -30,6 +32,8 @@ public sealed partial class YesAlreadyPlugin : IDalamudPlugin
     private readonly ConfigWindow configWindow;
     private readonly ZoneListWindow zoneListWindow;
     private readonly List<IBaseFeature> features;
+    private readonly SeString? fpsText;
+    private DtrBarEntry dtrEntry;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="YesAlreadyPlugin"/> class.
@@ -134,6 +138,8 @@ public sealed partial class YesAlreadyPlugin : IDalamudPlugin
 
         Service.Interface.UiBuilder.OpenConfigUi -= this.OnOpenConfigUi;
         Service.Interface.UiBuilder.Draw -= this.windowSystem.Draw;
+
+        dtrEntry?.Dispose();
 
         this.features.ForEach(feature => feature?.Dispose());
     }
@@ -269,6 +275,29 @@ public sealed partial class YesAlreadyPlugin : IDalamudPlugin
             this.EscapeTargetName = target != null
                 ? this.GetSeStringText(target.Name)
                 : string.Empty;
+        }
+
+        if (Service.Configuration.DTRSupport)
+        {
+            try
+            {
+                this.dtrEntry ??= Service.DtrBar.Get("YesAlready");
+            }
+            catch
+            {
+                return;
+            }
+
+            if (!this.dtrEntry.Shown) this.dtrEntry.Shown = true;
+
+            this.dtrEntry.Text = new SeString(
+                    new TextPayload($"YesAlready: {(Service.Configuration.Enabled ? "On" : "Off")}"));
+
+            this.dtrEntry.OnClick = () => Service.Configuration.Enabled ^= true;
+        }
+        else if (this.dtrEntry != null && this.dtrEntry.Shown)
+        {
+            this.dtrEntry.Shown = false;
         }
     }
 

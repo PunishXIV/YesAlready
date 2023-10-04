@@ -129,6 +129,11 @@ internal partial class YesAlreadyConfiguration : IPluginConfiguration
     public uint InclusionShopRememberSubcategory { get; set; } = 0;
 
     /// <summary>
+    /// Gets or sets a value indicating whether DTR support is enabled.
+    /// </summary>
+    public bool DTRSupport { get; set; } = true;
+
+    /// <summary>
     /// Loads the configuration.
     /// </summary>
     /// <param name="configDirectory">Configuration directory.</param>
