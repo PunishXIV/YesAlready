@@ -18,7 +18,17 @@
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <OutputPath>bin\$(Configuration)\</OutputPath>
+	<DalamudDevPlugins>$(appdata)\XIVLauncher\devPlugins\$(PluginName)\</DalamudDevPlugins>
+	<DalamudLibPath>$(appdata)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
+	<DalamudPluginPath>$(appdata)\XIVLauncher\installedPlugins\$(PluginName)\$(version)</DalamudPluginPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+	<OutputPath>bin/Release</OutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+	<OutputPath>$(DalamudDevPlugins)</OutputPath>
   </PropertyGroup>
 
   <PropertyGroup Label="Documentation">
@@ -52,7 +62,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <ProjectReference Include="..\..\ClickLib\ClickLib\ClickLib.csproj" />
+    <ProjectReference Include="..\ClickLib\ClickLib\ClickLib.csproj" />
     <Reference Include="Dalamud" Private="False" />
     <Reference Include="FFXIVClientStructs" Private="False" />
     <Reference Include="ImGui.NET" Private="False" />
