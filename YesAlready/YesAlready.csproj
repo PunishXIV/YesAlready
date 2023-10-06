@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Authors>daemitus</Authors>
     <Company>-</Company>
-    <Version>1.3.0.3</Version>
+    <Version>1.3.0.4</Version>
     <Description></Description>
     <Copyright></Copyright>
     <PackageProjectUrl>https://github.com/daemitus/YesAlready</PackageProjectUrl>
@@ -53,6 +53,8 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <ProjectReference Include="..\..\ClickLib\ClickLib\ClickLib.csproj" />
+    <ProjectReference Include="..\ECommons\ECommons\ECommons.csproj" />
+    <ProjectReference Include="..\punishLib\PunishLib\PunishLib.csproj" />
     <Reference Include="Dalamud" Private="False" />
     <Reference Include="FFXIVClientStructs" Private="False" />
     <Reference Include="ImGui.NET" Private="False" />

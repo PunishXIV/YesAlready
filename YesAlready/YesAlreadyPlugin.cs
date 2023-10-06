@@ -12,7 +12,8 @@ using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Interface.Windowing;
 using Dalamud.Memory;
 using Dalamud.Plugin;
-using Dalamud.Utility;
+using ECommons;
+using PunishLib;
 using YesAlready.BaseFeatures;
 using YesAlready.Interface;
 
@@ -37,6 +38,8 @@ public sealed partial class YesAlreadyPlugin : IDalamudPlugin
     /// <param name="pluginInterface">Dalamud plugin interface.</param>
     public YesAlreadyPlugin(DalamudPluginInterface pluginInterface)
     {
+        ECommonsMain.Init(pluginInterface, this);
+        PunishLibMain.Init(pluginInterface, this);
         pluginInterface.Create<Service>();
 
         Service.Plugin = this;
@@ -136,6 +139,8 @@ public sealed partial class YesAlreadyPlugin : IDalamudPlugin
         Service.Interface.UiBuilder.Draw -= this.windowSystem.Draw;
 
         this.features.ForEach(feature => feature?.Dispose());
+        PunishLibMain.Dispose();
+        ECommonsMain.Dispose();
     }
 
     /// <summary>

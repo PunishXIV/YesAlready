@@ -10,6 +10,8 @@ using Dalamud.Interface;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
+using PunishLib;
+using PunishLib.ImGuiMethods;
 
 namespace YesAlready.Interface;
 
@@ -90,8 +92,15 @@ internal class ConfigWindow : Window
             this.DisplayTalkOptions();
             this.DisplayBotherOptions();
 
+            if (ImGui.BeginTabItem("About"))
+            {
+                AboutTab.Draw(Service.Plugin);
+                ImGui.EndTabItem();
+            }
+
             ImGui.EndTabBar();
         }
+
     }
 
     #region Testing
