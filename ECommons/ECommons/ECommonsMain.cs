@@ -91,6 +91,7 @@ public static class ECommonsMain
         GenericHelpers.Safe(SendAction.Dispose);
         GenericHelpers.Safe(TaskManager.DisposeAll);
         GenericHelpers.Safe(EqualStrings.Dispose);
+        GenericHelpers.Safe(AutoCutsceneSkipper.Dispose);
         GenericHelpers.Safe(() => ThreadLoadImageHandler.httpClient?.Dispose());
         EzThrottler.Throttler = null;
         FrameThrottler.Throttler = null;

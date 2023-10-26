@@ -3,6 +3,7 @@ using Dalamud.Interface.Colors;
 using Dalamud.Interface.Internal.Notifications;
 using Dalamud.Interface.Style;
 using Dalamud.Interface.Utility;
+using Dalamud.Interface.Utility.Raii;
 using Dalamud.Logging;
 using ECommons.DalamudServices;
 using ECommons.Reflection;
@@ -22,6 +23,23 @@ namespace ECommons.ImGuiMethods;
 
 public static unsafe partial class ImGuiEx
 {
+    public static bool ButtonCond(string name, Func<bool> condition)
+    {
+        var dis = !condition();
+        if (dis) ImGui.BeginDisabled();
+        var ret = ImGui.Button(name);
+        if (dis) ImGui.EndDisabled();
+        return ret;
+    }
+
+    public static bool InputLong(string id, ref long num)
+    {
+        var txt = num.ToString();
+        var ret = ImGui.InputText(id, ref txt, 50);
+        long.TryParse(txt, out num);
+        return ret;
+    }
+
     public static bool CollapsingHeader(string text, Vector4? col = null)
     {
         if (col != null) ImGui.PushStyleColor(ImGuiCol.Text, col.Value);
@@ -92,7 +110,7 @@ public static unsafe partial class ImGuiEx
     /// <param name="col">Color in format 0xRRGGBB</param>
     /// <param name="alpha">Optional transparency value between 0 and 1</param>
     /// <returns>Color in <see cref="Vector4"/> format ready to be used with <see cref="ImGui"/> functions</returns>
-    public static Vector4 Vector4FromRGB(uint col, float alpha = 1.0f)
+    public static Vector4 Vector4FromRGB(this uint col, float alpha = 1.0f)
     {
         byte* bytes = (byte*)&col;
         return new Vector4((float)bytes[2] / 255f, (float)bytes[1] / 255f, (float)bytes[0] / 255f, alpha);
@@ -104,7 +122,7 @@ public static unsafe partial class ImGuiEx
     /// </summary>
     /// <param name="col">Color in format 0xRRGGBBAA</param>
     /// <returns>Color in <see cref="Vector4"/> format ready to be used with <see cref="ImGui"/> functions</returns>
-    public static Vector4 Vector4FromRGBA(uint col)
+    public static Vector4 Vector4FromRGBA(this uint col)
     {
         byte* bytes = (byte*)&col;
         return new Vector4((float)bytes[3] / 255f, (float)bytes[2] / 255f, (float)bytes[1] / 255f, (float)bytes[0] / 255f);
@@ -229,13 +247,15 @@ public static unsafe partial class ImGuiEx
         }
     }
 
+    public static bool ButtonCtrl(string text, string affix = " (Hold CTRL)") => ButtonCtrl(text, null, affix);
+
     /// <summary>
     /// Button that is disabled unless CTRL key is held
     /// </summary>
     /// <param name="text">Button ID</param>
     /// <param name="affix">Button affix</param>
     /// <returns></returns>
-    public static bool ButtonCtrl(string text, string affix = " (Hold CTRL)")
+    public static bool ButtonCtrl(string text, Vector2? size, string affix = " (Hold CTRL)")
     {
         var disabled = !ImGui.GetIO().KeyCtrl;
         if (disabled)
@@ -257,7 +277,7 @@ public static unsafe partial class ImGuiEx
         {
             name = $"{text}{affix}";
         }
-        var ret = ImGui.Button(name);
+        var ret = size == null?ImGui.Button(name):ImGui.Button(name, size.Value);
         if (disabled)
         {
             ImGui.EndDisabled();
@@ -842,6 +862,14 @@ public static unsafe partial class ImGuiEx
     {
         ImGui.PushFont(UiBuilder.IconFont);
         var result = ImGui.Button($"{icon.ToIconString()}##{icon.ToIconString()}-{id}", size);
+        ImGui.PopFont();
+        return result;
+    }
+
+    public static bool SmallIconButton(string icon, string id = "ECommonsButton")
+    {
+        ImGui.PushFont(UiBuilder.IconFont);
+        var result = ImGui.SmallButton($"{icon}##{icon}-{id}");
         ImGui.PopFont();
         return result;
     }
