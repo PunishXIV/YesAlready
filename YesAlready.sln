@@ -1,73 +1,37 @@
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.0.31423.177
+VisualStudioVersion = 17.6.33513.286
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YesAlready", "YesAlready\YesAlready.csproj", "{151006FE-161B-478D-BA72-479DFBF4BE7A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ECommons", "ECommons\ECommons\ECommons.csproj", "{50DD7BC8-F090-49E8-BE4E-2FB86CA78AA7}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Github Actions", "Github Actions", "{5996E313-C69E-4D3E-A6B7-8EE5F8562ED9}"
-	ProjectSection(SolutionItems) = preProject
-		.github\workflows\build.yml = .github\workflows\build.yml
-	EndProjectSection
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClickLib", "ClickLib\ClickLib\ClickLib.csproj", "{046A9762-FAF7-4073-9E8A-D1CFA768B80E}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{74CAD19F-CA68-44F6-9F50-1F6BB1242F09}"
-	ProjectSection(SolutionItems) = preProject
-		.editorconfig = .editorconfig
-		.gitignore = .gitignore
-		lib\FFXIVClientStructs\ida\data.yml = lib\FFXIVClientStructs\ida\data.yml
-		README.md = README.md
-	EndProjectSection
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClickLib", "..\ClickLib\ClickLib\ClickLib.csproj", "{8B73109D-D97E-4C1E-A974-42DD707D20DF}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PunishLib", "punishLib\PunishLib\PunishLib.csproj", "{B193C779-D4EA-4DBE-8A8A-B6F733CF1A55}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ECommons", "ECommons\ECommons\ECommons.csproj", "{17E07E57-8429-48E6-8FD3-2D717869D9A3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YesAlready", "YesAlready\YesAlready.csproj", "{DAA660F8-DB97-4FC2-8453-8B36E9F0D6A7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
 		Debug|x64 = Debug|x64
-		Release|Any CPU = Release|Any CPU
 		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{151006FE-161B-478D-BA72-479DFBF4BE7A}.Debug|Any CPU.ActiveCfg = Debug|x64
-		{151006FE-161B-478D-BA72-479DFBF4BE7A}.Debug|Any CPU.Build.0 = Debug|x64
-		{151006FE-161B-478D-BA72-479DFBF4BE7A}.Debug|x64.ActiveCfg = Debug|x64
-		{151006FE-161B-478D-BA72-479DFBF4BE7A}.Debug|x64.Build.0 = Debug|x64
-		{151006FE-161B-478D-BA72-479DFBF4BE7A}.Release|Any CPU.ActiveCfg = Release|x64
-		{151006FE-161B-478D-BA72-479DFBF4BE7A}.Release|Any CPU.Build.0 = Release|x64
-		{151006FE-161B-478D-BA72-479DFBF4BE7A}.Release|x64.ActiveCfg = Release|x64
-		{151006FE-161B-478D-BA72-479DFBF4BE7A}.Release|x64.Build.0 = Release|x64
-		{8B73109D-D97E-4C1E-A974-42DD707D20DF}.Debug|Any CPU.ActiveCfg = Debug|x64
-		{8B73109D-D97E-4C1E-A974-42DD707D20DF}.Debug|Any CPU.Build.0 = Debug|x64
-		{8B73109D-D97E-4C1E-A974-42DD707D20DF}.Debug|x64.ActiveCfg = Debug|x64
-		{8B73109D-D97E-4C1E-A974-42DD707D20DF}.Debug|x64.Build.0 = Debug|x64
-		{8B73109D-D97E-4C1E-A974-42DD707D20DF}.Release|Any CPU.ActiveCfg = Release|x64
-		{8B73109D-D97E-4C1E-A974-42DD707D20DF}.Release|Any CPU.Build.0 = Release|x64
-		{8B73109D-D97E-4C1E-A974-42DD707D20DF}.Release|x64.ActiveCfg = Release|x64
-		{8B73109D-D97E-4C1E-A974-42DD707D20DF}.Release|x64.Build.0 = Release|x64
-		{B193C779-D4EA-4DBE-8A8A-B6F733CF1A55}.Debug|Any CPU.ActiveCfg = Debug|x64
-		{B193C779-D4EA-4DBE-8A8A-B6F733CF1A55}.Debug|Any CPU.Build.0 = Debug|x64
-		{B193C779-D4EA-4DBE-8A8A-B6F733CF1A55}.Debug|x64.ActiveCfg = Debug|x64
-		{B193C779-D4EA-4DBE-8A8A-B6F733CF1A55}.Debug|x64.Build.0 = Debug|x64
-		{B193C779-D4EA-4DBE-8A8A-B6F733CF1A55}.Release|Any CPU.ActiveCfg = Release|x64
-		{B193C779-D4EA-4DBE-8A8A-B6F733CF1A55}.Release|Any CPU.Build.0 = Release|x64
-		{B193C779-D4EA-4DBE-8A8A-B6F733CF1A55}.Release|x64.ActiveCfg = Release|x64
-		{B193C779-D4EA-4DBE-8A8A-B6F733CF1A55}.Release|x64.Build.0 = Release|x64
-		{17E07E57-8429-48E6-8FD3-2D717869D9A3}.Debug|Any CPU.ActiveCfg = Debug|x64
-		{17E07E57-8429-48E6-8FD3-2D717869D9A3}.Debug|Any CPU.Build.0 = Debug|x64
-		{17E07E57-8429-48E6-8FD3-2D717869D9A3}.Debug|x64.ActiveCfg = Debug|x64
-		{17E07E57-8429-48E6-8FD3-2D717869D9A3}.Debug|x64.Build.0 = Debug|x64
-		{17E07E57-8429-48E6-8FD3-2D717869D9A3}.Release|Any CPU.ActiveCfg = Release|x64
-		{17E07E57-8429-48E6-8FD3-2D717869D9A3}.Release|Any CPU.Build.0 = Release|x64
-		{17E07E57-8429-48E6-8FD3-2D717869D9A3}.Release|x64.ActiveCfg = Release|x64
-		{17E07E57-8429-48E6-8FD3-2D717869D9A3}.Release|x64.Build.0 = Release|x64
+		{50DD7BC8-F090-49E8-BE4E-2FB86CA78AA7}.Debug|x64.ActiveCfg = Debug|x64
+		{50DD7BC8-F090-49E8-BE4E-2FB86CA78AA7}.Debug|x64.Build.0 = Debug|x64
+		{50DD7BC8-F090-49E8-BE4E-2FB86CA78AA7}.Release|x64.ActiveCfg = Release|x64
+		{50DD7BC8-F090-49E8-BE4E-2FB86CA78AA7}.Release|x64.Build.0 = Release|x64
+		{046A9762-FAF7-4073-9E8A-D1CFA768B80E}.Debug|x64.ActiveCfg = Debug|x64
+		{046A9762-FAF7-4073-9E8A-D1CFA768B80E}.Debug|x64.Build.0 = Debug|x64
+		{046A9762-FAF7-4073-9E8A-D1CFA768B80E}.Release|x64.ActiveCfg = Release|x64
+		{046A9762-FAF7-4073-9E8A-D1CFA768B80E}.Release|x64.Build.0 = Release|x64
+		{DAA660F8-DB97-4FC2-8453-8B36E9F0D6A7}.Debug|x64.ActiveCfg = Debug|x64
+		{DAA660F8-DB97-4FC2-8453-8B36E9F0D6A7}.Debug|x64.Build.0 = Debug|x64
+		{DAA660F8-DB97-4FC2-8453-8B36E9F0D6A7}.Release|x64.ActiveCfg = Release|x64
+		{DAA660F8-DB97-4FC2-8453-8B36E9F0D6A7}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {0BCA4E0B-8DA6-44FE-8A3F-E0E7BA1725FE}
+		SolutionGuid = {B17E85B1-5F60-4440-9F9A-3DDE877E8CDF}
 	EndGlobalSection
 EndGlobal

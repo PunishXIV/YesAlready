@@ -1,35 +1,35 @@
-﻿using System;
-
 using ClickLib.Clicks;
+using Dalamud.Game.Addon.Lifecycle;
+using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
+using ECommons.DalamudServices;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using YesAlready.BaseFeatures;
 
 namespace YesAlready.Features;
 
-/// <summary>
-/// AddonItemInspectionResult feature.
-/// </summary>
-internal class AddonItemInspectionResultFeature : OnSetupFeature
+internal class AddonItemInspectionResultFeature : BaseFeature
 {
-    private int itemInspectionCount = 0;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="AddonItemInspectionResultFeature"/> class.
-    /// </summary>
-    public AddonItemInspectionResultFeature()
-        : base("48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC 30 8B F2 49 8B F8 BA ?? ?? ?? ?? 48 8B D9 E8 ?? ?? ?? ?? 48 8B C8 E8 ?? ?? ?? ?? 48 8B D0")
+    public override void Enable()
     {
+        base.Enable();
+        AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "ItemInspectionResult", AddonSetup);
     }
 
-    /// <inheritdoc/>
-    protected override string AddonName => "ItemInspectionResult";
-
-    /// <inheritdoc/>
-    protected unsafe override void OnSetupImpl(IntPtr addon, uint a2, IntPtr data)
+    public override void Disable()
     {
-        if (!Service.Configuration.ItemInspectionResultEnabled)
+        base.Disable();
+        AddonLifecycle.UnregisterListener(AddonSetup);
+    }
+
+    private int itemInspectionCount = 0;
+
+    protected unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
+    {
+        var addon = (AtkUnitBase*)addonInfo.Addon;
+
+        if (!P.Config.Enabled || !P.Config.ItemInspectionResultEnabled)
             return;
 
         var addonPtr = (AddonItemInspectionResult*)addon;
@@ -41,25 +41,25 @@ internal class AddonItemInspectionResultFeature : OnSetupFeature
         if (!nameNode->AtkResNode.IsVisible || !descNode->AtkResNode.IsVisible)
             return;
 
-        var nameText = Service.Plugin.GetSeString(nameNode->NodeText.StringPtr);
-        var descText = Service.Plugin.GetSeStringText(descNode->NodeText.StringPtr);
+        var nameText = Utils.SEString.GetSeString(nameNode->NodeText.StringPtr);
+        var descText = Utils.SEString.GetSeStringText(descNode->NodeText.StringPtr);
         // This is hackish, but works well enough (for now).
         // Languages that dont contain the magic character will need special handling.
-        if (descText.Contains("※") || descText.Contains("liées à Garde-la-Reine"))
+        if (descText.Contains('※') || descText.Contains("liées à Garde-la-Reine"))
         {
             nameText.Payloads.Insert(0, new TextPayload("Received: "));
-            Service.Plugin.PrintMessage(nameText);
+            Svc.Log.Info(nameText.ToString());
         }
 
         this.itemInspectionCount++;
-        var rateLimiter = Service.Configuration.ItemInspectionResultRateLimiter;
-        if (rateLimiter != 0 && this.itemInspectionCount % rateLimiter == 0)
+        var rateLimiter = P.Config.ItemInspectionResultRateLimiter;
+        if (rateLimiter != 0 && itemInspectionCount % rateLimiter == 0)
         {
-            this.itemInspectionCount = 0;
-            Service.Plugin.PrintMessage("Rate limited, pausing item inspection loop.");
+            itemInspectionCount = 0;
+            Svc.Log.Info("Rate limited, pausing item inspection loop.");
             return;
         }
 
-        ClickItemInspectionResult.Using(addon).Next();
+        ClickItemInspectionResult.Using((nint)addon).Next();
     }
 }

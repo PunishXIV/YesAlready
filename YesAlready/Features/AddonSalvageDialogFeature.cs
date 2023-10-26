@@ -1,38 +1,41 @@
-﻿using System;
-
 using ClickLib.Clicks;
+using Dalamud.Game.Addon.Lifecycle;
+using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
 using FFXIVClientStructs.FFXIV.Client.UI;
+using FFXIVClientStructs.FFXIV.Component.GUI;
 using YesAlready.BaseFeatures;
 
 namespace YesAlready.Features;
 
-/// <summary>
-/// AddonSalvageDialog feature.
-/// </summary>
-internal class AddonSalvageDialogFeature : OnSetupFeature
+internal class AddonSalvageDialogFeature : BaseFeature
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="AddonSalvageDialogFeature"/> class.
-    /// </summary>
-    public AddonSalvageDialogFeature()
-        : base("48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 48 89 7C 24 ?? 41 56 48 83 EC 30 44 8B F2 49 8B E8")
+    public override void Enable()
     {
+        base.Enable();
+        AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "SalvageDialog", AddonSetup);
     }
 
-    /// <inheritdoc/>
-    protected override string AddonName => "SalvageDialog";
-
-    /// <inheritdoc/>
-    protected unsafe override void OnSetupImpl(IntPtr addon, uint a2, IntPtr data)
+    public override void Disable()
     {
-        if (Service.Configuration.DesynthBulkDialogEnabled)
+        base.Disable();
+        AddonLifecycle.UnregisterListener(AddonSetup);
+    }
+
+    protected unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
+    {
+        var addon = (AtkUnitBase*)addonInfo.Addon;
+
+        if (!P.Config.Enabled)
+            return;
+
+        if (P.Config.DesynthBulkDialogEnabled)
         {
             ((AddonSalvageDialog*)addon)->BulkDesynthEnabled = true;
         }
 
-        if (Service.Configuration.DesynthDialogEnabled)
+        if (P.Config.DesynthDialogEnabled)
         {
-            var clickAddon = ClickSalvageDialog.Using(addon);
+            var clickAddon = ClickSalvageDialog.Using((nint)addon);
             clickAddon.CheckBox();
             clickAddon.Desynthesize();
         }

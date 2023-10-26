@@ -1,68 +1,65 @@
-﻿using System;
-
+using System;
+using Dalamud.Game.Addon.Lifecycle;
+using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
 using Dalamud.Hooking;
-using Dalamud.Logging;
 using Dalamud.Utility.Signatures;
+using ECommons.DalamudServices;
 using FFXIVClientStructs.FFXIV.Component.GUI;
-
 using YesAlready.BaseFeatures;
-
+using YesAlready.Utils;
 using ValueType = FFXIVClientStructs.FFXIV.Component.GUI.ValueType;
 
 namespace YesAlready.Features;
 
-/// <summary>
-/// AddonInclusionShop feature.
-/// </summary>
-internal class AddonInclusionShopFeature : OnSetupFeature, IDisposable
+internal class AddonInclusionShopFeature : BaseFeature, IDisposable
 {
-    [Signature("48 89 5C 24 ?? 57 48 83 EC 20 48 8B DA 4D 8B D0 32 D2", DetourName = nameof(AgentReceiveEventDetour))]
-    private readonly Hook<AgentReceiveEventDelegate> agentReceiveEventHook = null!;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="AddonInclusionShopFeature"/> class.
-    /// </summary>
-    public AddonInclusionShopFeature()
-        : base("85 D2 0F 8E ?? ?? ?? ?? 4C 8B DC 55 53 41 54")
+    public override void Enable()
     {
-        Service.Hook.InitializeFromAttributes(this);
-
-        this.agentReceiveEventHook.Enable();
+        base.Enable();
+        AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "InclusionShop", AddonSetup);
     }
 
-    private unsafe delegate IntPtr AgentReceiveEventDelegate(IntPtr agent, IntPtr eventData, AtkValue* values, uint valueCount, ulong eventKind);
-
-    /// <inheritdoc/>
-    protected override string AddonName => "InclusionShop";
-
-    /// <inheritdoc/>
-    public new void Dispose()
+    public override void Disable()
     {
-        this.agentReceiveEventHook.Disable();
-        this.agentReceiveEventHook.Dispose();
-        base.Dispose();
+        base.Disable();
+        AddonLifecycle.UnregisterListener(AddonSetup);
     }
 
-    /// <inheritdoc/>
-    protected unsafe override void OnSetupImpl(IntPtr addon, uint a2, IntPtr data)
+    protected unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
     {
-        if (!Service.Configuration.InclusionShopRememberEnabled)
+        var addon = (AtkUnitBase*)addonInfo.Addon;
+
+        if (!P.Config.Enabled || !P.Config.InclusionShopRememberEnabled)
             return;
 
-        var unitbase = (AtkUnitBase*)addon;
+        Svc.Log.Debug($"Firing 12,{P.Config.InclusionShopRememberCategory}");
+        using var categoryValues = new AtkValueArray(12, P.Config.InclusionShopRememberCategory);
+        addon->FireCallback(2, categoryValues);
 
-        PluginLog.Debug($"Firing 12,{Service.Configuration.InclusionShopRememberCategory}");
-        using var categoryValues = new AtkValueArray(12, Service.Configuration.InclusionShopRememberCategory);
-        unitbase->FireCallback(2, categoryValues);
+        Svc.Log.Debug($"Firing 13,{P.Config.InclusionShopRememberSubcategory}");
+        using var subcategoryValues = new AtkValueArray(13, P.Config.InclusionShopRememberSubcategory);
+        addon->FireCallback(2, subcategoryValues);
+    }
 
-        PluginLog.Debug($"Firing 13,{Service.Configuration.InclusionShopRememberSubcategory}");
-        using var subcategoryValues = new AtkValueArray(13, Service.Configuration.InclusionShopRememberSubcategory);
-        unitbase->FireCallback(2, subcategoryValues);
+    [Signature("48 89 5C 24 ?? 57 48 83 EC 20 48 8B DA 4D 8B D0 32 D2", DetourName = nameof(AgentReceiveEventDetour))]
+    private readonly Hook<AgentReceiveEventDelegate> agentReceiveEventHook = null!;
+    private unsafe delegate IntPtr AgentReceiveEventDelegate(IntPtr agent, IntPtr eventData, AtkValue* values, uint valueCount, ulong eventKind);
+
+    public AddonInclusionShopFeature()
+    {
+        Svc.Hook.InitializeFromAttributes(this);
+        agentReceiveEventHook.Enable();
+    }
+
+    public void Dispose()
+    {
+        agentReceiveEventHook.Disable();
+        agentReceiveEventHook.Dispose();
     }
 
     private unsafe IntPtr AgentReceiveEventDetour(IntPtr agent, IntPtr eventData, AtkValue* values, uint valueCount, ulong eventKind)
     {
-        IntPtr Original() => this.agentReceiveEventHook.Original(agent, eventData, values, valueCount, eventKind);
+        IntPtr Original() => agentReceiveEventHook.Original(agent, eventData, values, valueCount, eventKind);
 
         if (valueCount != 2)
             return Original();
@@ -75,22 +72,22 @@ internal class AddonInclusionShopFeature : OnSetupFeature, IDisposable
         if (val0 == 12)
         {
             var val1 = values[1].UInt;
-            if (val1 != Service.Configuration.InclusionShopRememberCategory)
+            if (val1 != P.Config.InclusionShopRememberCategory)
             {
-                PluginLog.Debug($"Remembring InclusionShop category: {val1}");
-                Service.Configuration.InclusionShopRememberCategory = val1;
-                Service.Configuration.InclusionShopRememberSubcategory = 0;
-                Service.Configuration.Save();
+                Svc.Log.Debug($"Remembring InclusionShop category: {val1}");
+                P.Config.InclusionShopRememberCategory = val1;
+                P.Config.InclusionShopRememberSubcategory = 0;
+                P.Config.Save();
             }
         }
         else if (val0 == 13)
         {
             var val1 = values[1].UInt;
-            if (val1 != Service.Configuration.InclusionShopRememberSubcategory)
+            if (val1 != P.Config.InclusionShopRememberSubcategory)
             {
-                PluginLog.Debug($"Remembring InclusionShop subcategory: {val1}");
-                Service.Configuration.InclusionShopRememberSubcategory = val1;
-                Service.Configuration.Save();
+                Svc.Log.Debug($"Remembring InclusionShop subcategory: {val1}");
+                P.Config.InclusionShopRememberSubcategory = val1;
+                P.Config.Save();
             }
         }
 
