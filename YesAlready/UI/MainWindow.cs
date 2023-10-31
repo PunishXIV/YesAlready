@@ -74,6 +74,7 @@ internal class MainWindow : Window
             DisplayListOptions();
             DisplayTalkOptions();
             DisplayBotherOptions();
+            DisplaySettings();
 
             ImGui.EndTabBar();
         }
@@ -418,6 +419,65 @@ internal class MainWindow : Window
         }
 
         IndentedTextColored(shadedColor, "Automatically exchange items/currencies in various shops (e.g. scrip vendors).");
+
+        #endregion
+        #region FallGuysRegisterConfirm
+
+        var fgsEnter = P.Config.FallGuysRegisterConfirm;
+        if (ImGui.Checkbox("FGSEnterDialog", ref fgsEnter))
+        {
+            P.Config.FallGuysRegisterConfirm = fgsEnter;
+            P.Config.Save();
+        }
+
+        IndentedTextColored(shadedColor, "Automatically register for Blunderville when speaking with the Blunderville Registrar.");
+
+        #endregion
+        #region FallGuysExitConfirm
+
+        var fgsExit = P.Config.FallGuysExitConfirm;
+        if (ImGui.Checkbox("FGSExitDialog", ref fgsExit))
+        {
+            P.Config.FallGuysExitConfirm = fgsExit;
+            P.Config.Save();
+        }
+
+        IndentedTextColored(shadedColor, "Automatically confirm the exit prompt when leaving Blunderville.");
+
+        #endregion
+
+        ImGui.PopID();
+
+        ImGui.EndTabItem();
+    }
+
+    private void DisplaySettings()
+    {
+        if (!ImGui.BeginTabItem("Settings"))
+            return;
+
+        static void IndentedTextColored(Vector4 color, string text)
+        {
+            var indent = 27f * ImGuiHelpers.GlobalScale;
+            ImGui.Indent(indent);
+            ImGui.PushStyleColor(ImGuiCol.Text, color);
+            ImGui.TextWrapped(text);
+            ImGui.PopStyleColor();
+            ImGui.Unindent(indent);
+        }
+
+        ImGui.PushID("Settings");
+
+        #region Enable DTR
+
+        var dtrSupport = P.Config.DTRSupport;
+        if (ImGui.Checkbox("DTR Support", ref dtrSupport))
+        {
+            P.Config.DTRSupport = dtrSupport;
+            P.Config.Save();
+        }
+
+        IndentedTextColored(this.shadedColor, "Shows the status of YesAlready in the DTR bar, with the ability to quick toggle the plugin.");
 
         #endregion
 
