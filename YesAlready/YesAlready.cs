@@ -151,16 +151,21 @@ public class YesAlready : IDalamudPlugin
         }
     }
 
+    private bool wasDisableKeyPressed;
     private void FrameworkUpdate(object framework)
     {
+        // This doesn't respect the plugin being turned off manually.
         if (Config.DisableKey != VirtualKey.NO_KEY)
-        {
             DisableKeyPressed = Svc.KeyState[Config.DisableKey];
-        }
         else
-        {
             DisableKeyPressed = false;
-        }
+
+        if (DisableKeyPressed && !wasDisableKeyPressed)
+            P.Config.Enabled = false;
+        else if (!DisableKeyPressed && wasDisableKeyPressed)
+            P.Config.Enabled = true;
+
+        wasDisableKeyPressed = DisableKeyPressed;
 
         if (Config.ForcedYesKey != VirtualKey.NO_KEY)
         {
