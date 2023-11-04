@@ -41,8 +41,6 @@ public partial class Configuration() : IPluginConfiguration
     public bool FallGuysRegisterConfirm { get; set; } = false;
     public bool FallGuysExitConfirm { get; set; } = false;
 
-    public bool DTRSupport { get; set; } = true;
-
     public static Configuration Load(DirectoryInfo configDirectory)
     {
         var pluginConfigPath = new FileInfo(Path.Combine(configDirectory.Parent!.FullName, "YesAlready.json"));

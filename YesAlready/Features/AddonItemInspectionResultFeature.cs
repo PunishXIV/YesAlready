@@ -51,7 +51,7 @@ internal class AddonItemInspectionResultFeature : BaseFeature
             Svc.Log.Info(nameText.ToString());
         }
 
-        this.itemInspectionCount++;
+        itemInspectionCount++;
         var rateLimiter = P.Config.ItemInspectionResultRateLimiter;
         if (rateLimiter != 0 && itemInspectionCount % rateLimiter == 0)
         {

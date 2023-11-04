@@ -17,7 +17,6 @@ using Dalamud.Game.Gui.Dtr;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.IoC;
 using Dalamud.Plugin.Services;
-
 namespace YesAlready;
 
 public class YesAlready : IDalamudPlugin
@@ -37,7 +36,7 @@ public class YesAlready : IDalamudPlugin
     internal static YesAlready P;
     internal static DalamudPluginInterface pi;
 
-    private DtrBarEntry dtrEntry;
+    private readonly DtrBarEntry dtrEntry;
 
     public YesAlready(DalamudPluginInterface pluginInterface)
     {
@@ -75,6 +74,8 @@ public class YesAlready : IDalamudPlugin
         LoadTerritories();
         EnableFeatures(true);
 
+        dtrEntry ??= Svc.DtrBar.Get("YesAlready");
+
         Svc.Framework.Update += FrameworkUpdate;
         Svc.PluginInterface.UiBuilder.Draw += Ws.Draw;
         Svc.PluginInterface.UiBuilder.OpenConfigUi += DrawConfigUI;
@@ -104,6 +105,7 @@ public class YesAlready : IDalamudPlugin
             Svc.Commands.RemoveHandler(c);
         }
         registeredCommands.Clear();
+        dtrEntry.Remove();
 
         Svc.Framework.Update -= FrameworkUpdate;
 
@@ -179,27 +181,10 @@ public class YesAlready : IDalamudPlugin
                 : string.Empty;
         }
 
-        if (P.Config.DTRSupport)
+        if (dtrEntry.Shown)
         {
-            try
-            {
-                dtrEntry ??= Svc.DtrBar.Get("YesAlready");
-            }
-            catch
-            {
-                return;
-            }
-
-            if (!dtrEntry.Shown) dtrEntry.Shown = true;
-
-            dtrEntry.Text = new SeString(
-                    new TextPayload($"YesAlready: {(P.Config.Enabled ? "On" : "Off")}"));
-
+            dtrEntry.Text = new SeString(new TextPayload($"{Name}: {(P.Config.Enabled ? "On" : "Off")}"));
             dtrEntry.OnClick = () => P.Config.Enabled ^= true;
-        }
-        else if (dtrEntry != null && dtrEntry.Shown)
-        {
-            dtrEntry.Shown = false;
         }
     }
 
