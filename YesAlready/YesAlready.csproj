@@ -37,7 +37,7 @@
     <ItemGroup>
         <ProjectReference Include="..\ECommons\ECommons\ECommons.csproj" />
         <ProjectReference Include="..\ClickLib\ClickLib\ClickLib.csproj" />
-        <ProjectReference Include="..\punishLib\PunishLib\PunishLib.csproj" />
+        <ProjectReference Include="..\PunishLib\PunishLib\PunishLib.csproj" />
     </ItemGroup>
     
     <PropertyGroup Condition="'$(OS)' != 'Windows_NT' OR '$(CI)' == 'true'">
