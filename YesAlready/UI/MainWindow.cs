@@ -74,7 +74,6 @@ internal class MainWindow : Window
             DisplayListOptions();
             DisplayTalkOptions();
             DisplayBotherOptions();
-            DisplaySettings();
 
             ImGui.EndTabBar();
         }
@@ -451,41 +450,6 @@ internal class MainWindow : Window
         ImGui.EndTabItem();
     }
 
-    private void DisplaySettings()
-    {
-        if (!ImGui.BeginTabItem("Settings"))
-            return;
-
-        static void IndentedTextColored(Vector4 color, string text)
-        {
-            var indent = 27f * ImGuiHelpers.GlobalScale;
-            ImGui.Indent(indent);
-            ImGui.PushStyleColor(ImGuiCol.Text, color);
-            ImGui.TextWrapped(text);
-            ImGui.PopStyleColor();
-            ImGui.Unindent(indent);
-        }
-
-        ImGui.PushID("Settings");
-
-        #region Enable DTR
-
-        var dtrSupport = P.Config.DTRSupport;
-        if (ImGui.Checkbox("DTR Support", ref dtrSupport))
-        {
-            P.Config.DTRSupport = dtrSupport;
-            P.Config.Save();
-        }
-
-        IndentedTextColored(this.shadedColor, "Shows the status of YesAlready in the DTR bar, with the ability to quick toggle the plugin.");
-
-        #endregion
-
-        ImGui.PopID();
-
-        ImGui.EndTabItem();
-    }
-
     // ====================================================================================================
 
     private static void DisplayTextButtons()
@@ -494,7 +458,7 @@ internal class MainWindow : Window
         var newStyle = new Vector2(style.ItemSpacing.X / 2, style.ItemSpacing.Y);
         ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, newStyle);
 
-        if (ImGuiEx.IconButton(FontAwesomeIcon.Plus, "Add new entry"))
+        if (Utils.ImGuiEx.IconButton(FontAwesomeIcon.Plus, "Add new entry"))
         {
             var newNode = new TextEntryNode { Enabled = false, Text = "Your text goes here" };
             RootFolder.Children.Add(newNode);
@@ -502,7 +466,7 @@ internal class MainWindow : Window
         }
 
         ImGui.SameLine();
-        if (ImGuiEx.IconButton(FontAwesomeIcon.SearchPlus, "Add last seen as new entry"))
+        if (Utils.ImGuiEx.IconButton(FontAwesomeIcon.SearchPlus, "Add last seen as new entry"))
         {
             var io = ImGui.GetIO();
             var zoneRestricted = io.KeyCtrl;
@@ -514,7 +478,7 @@ internal class MainWindow : Window
         }
 
         ImGui.SameLine();
-        if (ImGuiEx.IconButton(FontAwesomeIcon.FolderPlus, "Add folder"))
+        if (Utils.ImGuiEx.IconButton(FontAwesomeIcon.FolderPlus, "Add folder"))
         {
             var newNode = new TextFolderNode { Name = "Untitled folder" };
             RootFolder.Children.Add(newNode);
@@ -545,7 +509,8 @@ internal class MainWindow : Window
         sb.AppendLine("  - SelectYesNo");
 
         ImGui.SameLine();
-        ImGuiEx.IconButton(FontAwesomeIcon.QuestionCircle, sb.ToString());
+        Utils.ImGuiEx.IconButton(FontAwesomeIcon.QuestionCircle, sb.ToString());
+        if (ImGui.IsItemHovered()) ImGui.SetTooltip(sb.ToString());
 
         ImGui.PopStyleVar(); // ItemSpacing
     }
@@ -575,7 +540,7 @@ internal class MainWindow : Window
         var newStyle = new Vector2(style.ItemSpacing.X / 2, style.ItemSpacing.Y);
         ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, newStyle);
 
-        if (ImGuiEx.IconButton(FontAwesomeIcon.Plus, "Add new entry"))
+        if (Utils.ImGuiEx.IconButton(FontAwesomeIcon.Plus, "Add new entry"))
         {
             var newNode = new ListEntryNode { Enabled = false, Text = "Your text goes here" };
             ListRootFolder.Children.Add(newNode);
@@ -583,7 +548,7 @@ internal class MainWindow : Window
         }
 
         ImGui.SameLine();
-        if (ImGuiEx.IconButton(FontAwesomeIcon.SearchPlus, "Add last selected as new entry"))
+        if (Utils.ImGuiEx.IconButton(FontAwesomeIcon.SearchPlus, "Add last selected as new entry"))
         {
             var newNode = new ListEntryNode { Enabled = true, Text = P.LastSeenListSelection, TargetRestricted = true, TargetText = P.LastSeenListTarget };
             ListRootFolder.Children.Add(newNode);
@@ -591,7 +556,7 @@ internal class MainWindow : Window
         }
 
         ImGui.SameLine();
-        if (ImGuiEx.IconButton(FontAwesomeIcon.FolderPlus, "Add folder"))
+        if (Utils.ImGuiEx.IconButton(FontAwesomeIcon.FolderPlus, "Add folder"))
         {
             var newNode = new TextFolderNode { Name = "Untitled folder" };
             ListRootFolder.Children.Add(newNode);
@@ -616,7 +581,7 @@ internal class MainWindow : Window
         sb.AppendLine("  - SelectIconString");
 
         ImGui.SameLine();
-        ImGuiEx.IconButton(FontAwesomeIcon.QuestionCircle, sb.ToString());
+        Utils.ImGuiEx.IconButton(FontAwesomeIcon.QuestionCircle, sb.ToString());
 
         ImGui.PopStyleVar(); // ItemSpacing
     }
@@ -646,7 +611,7 @@ internal class MainWindow : Window
         var newStyle = new Vector2(style.ItemSpacing.X / 2, style.ItemSpacing.Y);
         ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, newStyle);
 
-        if (ImGuiEx.IconButton(FontAwesomeIcon.Plus, "Add new entry"))
+        if (Utils.ImGuiEx.IconButton(FontAwesomeIcon.Plus, "Add new entry"))
         {
             var newNode = new TalkEntryNode { Enabled = false, TargetText = "Your text goes here" };
             TalkRootFolder.Children.Add(newNode);
@@ -654,7 +619,7 @@ internal class MainWindow : Window
         }
 
         ImGui.SameLine();
-        if (ImGuiEx.IconButton(FontAwesomeIcon.SearchPlus, "Add current target as a new entry"))
+        if (Utils.ImGuiEx.IconButton(FontAwesomeIcon.SearchPlus, "Add current target as a new entry"))
         {
             var target = Svc.Targets.Target;
             var targetName = P.LastSeenTalkTarget = target != null
@@ -667,7 +632,7 @@ internal class MainWindow : Window
         }
 
         ImGui.SameLine();
-        if (ImGuiEx.IconButton(FontAwesomeIcon.FolderPlus, "Add folder"))
+        if (Utils.ImGuiEx.IconButton(FontAwesomeIcon.FolderPlus, "Add folder"))
         {
             var newNode = new TextFolderNode { Name = "Untitled folder" };
             TalkRootFolder.Children.Add(newNode);
@@ -691,7 +656,7 @@ internal class MainWindow : Window
         sb.AppendLine("  - Talk");
 
         ImGui.SameLine();
-        ImGuiEx.IconButton(FontAwesomeIcon.QuestionCircle, sb.ToString());
+        Utils.ImGuiEx.IconButton(FontAwesomeIcon.QuestionCircle, sb.ToString());
 
         ImGui.PopStyleVar(); // ItemSpacing
     }
@@ -971,7 +936,7 @@ internal class MainWindow : Window
                 var trashAltWidth = Utils.ImGuiEx.GetIconButtonWidth(FontAwesomeIcon.TrashAlt);
 
                 ImGui.SameLine(ImGui.GetContentRegionMax().X - trashAltWidth);
-                if (ImGuiEx.IconButton(FontAwesomeIcon.TrashAlt, "Delete"))
+                if (Utils.ImGuiEx.IconButton(FontAwesomeIcon.TrashAlt, "Delete"))
                 {
                     if (P.Config.TryFindParent(node, out var parentNode))
                     {
@@ -998,13 +963,13 @@ internal class MainWindow : Window
                 var searchPlusWidth = Utils.ImGuiEx.GetIconButtonWidth(FontAwesomeIcon.SearchPlus);
 
                 ImGui.SameLine(ImGui.GetContentRegionMax().X - searchWidth);
-                if (ImGuiEx.IconButton(FontAwesomeIcon.Search, "Zone List"))
+                if (Utils.ImGuiEx.IconButton(FontAwesomeIcon.Search, "Zone List"))
                 {
                     P.OpenZoneListUi();
                 }
 
                 ImGui.SameLine(ImGui.GetContentRegionMax().X - searchWidth - searchPlusWidth - newItemSpacing.X);
-                if (ImGuiEx.IconButton(FontAwesomeIcon.SearchPlus, "Fill with current zone"))
+                if (Utils.ImGuiEx.IconButton(FontAwesomeIcon.SearchPlus, "Fill with current zone"))
                 {
                     var currentID = Svc.ClientState.TerritoryType;
                     if (P.TerritoryNames.TryGetValue(currentID, out var zoneName))
@@ -1043,7 +1008,7 @@ internal class MainWindow : Window
                 var trashAltWidth = Utils.ImGuiEx.GetIconButtonWidth(FontAwesomeIcon.TrashAlt);
 
                 ImGui.SameLine(ImGui.GetContentRegionMax().X - trashAltWidth);
-                if (ImGuiEx.IconButton(FontAwesomeIcon.TrashAlt, "Delete"))
+                if (Utils.ImGuiEx.IconButton(FontAwesomeIcon.TrashAlt, "Delete"))
                 {
                     if (P.Config.TryFindParent(node, out var parentNode))
                     {
@@ -1069,7 +1034,7 @@ internal class MainWindow : Window
                 var searchPlusWidth = Utils.ImGuiEx.GetIconButtonWidth(FontAwesomeIcon.SearchPlus);
 
                 ImGui.SameLine(ImGui.GetContentRegionMax().X - searchPlusWidth);
-                if (ImGuiEx.IconButton(FontAwesomeIcon.SearchPlus, "Fill with current target"))
+                if (Utils.ImGuiEx.IconButton(FontAwesomeIcon.SearchPlus, "Fill with current target"))
                 {
                     var target = Svc.Targets.Target;
                     var name = target?.Name?.TextValue ?? string.Empty;
@@ -1110,7 +1075,7 @@ internal class MainWindow : Window
                 var trashAltWidth = Utils.ImGuiEx.GetIconButtonWidth(FontAwesomeIcon.TrashAlt);
 
                 ImGui.SameLine(ImGui.GetContentRegionMax().X - trashAltWidth);
-                if (ImGuiEx.IconButton(FontAwesomeIcon.TrashAlt, "Delete"))
+                if (Utils.ImGuiEx.IconButton(FontAwesomeIcon.TrashAlt, "Delete"))
                 {
                     if (P.Config.TryFindParent(node, out var parentNode))
                     {
@@ -1122,7 +1087,7 @@ internal class MainWindow : Window
                 var searchPlusWidth = Utils.ImGuiEx.GetIconButtonWidth(FontAwesomeIcon.SearchPlus);
 
                 ImGui.SameLine(ImGui.GetContentRegionMax().X - searchPlusWidth - trashAltWidth - newItemSpacing.X);
-                if (ImGuiEx.IconButton(FontAwesomeIcon.SearchPlus, "Fill with current target"))
+                if (Utils.ImGuiEx.IconButton(FontAwesomeIcon.SearchPlus, "Fill with current target"))
                 {
                     var target = Svc.Targets.Target;
                     var name = target?.Name?.TextValue ?? string.Empty;
@@ -1153,7 +1118,7 @@ internal class MainWindow : Window
             {
                 ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, newItemSpacing);
 
-                if (ImGuiEx.IconButton(FontAwesomeIcon.Plus, "Add entry"))
+                if (Utils.ImGuiEx.IconButton(FontAwesomeIcon.Plus, "Add entry"))
                 {
                     if (root == RootFolder)
                     {
@@ -1170,7 +1135,7 @@ internal class MainWindow : Window
                 }
 
                 ImGui.SameLine();
-                if (ImGuiEx.IconButton(FontAwesomeIcon.SearchPlus, "Add last seen as new entry"))
+                if (Utils.ImGuiEx.IconButton(FontAwesomeIcon.SearchPlus, "Add last seen as new entry"))
                 {
                     if (root == RootFolder)
                     {
@@ -1197,7 +1162,7 @@ internal class MainWindow : Window
                 }
 
                 ImGui.SameLine();
-                if (ImGuiEx.IconButton(FontAwesomeIcon.FolderPlus, "Add folder"))
+                if (Utils.ImGuiEx.IconButton(FontAwesomeIcon.FolderPlus, "Add folder"))
                 {
                     var newNode = new TextFolderNode { Name = "Untitled folder" };
                     folderNode.Children.Add(newNode);
@@ -1206,7 +1171,7 @@ internal class MainWindow : Window
 
                 var trashWidth = Utils.ImGuiEx.GetIconButtonWidth(FontAwesomeIcon.TrashAlt);
                 ImGui.SameLine(ImGui.GetContentRegionMax().X - trashWidth);
-                if (ImGuiEx.IconButton(FontAwesomeIcon.TrashAlt, "Delete"))
+                if (Utils.ImGuiEx.IconButton(FontAwesomeIcon.TrashAlt, "Delete"))
                 {
                     if (P.Config.TryFindParent(node, out var parentNode))
                     {

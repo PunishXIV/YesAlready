@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClickLib", "ClickLib\ClickL
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YesAlready", "YesAlready\YesAlready.csproj", "{DAA660F8-DB97-4FC2-8453-8B36E9F0D6A7}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ECommons", "ECommons\ECommons\ECommons.csproj", "{BAE99E1B-3AD1-493F-A005-1411B57809BD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -21,6 +23,10 @@ Global
 		{DAA660F8-DB97-4FC2-8453-8B36E9F0D6A7}.Debug|x64.Build.0 = Debug|x64
 		{DAA660F8-DB97-4FC2-8453-8B36E9F0D6A7}.Release|x64.ActiveCfg = Release|x64
 		{DAA660F8-DB97-4FC2-8453-8B36E9F0D6A7}.Release|x64.Build.0 = Release|x64
+		{BAE99E1B-3AD1-493F-A005-1411B57809BD}.Debug|x64.ActiveCfg = Debug|x64
+		{BAE99E1B-3AD1-493F-A005-1411B57809BD}.Debug|x64.Build.0 = Debug|x64
+		{BAE99E1B-3AD1-493F-A005-1411B57809BD}.Release|x64.ActiveCfg = Release|x64
+		{BAE99E1B-3AD1-493F-A005-1411B57809BD}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
