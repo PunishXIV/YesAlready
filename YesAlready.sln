@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YesAlready", "YesAlready\Ye
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ECommons", "ECommons\ECommons\ECommons.csproj", "{BAE99E1B-3AD1-493F-A005-1411B57809BD}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PunishLib", "PunishLib\PunishLib\PunishLib.csproj", "{3A6D49AE-7CEA-402F-8C86-F00E9F1106C9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -27,6 +29,10 @@ Global
 		{BAE99E1B-3AD1-493F-A005-1411B57809BD}.Debug|x64.Build.0 = Debug|x64
 		{BAE99E1B-3AD1-493F-A005-1411B57809BD}.Release|x64.ActiveCfg = Release|x64
 		{BAE99E1B-3AD1-493F-A005-1411B57809BD}.Release|x64.Build.0 = Release|x64
+		{3A6D49AE-7CEA-402F-8C86-F00E9F1106C9}.Debug|x64.ActiveCfg = Debug|x64
+		{3A6D49AE-7CEA-402F-8C86-F00E9F1106C9}.Debug|x64.Build.0 = Debug|x64
+		{3A6D49AE-7CEA-402F-8C86-F00E9F1106C9}.Release|x64.ActiveCfg = Release|x64
+		{3A6D49AE-7CEA-402F-8C86-F00E9F1106C9}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -10,6 +10,7 @@ using ImGuiNET;
 using ECommons.DalamudServices;
 using ClickLib.Exceptions;
 using System.Linq;
+using PunishLib.ImGuiMethods;
 
 namespace YesAlready.UI;
 
@@ -74,6 +75,12 @@ internal class MainWindow : Window
             DisplayListOptions();
             DisplayTalkOptions();
             DisplayBotherOptions();
+
+            if (ImGui.BeginTabItem("About"))
+            {
+                AboutTab.Draw(Name);
+                ImGui.EndTabItem();
+            }
 
             ImGui.EndTabBar();
         }
