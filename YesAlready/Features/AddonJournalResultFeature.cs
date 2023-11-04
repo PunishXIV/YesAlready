@@ -1,31 +1,31 @@
-using System;
-
 using ClickLib.Clicks;
+using Dalamud.Game.Addon.Lifecycle;
+using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
 using FFXIVClientStructs.FFXIV.Client.UI;
+using FFXIVClientStructs.FFXIV.Component.GUI;
 using YesAlready.BaseFeatures;
 
 namespace YesAlready.Features;
 
-/// <summary>
-/// AddonJournalResult feature.
-/// </summary>
-internal class AddonJournalResultFeature : OnSetupFeature
+internal class AddonJournalResultFeature : BaseFeature
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="AddonJournalResultFeature"/> class.
-    /// </summary>
-    public AddonJournalResultFeature()
-        : base("48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 48 83 EC 30 8B EA 49 8B F0 BA ?? ?? ?? ?? 48 8B F9 E8 ?? ?? ?? ?? BA ?? ?? ?? ?? 48 89 87")
+    public override void Enable()
     {
+        base.Enable();
+        AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "JournalResult", AddonSetup);
     }
 
-    /// <inheritdoc/>
-    protected override string AddonName => "JournalResult";
-
-    /// <inheritdoc/>
-    protected unsafe override void OnSetupImpl(IntPtr addon, uint a2, IntPtr data)
+    public override void Disable()
     {
-        if (!Service.Configuration.JournalResultCompleteEnabled)
+        base.Disable();
+        AddonLifecycle.UnregisterListener(AddonSetup);
+    }
+
+    protected unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
+    {
+        var addon = (AtkUnitBase*)addonInfo.Addon;
+
+        if (!P.Config.Enabled || !P.Config.JournalResultCompleteEnabled)
             return;
 
         var addonPtr = (AddonJournalResult*)addon;
@@ -33,6 +33,6 @@ internal class AddonJournalResultFeature : OnSetupFeature
         if (!addonPtr->CompleteButton->IsEnabled)
             return;
 
-        ClickJournalResult.Using(addon).Complete();
+        ClickJournalResult.Using((nint)addon).Complete();
     }
 }

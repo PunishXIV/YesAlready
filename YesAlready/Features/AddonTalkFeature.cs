@@ -1,64 +1,69 @@
-﻿using System;
+using System;
 using System.Linq;
 
 using ClickLib.Clicks;
-using Dalamud.Logging;
+using Dalamud.Game.Addon.Lifecycle;
+using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
+using ECommons.DalamudServices;
 using FFXIVClientStructs.FFXIV.Client.UI;
+using FFXIVClientStructs.FFXIV.Component.GUI;
 using YesAlready.BaseFeatures;
 
 namespace YesAlready.Features;
 
-/// <summary>
-/// AddonTalk feature.
-/// </summary>
-internal class AddonTalkFeature : UpdateFeature
+internal class AddonTalkFeature : BaseFeature
 {
+    public override void Enable()
+    {
+        base.Enable();
+        AddonLifecycle.RegisterListener(AddonEvent.PostUpdate, "Talk", AddonSetup);
+    }
+
+    public override void Disable()
+    {
+        base.Disable();
+        AddonLifecycle.UnregisterListener(AddonSetup);
+    }
+
     private ClickTalk? clickTalk = null;
     private IntPtr lastTalkAddon = IntPtr.Zero;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="AddonTalkFeature"/> class.
-    /// </summary>
-    public AddonTalkFeature()
-        : base("48 89 74 24 ?? 57 48 83 EC 40 0F 29 74 24 ?? 48 8B F9 0F 29 7C 24 ?? 0F 28 F1")
+    protected unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
     {
-    }
+        var addon = (AtkUnitBase*)addonInfo.Addon;
 
-    /// <inheritdoc/>
-    protected override string AddonName => "Talk";
+        if (!P.Config.Enabled)
+            return;
 
-    /// <inheritdoc/>
-    protected unsafe override void UpdateImpl(IntPtr addon, IntPtr a2, IntPtr a3)
-    {
         var addonPtr = (AddonTalk*)addon;
         if (!addonPtr->AtkUnitBase.IsVisible)
             return;
 
-        var target = Service.TargetManager.Target;
-        var targetName = Service.Plugin.LastSeenTalkTarget = target != null
-            ? Service.Plugin.GetSeStringText(target.Name)
+        var target = Svc.Targets.Target;
+        var targetName = P.LastSeenTalkTarget = target != null
+            ? Utils.SEString.GetSeStringText(target.Name)
             : string.Empty;
 
-        var nodes = Service.Configuration.GetAllNodes().OfType<TalkEntryNode>();
+        var nodes = P.Config.GetAllNodes().OfType<TalkEntryNode>();
         foreach (var node in nodes)
         {
             if (!node.Enabled || string.IsNullOrEmpty(node.TargetText))
                 continue;
 
-            var matched = this.EntryMatchesTargetName(node, targetName);
+            var matched = EntryMatchesTargetName(node, targetName);
             if (!matched)
                 continue;
 
-            if (this.clickTalk == null || this.lastTalkAddon != addon)
-                this.clickTalk = ClickTalk.Using(this.lastTalkAddon = addon);
+            if (clickTalk == null || lastTalkAddon != (IntPtr)addon)
+                clickTalk = ClickTalk.Using(lastTalkAddon = (IntPtr)addon);
 
-            PluginLog.Debug("AddonTalk: Advancing");
-            this.clickTalk.Click();
+            Svc.Log.Debug("AddonTalk: Advancing");
+            clickTalk.Click();
             return;
         }
     }
 
-    private bool EntryMatchesTargetName(TalkEntryNode node, string targetName)
+    private static bool EntryMatchesTargetName(TalkEntryNode node, string targetName)
     {
         return (node.TargetIsRegex && (node.TargetRegex?.IsMatch(targetName) ?? false)) ||
               (!node.TargetIsRegex && targetName.Contains(node.TargetText));

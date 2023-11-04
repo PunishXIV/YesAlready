@@ -1,41 +1,40 @@
-﻿using System;
-
 using ClickLib.Clicks;
+using Dalamud.Game.Addon.Lifecycle;
+using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
+using ECommons.DalamudServices;
 using FFXIVClientStructs.FFXIV.Client.UI;
+using FFXIVClientStructs.FFXIV.Component.GUI;
+using Lumina.Excel.GeneratedSheets;
 using YesAlready.BaseFeatures;
 
 namespace YesAlready.Features;
 
-/// <summary>
-/// AddonRetainerTaskResult feature.
-/// </summary>
-internal class AddonRetainerTaskResultFeature : OnSetupFeature
+internal class AddonRetainerTaskResultFeature : BaseFeature
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="AddonRetainerTaskResultFeature"/> class.
-    /// </summary>
-    public AddonRetainerTaskResultFeature()
-        : base("48 89 5C 24 ?? 55 56 57 48 83 EC 40 8B F2 49 8B F8 BA ?? ?? ?? ?? 48 8B D9 E8 ?? ?? ?? ??")
+    public override void Enable()
     {
+        base.Enable();
+        AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "RetainerTaskResult", AddonSetup);
     }
 
-    /// <inheritdoc/>
-    protected override string AddonName => "RetainerTaskResult";
-
-    /// <inheritdoc/>
-    protected unsafe override void OnSetupImpl(IntPtr addon, uint a2, IntPtr data)
+    public override void Disable()
     {
-        if (!Service.Configuration.RetainerTaskResultEnabled)
+        base.Disable();
+        AddonLifecycle.UnregisterListener(AddonSetup);
+    }
+
+    protected unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
+    {
+        var addon = (AtkUnitBase*)addonInfo.Addon;
+
+        if (!P.Config.Enabled || !P.Config.RetainerTaskResultEnabled)
             return;
 
         var addonPtr = (AddonRetainerTaskResult*)addon;
         var buttonText = addonPtr->ReassignButton->ButtonTextNode->NodeText.ToString();
-        if (buttonText == "Recall" ||
-            buttonText == "中断する" ||
-            buttonText == "Zurückrufen" ||
-            buttonText == "Interrompre")
+        if (buttonText == Svc.Data.GetExcelSheet<Addon>(Svc.ClientState.ClientLanguage).GetRow(2365).Text)
             return;
 
-        ClickRetainerTaskResult.Using(addon).Reassign();
+        ClickRetainerTaskResult.Using((nint)addon).Reassign();
     }
 }

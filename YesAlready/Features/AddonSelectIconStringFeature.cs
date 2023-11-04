@@ -1,42 +1,46 @@
-﻿using System;
+using System;
 
 using ClickLib.Clicks;
-using Dalamud.Logging;
+using Dalamud.Game.Addon.Lifecycle;
+using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
+using ECommons.DalamudServices;
 using FFXIVClientStructs.FFXIV.Client.UI;
+using FFXIVClientStructs.FFXIV.Component.GUI;
 using YesAlready.BaseFeatures;
 
 namespace YesAlready.Features;
 
-/// <summary>
-/// AddonSelectString feature.
-/// </summary>
 internal class AddonSelectIconStringFeature : OnSetupSelectListFeature
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="AddonSelectIconStringFeature"/> class.
-    /// </summary>
-    public AddonSelectIconStringFeature()
-        : base("40 53 56 57 41 54 41 57 48 83 EC 30 4D 8B F8 44 8B E2 48 8B F1 E8 ?? ?? ?? ??")
+    public override void Enable()
     {
+        base.Enable();
+        AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "SelectIconString", AddonSetup);
     }
 
-    /// <inheritdoc/>
-    protected override string AddonName => "SelectIconString";
-
-    /// <inheritdoc/>
-    protected unsafe override void OnSetupImpl(IntPtr addon, uint a2, IntPtr data)
+    public override void Disable()
     {
+        base.Disable();
+        AddonLifecycle.UnregisterListener(AddonSetup);
+    }
+
+    protected unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
+    {
+        var addon = (AtkUnitBase*)addonInfo.Addon;
+
+        if (!P.Config.Enabled)
+            return;
+
         var addonPtr = (AddonSelectIconString*)addon;
         var popupMenu = &addonPtr->PopupMenu.PopupMenu;
 
-        this.SetupOnItemSelectedHook(popupMenu);
-        this.CompareNodesToEntryTexts(addon, popupMenu);
+        SetupOnItemSelectedHook(popupMenu);
+        CompareNodesToEntryTexts((nint)addon, popupMenu);
     }
 
-    /// <inheritdoc/>
     protected override void SelectItemExecute(IntPtr addon, int index)
     {
-        PluginLog.Debug($"AddonSelectIconString: Selecting {index}");
+        Svc.Log.Debug($"AddonSelectIconString: Selecting {index}");
         ClickSelectIconString.Using(addon).SelectItem((ushort)index);
     }
 }

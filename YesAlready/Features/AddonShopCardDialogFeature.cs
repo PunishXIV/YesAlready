@@ -1,37 +1,37 @@
-﻿using System;
-
 using ClickLib.Clicks;
+using Dalamud.Game.Addon.Lifecycle;
+using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
 using FFXIVClientStructs.FFXIV.Client.UI;
+using FFXIVClientStructs.FFXIV.Component.GUI;
 using YesAlready.BaseFeatures;
 
 namespace YesAlready.Features;
 
-/// <summary>
-/// AddonShopCardDialog feature.
-/// </summary>
-internal class AddonShopCardDialogFeature : OnSetupFeature
+internal class AddonShopCardDialogFeature : BaseFeature
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="AddonShopCardDialogFeature"/> class.
-    /// </summary>
-    public AddonShopCardDialogFeature()
-        : base("48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 48 89 7C 24 ?? 41 54 41 56 41 57 48 83 EC 50 48 8B F9 49 8B F0")
+    public override void Enable()
     {
+        base.Enable();
+        AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "ShopCardDialog", AddonSetup);
     }
 
-    /// <inheritdoc/>
-    protected override string AddonName => "ShopCardDialog";
-
-    /// <inheritdoc/>
-    protected unsafe override void OnSetupImpl(IntPtr addon, uint a2, IntPtr data)
+    public override void Disable()
     {
-        if (!Service.Configuration.ShopCardDialog)
+        base.Disable();
+        AddonLifecycle.UnregisterListener(AddonSetup);
+    }
+
+    protected unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
+    {
+        var addon = (AtkUnitBase*)addonInfo.Addon;
+
+        if (!P.Config.Enabled || !P.Config.ShopCardDialog)
             return;
 
         var addonPtr = (AddonShopCardDialog*)addon;
         if (addonPtr->CardQuantityInput != null)
             addonPtr->CardQuantityInput->SetValue(addonPtr->CardQuantityInput->Data.Max);
 
-        ClickShopCardDialog.Using(addon).Sell();
+        ClickShopCardDialog.Using((nint)addon).Sell();
     }
 }

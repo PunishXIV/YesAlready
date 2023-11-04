@@ -1,41 +1,46 @@
-﻿using System;
+using System;
 
 using ClickLib.Clicks;
-using Dalamud.Logging;
+using Dalamud.Game.Addon.Lifecycle;
+using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
+using ECommons.DalamudServices;
 using FFXIVClientStructs.FFXIV.Client.UI;
+using FFXIVClientStructs.FFXIV.Component.GUI;
 using YesAlready.BaseFeatures;
 
 namespace YesAlready.Features;
 
-/// <summary>
-/// AddonSelectString feature.
-/// </summary>
 internal class AddonSelectStringFeature : OnSetupSelectListFeature
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="AddonSelectStringFeature"/> class.
-    /// </summary>
-    public AddonSelectStringFeature()
-        : base("40 53 56 57 41 54 41 55 41 57 48 83 EC 48 4D 8B F8 44 8B E2 48 8B F1 E8 ?? ?? ?? ??")
+    public override void Enable()
     {
+        base.Enable();
+        AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "SelectString", AddonSetup);
     }
 
-    /// <inheritdoc/>
-    protected override string AddonName => "SelectString";
-
-    /// <inheritdoc/>
-    protected unsafe override void OnSetupImpl(IntPtr addon, uint a2, IntPtr data)
+    public override void Disable()
     {
+        base.Disable();
+        AddonLifecycle.UnregisterListener(AddonSetup);
+    }
+
+    protected unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
+    {
+        var addon = (AtkUnitBase*)addonInfo.Addon;
+
+        if (!P.Config.Enabled)
+            return;
+
         var addonPtr = (AddonSelectString*)addon;
         var popupMenu = &addonPtr->PopupMenu.PopupMenu;
-        this.SetupOnItemSelectedHook(popupMenu);
-        this.CompareNodesToEntryTexts(addon, popupMenu);
+
+        SetupOnItemSelectedHook(popupMenu);
+        CompareNodesToEntryTexts((nint)addon, popupMenu);
     }
 
-    /// <inheritdoc/>
     protected override void SelectItemExecute(IntPtr addon, int index)
     {
-        PluginLog.Debug($"AddonSelectString: Selecting {index}");
+        Svc.Log.Debug($"AddonSelectString: Selecting {index}");
         ClickSelectString.Using(addon).SelectItem((ushort)index);
     }
 }
