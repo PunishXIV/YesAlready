@@ -16,6 +16,7 @@
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
         <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+        <EnableWindowsTargeting>true</EnableWindowsTargeting>
         <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
         <AssemblyName>$(PluginName)</AssemblyName>
         <PackageId>$(PluginName)</PackageId>
@@ -34,7 +35,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\ClickLib\ClickLib\ClickLib.csproj" />
+        <ProjectReference Include="..\ECommons\ECommons\ECommons.csproj" />
+        <ProjectReference Include="..\ClickLib\ClickLib\ClickLib.csproj" />                                   
     </ItemGroup>
     
     <PropertyGroup Condition="'$(OS)' != 'Windows_NT' OR '$(CI)' == 'true'">
