@@ -76,11 +76,11 @@ internal class MainWindow : Window
             DisplayTalkOptions();
             DisplayBotherOptions();
 
-            if (ImGui.BeginTabItem("About"))
-            {
-                AboutTab.Draw(Name);
-                ImGui.EndTabItem();
-            }
+            //if (ImGui.BeginTabItem("About"))
+            //{
+            //    AboutTab.Draw("YesAlready");
+            //    ImGui.EndTabItem();
+            //}
 
             ImGui.EndTabBar();
         }
