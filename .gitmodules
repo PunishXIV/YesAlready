@@ -3,4 +3,4 @@
 	url = https://github.com/Limiana/ClickLib.git
 [submodule "ECommons"]
 	path = ECommons
-	url = https://github.com/NightmareXIV/ECommons.git
+	url = https://github.com/NightmareXIV/ECommons
