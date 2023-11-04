@@ -36,7 +36,7 @@ public class YesAlready : IDalamudPlugin
     internal static YesAlready P;
     internal static DalamudPluginInterface pi;
 
-    private DtrBarEntry dtrEntry;
+    private readonly DtrBarEntry dtrEntry;
 
     public YesAlready(DalamudPluginInterface pluginInterface)
     {
