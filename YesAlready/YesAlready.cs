@@ -32,7 +32,7 @@ public class YesAlready : IDalamudPlugin
     internal WindowSystem Ws;
     internal MainWindow MainWindow;
     internal Configuration Config;
-    private readonly ZoneListWindow zoneListWindow;
+    internal ZoneListWindow zoneListWindow;
 
     internal static YesAlready P;
     internal static DalamudPluginInterface pi;
@@ -49,7 +49,9 @@ public class YesAlready : IDalamudPlugin
         ECommonsMain.Init(pi, P);
         Ws = new();
         MainWindow = new();
+        zoneListWindow = new();
         Ws.AddWindow(MainWindow);
+        Ws.AddWindow(zoneListWindow);
         BlockListHandler = new();
 
         Config = pi.GetPluginConfig() as Configuration ?? new Configuration();
@@ -119,6 +121,7 @@ public class YesAlready : IDalamudPlugin
 
         Ws.RemoveAllWindows();
         MainWindow = null;
+        zoneListWindow = null;
         Ws = null;
         ECommonsMain.Dispose();
         pi = null;
@@ -156,16 +159,21 @@ public class YesAlready : IDalamudPlugin
         }
     }
 
+    private bool wasDisableKeyPressed;
     private void FrameworkUpdate(object framework)
     {
+        // This doesn't respect the plugin being turned off manually.
         if (Config.DisableKey != VirtualKey.NO_KEY)
-        {
             DisableKeyPressed = Svc.KeyState[Config.DisableKey];
-        }
         else
-        {
             DisableKeyPressed = false;
-        }
+
+        if (DisableKeyPressed && !wasDisableKeyPressed)
+            P.Config.Enabled = false;
+        else if (!DisableKeyPressed && wasDisableKeyPressed)
+            P.Config.Enabled = true;
+
+        wasDisableKeyPressed = DisableKeyPressed;
 
         if (Config.ForcedYesKey != VirtualKey.NO_KEY)
         {
@@ -264,7 +272,7 @@ public class YesAlready : IDalamudPlugin
         sb.AppendLine($"{Command} lasttalk - Add the last seen target during a Talk dialog.");
         sb.AppendLine($"{Command} dutyconfirm - Toggle duty confirm.");
         sb.AppendLine($"{Command} onetimeconfirm - Toggles duty confirm as well as one-time confirm.");
-        Svc.Log.Info(sb.ToString());
+        Utils.SEString.PrintPluginMessage(sb.ToString());
     }
 
     private void CommandAddNode(bool zoneRestricted, bool createFolder, bool selectNo)
@@ -280,7 +288,7 @@ public class YesAlready : IDalamudPlugin
         Configuration.CreateTextNode(Config.RootFolder, zoneRestricted, createFolder, selectNo);
         Config.Save();
 
-        Svc.Log.Info("Added a new text entry.");
+        Utils.SEString.PrintPluginMessage("Added a new text entry.");
     }
 
     private void CommandAddListNode()
@@ -306,7 +314,7 @@ public class YesAlready : IDalamudPlugin
         parent.Children.Add(newNode);
         Config.Save();
 
-        Svc.Log.Info("Added a new list entry.");
+        Utils.SEString.PrintPluginMessage("Added a new list entry.");
     }
 
     private void CommandAddTalkNode()
@@ -325,7 +333,7 @@ public class YesAlready : IDalamudPlugin
         parent.Children.Add(newNode);
         Config.Save();
 
-        Svc.Log.Info("Added a new talk entry.");
+        Utils.SEString.PrintPluginMessage("Added a new talk entry.");
     }
 
     private void ToggleDutyConfirm()
@@ -335,7 +343,7 @@ public class YesAlready : IDalamudPlugin
         Config.Save();
 
         var state = Config.ContentsFinderConfirmEnabled ? "enabled" : "disabled";
-        Svc.Log.Info($"Duty Confirm {state}.");
+        Utils.SEString.PrintPluginMessage($"Duty Confirm {state}.");
     }
 
     private void ToggleOneTimeConfirm()
@@ -345,7 +353,7 @@ public class YesAlready : IDalamudPlugin
         Config.Save();
 
         var state = Config.ContentsFinderOneTimeConfirmEnabled ? "enabled" : "disabled";
-        Svc.Log.Info($"Duty Confirm and One Time Confirm {state}.");
+        Utils.SEString.PrintPluginMessage($"Duty Confirm and One Time Confirm {state}.");
     }
 
     #endregion

@@ -5,7 +5,6 @@ using System.Runtime.InteropServices;
 using ClickLib.Clicks;
 using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
-using Dalamud.Memory;
 using ECommons.DalamudServices;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Component.GUI;
@@ -38,8 +37,7 @@ internal class AddonSelectYesNoFeature : BaseFeature
         if (dataPtr == null)
             return;
 
-        //var text = P.LastSeenDialogText = Utils.SEString.GetSeStringText(dataPtr->TextPtr);
-        var text = P.LastSeenDialogText = MemoryHelper.ReadSeStringNullTerminated(new nint(addon->AtkValues[0].String)).ToString();
+        var text = P.LastSeenDialogText = Utils.SEString.GetSeStringText(new nint(addon->AtkValues[0].String));
         Svc.Log.Debug($"AddonSelectYesNo: text={text}");
 
         if (P.ForcedYesKeyPressed)
