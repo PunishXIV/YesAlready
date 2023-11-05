@@ -11,6 +11,8 @@ using ECommons.DalamudServices;
 using ClickLib.Exceptions;
 using System.Linq;
 using PunishLib.ImGuiMethods;
+using Dalamud.Interface.Colors;
+using ECommons;
 
 namespace YesAlready.UI;
 
@@ -61,6 +63,15 @@ internal class MainWindow : Window
         ImGui.SameLine();
         if (ImGui.Button("Disable Features")) EnableFeatures(false);
 #endif
+
+        if (P.BlockListHandler.Locked)
+        {
+            ImGuiEx.Text(ImGuiColors.DalamudRed, $"Yes Already function is paused because following plugins have requested it: {P.BlockListHandler.BlockList.Print()}");
+            if(ImGui.Button("Force unlock"))
+            {
+                P.BlockListHandler.BlockList.Clear();
+            }
+        }
 
         var enabled = P.Config.Enabled;
         if (ImGui.Checkbox("Enabled", ref enabled))

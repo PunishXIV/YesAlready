@@ -25,7 +25,7 @@ internal class AddonShopCardDialogFeature : BaseFeature
     {
         var addon = (AtkUnitBase*)addonInfo.Addon;
 
-        if (!P.Config.Enabled || !P.Config.ShopCardDialog)
+        if (!P.Active || !P.Config.ShopCardDialog)
             return;
 
         var addonPtr = (AddonShopCardDialog*)addon;

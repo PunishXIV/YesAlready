@@ -24,7 +24,7 @@ internal class AddonMateriaRetrieveDialogFeature : BaseFeature
     {
         var addon = (AtkUnitBase*)addonInfo.Addon;
 
-        if (!P.Config.Enabled || !P.Config.MateriaRetrieveDialogEnabled)
+        if (!P.Active || !P.Config.MateriaRetrieveDialogEnabled)
             return;
 
         ClickMateriaRetrieveDialog.Using((nint)addon).Begin();

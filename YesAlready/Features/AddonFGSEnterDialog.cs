@@ -24,7 +24,7 @@ internal class AddonFGSEnterDialog : BaseFeature
     {
         var addon = (AtkUnitBase*)addonInfo.Addon;
 
-        if (!P.Config.Enabled || !P.Config.FallGuysRegisterConfirm)
+        if (!P.Active || !P.Config.FallGuysRegisterConfirm)
             return;
 
         Callback.Fire(addon, true, 0);

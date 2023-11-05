@@ -27,7 +27,7 @@ internal class AddonRetainerTaskResultFeature : BaseFeature
     {
         var addon = (AtkUnitBase*)addonInfo.Addon;
 
-        if (!P.Config.Enabled || !P.Config.RetainerTaskResultEnabled)
+        if (!P.Active || !P.Config.RetainerTaskResultEnabled)
             return;
 
         var addonPtr = (AddonRetainerTaskResult*)addon;
