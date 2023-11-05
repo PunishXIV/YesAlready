@@ -32,7 +32,7 @@ public class YesAlready : IDalamudPlugin
     internal WindowSystem Ws;
     internal MainWindow MainWindow;
     internal Configuration Config;
-    private readonly ZoneListWindow zoneListWindow;
+    internal ZoneListWindow zoneListWindow;
 
     internal static YesAlready P;
     internal static DalamudPluginInterface pi;
@@ -49,7 +49,9 @@ public class YesAlready : IDalamudPlugin
         ECommonsMain.Init(pi, P);
         Ws = new();
         MainWindow = new();
+        zoneListWindow = new();
         Ws.AddWindow(MainWindow);
+        Ws.AddWindow(zoneListWindow);
         BlockListHandler = new();
 
         Config = pi.GetPluginConfig() as Configuration ?? new Configuration();
@@ -119,6 +121,7 @@ public class YesAlready : IDalamudPlugin
 
         Ws.RemoveAllWindows();
         MainWindow = null;
+        zoneListWindow = null;
         Ws = null;
         ECommonsMain.Dispose();
         pi = null;

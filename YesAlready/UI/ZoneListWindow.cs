@@ -14,8 +14,8 @@ internal class ZoneListWindow : Window
     public ZoneListWindow()
         : base("Yes Already Zone List")
     {
-        this.Size = new Vector2(525, 600);
-        this.SizeCondition = ImGuiCond.FirstUseEver;
+        Size = new Vector2(525, 600);
+        SizeCondition = ImGuiCond.FirstUseEver;
     }
 
     public override void PreDraw()
@@ -46,7 +46,7 @@ internal class ZoneListWindow : Window
 
         var names = P.TerritoryNames.AsEnumerable();
 
-        if (this.sortZoneByName)
+        if (sortZoneByName)
             names = names.ToList().OrderBy(kvp => kvp.Value);
 
         foreach (var kvp in names)
