@@ -66,7 +66,7 @@ internal class MainWindow : Window
 
         if (P.BlockListHandler.Locked)
         {
-            ImGuiEx.Text(ImGuiColors.DalamudRed, $"Yes Already function is paused because following plugins have requested it: {P.BlockListHandler.BlockList.Print()}");
+            ImGuiEx.TextWrapped(ImGuiColors.DalamudRed, $"Yes Already function is paused because following plugins have requested it: {P.BlockListHandler.BlockList.Print()}");
             if(ImGui.Button("Force unlock"))
             {
                 P.BlockListHandler.BlockList.Clear();
