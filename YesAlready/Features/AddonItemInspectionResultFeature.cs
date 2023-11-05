@@ -29,7 +29,7 @@ internal class AddonItemInspectionResultFeature : BaseFeature
     {
         var addon = (AtkUnitBase*)addonInfo.Addon;
 
-        if (!P.Config.Enabled || !P.Config.ItemInspectionResultEnabled)
+        if (!P.Active || !P.Config.ItemInspectionResultEnabled)
             return;
 
         var addonPtr = (AddonItemInspectionResult*)addon;

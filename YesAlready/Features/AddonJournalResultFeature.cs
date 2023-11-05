@@ -25,7 +25,7 @@ internal class AddonJournalResultFeature : BaseFeature
     {
         var addon = (AtkUnitBase*)addonInfo.Addon;
 
-        if (!P.Config.Enabled || !P.Config.JournalResultCompleteEnabled)
+        if (!P.Active || !P.Config.JournalResultCompleteEnabled)
             return;
 
         var addonPtr = (AddonJournalResult*)addon;

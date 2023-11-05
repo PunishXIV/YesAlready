@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <Authors>daemitus, croizat</Authors>
-        <Version>1.4.0.0</Version>
+        <Version>1.4.0.1</Version>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -37,7 +37,7 @@
     <ItemGroup>
         <ProjectReference Include="..\ECommons\ECommons\ECommons.csproj" />
         <ProjectReference Include="..\ClickLib\ClickLib\ClickLib.csproj" />
-        <ProjectReference Include="..\punishLib\PunishLib\PunishLib.csproj" />
+        <ProjectReference Include="..\PunishLib\PunishLib\PunishLib.csproj" />
     </ItemGroup>
     
     <PropertyGroup Condition="'$(OS)' != 'Windows_NT' OR '$(CI)' == 'true'">

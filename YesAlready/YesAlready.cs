@@ -17,6 +17,7 @@ using Dalamud.Game.Gui.Dtr;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.IoC;
 using Dalamud.Plugin.Services;
+using YesAlready.IPC;
 namespace YesAlready;
 
 public class YesAlready : IDalamudPlugin
@@ -37,6 +38,9 @@ public class YesAlready : IDalamudPlugin
     internal static DalamudPluginInterface pi;
 
     private readonly DtrBarEntry dtrEntry;
+    internal BlockListHandler BlockListHandler;
+
+    internal bool Active => Config.Enabled && !BlockListHandler.Locked;
 
     public YesAlready(DalamudPluginInterface pluginInterface)
     {
@@ -46,6 +50,7 @@ public class YesAlready : IDalamudPlugin
         Ws = new();
         MainWindow = new();
         Ws.AddWindow(MainWindow);
+        BlockListHandler = new();
 
         Config = pi.GetPluginConfig() as Configuration ?? new Configuration();
         Configuration.Initialize(Svc.PluginInterface);
@@ -188,7 +193,7 @@ public class YesAlready : IDalamudPlugin
 
         if (dtrEntry.Shown)
         {
-            dtrEntry.Text = new SeString(new TextPayload($"{Name}: {(P.Config.Enabled ? "On" : "Off")}"));
+            dtrEntry.Text = new SeString(new TextPayload($"{Name}: {(P.Config.Enabled ? (P.BlockListHandler.Locked?"Paused":"On") : "Off")}"));
             dtrEntry.OnClick = () => P.Config.Enabled ^= true;
         }
     }

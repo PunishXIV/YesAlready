@@ -24,7 +24,7 @@ internal class AddonShopExchangeItemDialogFeature : BaseFeature
     {
         var addon = (AtkUnitBase*)addonInfo.Addon;
 
-        if (!P.Config.Enabled || !P.Config.ShopExchangeItemDialogEnabled)
+        if (!P.Active || !P.Config.ShopExchangeItemDialogEnabled)
             return;
 
         Callback.Fire(addon, true, 0);

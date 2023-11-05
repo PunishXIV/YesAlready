@@ -24,7 +24,7 @@ internal class AddonRetainerTaskAskFeature : BaseFeature
     {
         var addon = (AtkUnitBase*)addonInfo.Addon;
 
-        if (!P.Config.Enabled || !P.Config.RetainerTaskAskEnabled)
+        if (!P.Active || !P.Config.RetainerTaskAskEnabled)
             return;
 
         ClickRetainerTaskAsk.Using((nint)addon).Assign();

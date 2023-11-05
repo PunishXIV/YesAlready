@@ -24,7 +24,7 @@ internal class AddonMaterializeDialogFeature : BaseFeature
     {
         var addon = (AtkUnitBase*)addonInfo.Addon;
 
-        if (!P.Config.Enabled || !P.Config.MaterializeDialogEnabled)
+        if (!P.Active || !P.Config.MaterializeDialogEnabled)
             return;
 
         ClickMaterializeDialog.Using((nint)addon).Materialize();
