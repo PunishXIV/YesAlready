@@ -269,7 +269,7 @@ public class YesAlready : IDalamudPlugin
         sb.AppendLine($"{Command} lasttalk - Add the last seen target during a Talk dialog.");
         sb.AppendLine($"{Command} dutyconfirm - Toggle duty confirm.");
         sb.AppendLine($"{Command} onetimeconfirm - Toggles duty confirm as well as one-time confirm.");
-        Svc.Log.Info(sb.ToString());
+        Utils.SEString.PrintPluginMessage(sb.ToString());
     }
 
     private void CommandAddNode(bool zoneRestricted, bool createFolder, bool selectNo)
@@ -285,7 +285,7 @@ public class YesAlready : IDalamudPlugin
         Configuration.CreateTextNode(Config.RootFolder, zoneRestricted, createFolder, selectNo);
         Config.Save();
 
-        Svc.Log.Info("Added a new text entry.");
+        Utils.SEString.PrintPluginMessage("Added a new text entry.");
     }
 
     private void CommandAddListNode()
@@ -311,7 +311,7 @@ public class YesAlready : IDalamudPlugin
         parent.Children.Add(newNode);
         Config.Save();
 
-        Svc.Log.Info("Added a new list entry.");
+        Utils.SEString.PrintPluginMessage("Added a new list entry.");
     }
 
     private void CommandAddTalkNode()
@@ -330,7 +330,7 @@ public class YesAlready : IDalamudPlugin
         parent.Children.Add(newNode);
         Config.Save();
 
-        Svc.Log.Info("Added a new talk entry.");
+        Utils.SEString.PrintPluginMessage("Added a new talk entry.");
     }
 
     private void ToggleDutyConfirm()
@@ -340,7 +340,7 @@ public class YesAlready : IDalamudPlugin
         Config.Save();
 
         var state = Config.ContentsFinderConfirmEnabled ? "enabled" : "disabled";
-        Svc.Log.Info($"Duty Confirm {state}.");
+        Utils.SEString.PrintPluginMessage($"Duty Confirm {state}.");
     }
 
     private void ToggleOneTimeConfirm()
@@ -350,7 +350,7 @@ public class YesAlready : IDalamudPlugin
         Config.Save();
 
         var state = Config.ContentsFinderOneTimeConfirmEnabled ? "enabled" : "disabled";
-        Svc.Log.Info($"Duty Confirm and One Time Confirm {state}.");
+        Utils.SEString.PrintPluginMessage($"Duty Confirm and One Time Confirm {state}.");
     }
 
     #endregion
