@@ -74,6 +74,41 @@ public class TextEntryNode : ITextNode
     public bool IsYes { get; set; } = true;
 }
 
+public class OkEntryNode : ITextNode
+{
+    public bool Enabled { get; set; } = true;
+
+    [JsonIgnore]
+    public string Name
+    {
+        get
+        {
+            return Text;
+        }
+    }
+
+    public string Text { get; set; } = string.Empty;
+
+    [JsonIgnore]
+    public bool IsTextRegex => Text.StartsWith("/") && Text.EndsWith("/");
+
+    [JsonIgnore]
+    public Regex? TextRegex
+    {
+        get
+        {
+            try
+            {
+                return new(Text.Trim('/'), RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+    }
+}
+
 public class ListEntryNode : ITextNode
 {
     public bool Enabled { get; set; } = true;
@@ -193,6 +228,10 @@ public class ConcreteNodeConverter : JsonConverter
         if (jType == SimpleName(typeof(TextEntryNode)))
         {
             return CreateObject<TextEntryNode>(jObject, serializer);
+        }
+        else if (jType == SimpleName(typeof(OkEntryNode)))
+        {
+            return CreateObject<OkEntryNode>(jObject, serializer);
         }
         else if (jType == SimpleName(typeof(ListEntryNode)))
         {

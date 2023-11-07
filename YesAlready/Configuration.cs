@@ -18,6 +18,7 @@ public partial class Configuration() : IPluginConfiguration
     public VirtualKey ForcedYesKey { get; set; } = VirtualKey.NO_KEY;
     public VirtualKey DisableKey { get; set; } = VirtualKey.NO_KEY;
     public TextFolderNode RootFolder { get; private set; } = new TextFolderNode { Name = "/" };
+    public TextFolderNode OkRootFolder { get; private set; } = new TextFolderNode { Name = "/" };
     public TextFolderNode ListRootFolder { get; private set; } = new TextFolderNode { Name = "/" };
     public TextFolderNode TalkRootFolder { get; private set; } = new TextFolderNode { Name = "/" };
     public bool DesynthDialogEnabled { get; set; } = false;
@@ -40,6 +41,9 @@ public partial class Configuration() : IPluginConfiguration
     public bool GuildLeveDifficultyConfirm { get; set; } = false;
     public bool FallGuysRegisterConfirm { get; set; } = false;
     public bool FallGuysExitConfirm { get; set; } = false;
+    public bool RetainerTransferProgressConfirm { get; set; } = false;
+    public bool DesynthesisResults {  get; set; } = false;
+    public bool AetherialReductionResults { get; set; } = false;
 
     public static Configuration Load(DirectoryInfo configDirectory)
     {
@@ -62,10 +66,12 @@ public partial class Configuration() : IPluginConfiguration
         return new ITextNode[]
         {
             RootFolder,
+            OkRootFolder,
             ListRootFolder,
             TalkRootFolder,
         }
         .Concat(GetAllNodes(RootFolder.Children))
+        .Concat(GetAllNodes(OkRootFolder.Children))
         .Concat(GetAllNodes(ListRootFolder.Children))
         .Concat(GetAllNodes(TalkRootFolder.Children));
     }
@@ -131,6 +137,23 @@ public partial class Configuration() : IPluginConfiguration
         if (selectNo)
         {
             newNode.IsYes = false;
+        }
+
+        chosenFolder.Children.Add(newNode);
+    }
+
+    public static void CreateOkNode(TextFolderNode folder, bool createFolder)
+    {
+        var newNode = new OkEntryNode() { Enabled = true, Text = P.LastSeenOkText };
+        var chosenFolder = folder;
+
+        if (createFolder)
+        {
+            if (chosenFolder == default)
+            {
+                chosenFolder = new TextFolderNode { Name = chosenFolder.Name };
+                folder.Children.Add(chosenFolder);
+            }
         }
 
         chosenFolder.Children.Add(newNode);
