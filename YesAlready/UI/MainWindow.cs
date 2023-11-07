@@ -384,7 +384,7 @@ internal class MainWindow : Window
             P.Config.Save();
         }
 
-        IndentedTextColored(shadedColor, "Automatically closes the RetainerItemTransferProgress window when finished transferring.");
+        IndentedTextColored(shadedColor, "Automatically closes the RetainerItemTransferProgress window when finished entrusting items.");
 
         #endregion
         #region GrandCompanySupplyReward
