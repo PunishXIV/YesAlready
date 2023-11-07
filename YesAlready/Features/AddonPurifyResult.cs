@@ -1,11 +1,11 @@
-using Dalamud.Plugin.Services;
+using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
+using Dalamud.Game.Addon.Lifecycle;
 using ECommons.Automation;
 using ECommons.DalamudServices;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using Lumina.Excel.GeneratedSheets;
 using System.Linq;
 using YesAlready.BaseFeatures;
-using static ECommons.GenericHelpers;
 
 namespace YesAlready.Features;
 
@@ -14,27 +14,26 @@ internal class AddonPurifyResult : BaseFeature
     public override void Enable()
     {
         base.Enable();
-        Svc.Framework.Update += AddonListener;
+        AddonLifecycle.RegisterListener(AddonEvent.PostUpdate, "PurifyResult", AddonUpdate);
     }
 
     public override void Disable()
     {
         base.Disable();
-        Svc.Framework.Update -= AddonListener;
+        AddonLifecycle.UnregisterListener(AddonUpdate);
     }
 
-    protected static unsafe void AddonListener(IFramework framework)
+    protected static unsafe void AddonUpdate(AddonEvent eventType, AddonArgs addonInfo)
     {
+        var addon = (AtkUnitBase*)addonInfo.Addon;
+
         if (!P.Active || !P.Config.AetherialReductionResults)
             return;
 
-        if (TryGetAddonByName<AtkUnitBase>("PurifyResult", out var addon))
+        if (addon->UldManager.NodeList[17]->GetAsAtkTextNode()->NodeText.ToString() == Svc.Data.GetExcelSheet<Addon>().First(x => x.RowId == 2171).Text.RawString)
         {
-            if (addon->UldManager.NodeList[17]->GetAsAtkTextNode()->NodeText.ToString() == Svc.Data.GetExcelSheet<Addon>().First(x => x.RowId == 2171).Text.RawString)
-            {
-                Svc.Log.Debug("Closing Purify Results menu");
-                Callback.Fire(addon, true, -1);
-            }
+            Svc.Log.Debug("Closing Purify Results menu");
+            Callback.Fire(addon, true, -1);
         }
     }
 }

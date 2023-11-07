@@ -1,9 +1,9 @@
-using Dalamud.Plugin.Services;
+using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
+using Dalamud.Game.Addon.Lifecycle;
 using ECommons.Automation;
 using ECommons.DalamudServices;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using YesAlready.BaseFeatures;
-using static ECommons.GenericHelpers;
 
 namespace YesAlready.Features;
 
@@ -12,27 +12,26 @@ internal class AddonSalvageResult : BaseFeature
     public override void Enable()
     {
         base.Enable();
-        Svc.Framework.Update += AddonListener;
+        AddonLifecycle.RegisterListener(AddonEvent.PostUpdate, "SalvageResult", AddonUpdate);
     }
 
     public override void Disable()
     {
         base.Disable();
-        Svc.Framework.Update -= AddonListener;
+        AddonLifecycle.UnregisterListener(AddonUpdate);
     }
 
-    protected static unsafe void AddonListener(IFramework framework)
+    protected static unsafe void AddonUpdate(AddonEvent eventType, AddonArgs addonInfo)
     {
+        var addon = (AtkUnitBase*)addonInfo.Addon;
+
         if (!P.Active || !P.Config.DesynthesisResults)
             return;
 
-        if (TryGetAddonByName<AtkUnitBase>("SalvageResult", out var addon))
+        if (addon->AtkValues[17].Byte == 0)
         {
-            if (addon->AtkValues[17].Byte == 0)
-            {
-                Svc.Log.Debug("Closing Salvage Auto Results menu");
-                Callback.Fire(addon, true, 1);
-            }
+            Svc.Log.Debug("Closing Salvage Auto Results menu");
+            Callback.Fire(addon, true, 1);
         }
     }
 }

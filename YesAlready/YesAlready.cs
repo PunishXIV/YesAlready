@@ -18,7 +18,6 @@ using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.IoC;
 using Dalamud.Plugin.Services;
 using YesAlready.IPC;
-using static System.ComponentModel.Design.ObjectSelectorEditor;
 
 namespace YesAlready;
 
