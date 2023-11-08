@@ -90,7 +90,7 @@ internal class MainWindow : Window
             DisplayListOptions();
             DisplayTalkOptions();
             DisplayBotherOptions();
-            DisplayDTROptions();
+            DisplayMiscOptions();
 
             //if (ImGui.BeginTabItem("About"))
             //{
@@ -100,6 +100,16 @@ internal class MainWindow : Window
 
             ImGui.EndTabBar();
         }
+    }
+
+    private static void IndentedTextColored(Vector4 color, string text)
+    {
+        var indent = 27f * ImGuiHelpers.GlobalScale;
+        ImGui.Indent(indent);
+        ImGui.PushStyleColor(ImGuiCol.Text, color);
+        ImGui.TextWrapped(text);
+        ImGui.PopStyleColor();
+        ImGui.Unindent(indent);
     }
 
     #region Testing
@@ -135,9 +145,9 @@ internal class MainWindow : Window
 
     // ====================================================================================================
 
-    private void DisplayDTROptions()
+    private void DisplayMiscOptions()
     {
-        if (!ImGui.BeginTabItem("Server info bar"))
+        if (!ImGui.BeginTabItem("Settings"))
             return;
 
         ImGui.PushID("Server info bar");
@@ -147,7 +157,7 @@ internal class MainWindow : Window
             var config = DalamudReflector.GetService("Dalamud.Configuration.Internal.DalamudConfiguration");
             var dtrList = config.GetFoP<List<string>>("DtrIgnore");
             var enabled = !dtrList.Contains(Svc.PluginInterface.InternalName);
-            if(ImGui.Checkbox("Enable", ref enabled))
+            if(ImGui.Checkbox("DTR", ref enabled))
             {
                 if(enabled)
                 {
@@ -159,6 +169,7 @@ internal class MainWindow : Window
                 }
                 config.Call("QueueSave");
             }
+            IndentedTextColored(shadedColor, $"Display the status of the {Name} in the Server Info Bar (DTR Bar). Clicking toggles the plugin.");            
         }
         catch(Exception e)
         {
@@ -234,16 +245,6 @@ internal class MainWindow : Window
     {
         if (!ImGui.BeginTabItem("Bothers"))
             return;
-
-        static void IndentedTextColored(Vector4 color, string text)
-        {
-            var indent = 27f * ImGuiHelpers.GlobalScale;
-            ImGui.Indent(indent);
-            ImGui.PushStyleColor(ImGuiCol.Text, color);
-            ImGui.TextWrapped(text);
-            ImGui.PopStyleColor();
-            ImGui.Unindent(indent);
-        }
 
         ImGui.PushID("BotherOptions");
 
@@ -688,7 +689,7 @@ internal class MainWindow : Window
         sb.AppendLine("Ctrl-Shift right click a line to delete it and any children.");
         sb.AppendLine();
         sb.AppendLine("\"Add last seen as new entry\" button modifiers:");
-        sb.AppendLine("   Shift-Click to add to a new or first existing folder with the current zone name, restricted to that zone.");
+        sb.AppendLine("   Shift-Click to add to a new or first existing folder.");
         sb.AppendLine();
         sb.AppendLine("Currently supported text addons:");
         sb.AppendLine("  - SelectOk");
