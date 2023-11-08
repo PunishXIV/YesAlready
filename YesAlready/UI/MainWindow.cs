@@ -13,6 +13,8 @@ using System.Linq;
 using PunishLib.ImGuiMethods;
 using Dalamud.Interface.Colors;
 using ECommons;
+using ECommons.Reflection;
+using System.Collections.Generic;
 
 namespace YesAlready.UI;
 
@@ -86,6 +88,7 @@ internal class MainWindow : Window
             DisplayListOptions();
             DisplayTalkOptions();
             DisplayBotherOptions();
+            DisplayDTROptions();
 
             //if (ImGui.BeginTabItem("About"))
             //{
@@ -129,6 +132,41 @@ internal class MainWindow : Window
     #endregion
 
     // ====================================================================================================
+
+    private void DisplayDTROptions()
+    {
+        if (!ImGui.BeginTabItem("Server info bar"))
+            return;
+
+        ImGui.PushID("Server info bar");
+
+        try
+        {
+            var config = DalamudReflector.GetService("Dalamud.Configuration.Internal.DalamudConfiguration");
+            var dtrList = config.GetFoP<List<string>>("DtrIgnore");
+            var enabled = !dtrList.Contains(Svc.PluginInterface.InternalName);
+            if(ImGui.Checkbox("Enable", ref enabled))
+            {
+                if(enabled)
+                {
+                    dtrList.Remove(Svc.PluginInterface.InternalName);
+                }
+                else
+                {
+                    dtrList.Add(Svc.PluginInterface.InternalName);
+                }
+                config.Call("QueueSave");
+            }
+        }
+        catch(Exception e)
+        {
+            ImGuiEx.TextWrapped(ImGuiColors.DalamudRed, $"{e}");
+        }
+
+        ImGui.PopID();
+
+        ImGui.EndTabItem();
+    }
 
     private void DisplayTextOptions()
     {
