@@ -689,7 +689,7 @@ internal class MainWindow : Window
         sb.AppendLine("Ctrl-Shift right click a line to delete it and any children.");
         sb.AppendLine();
         sb.AppendLine("\"Add last seen as new entry\" button modifiers:");
-        sb.AppendLine("   Shift-Click to add to a new or first existing folder with the current zone name, restricted to that zone.");
+        sb.AppendLine("   Shift-Click to add to a new or first existing folder.");
         sb.AppendLine();
         sb.AppendLine("Currently supported text addons:");
         sb.AppendLine("  - SelectOk");
