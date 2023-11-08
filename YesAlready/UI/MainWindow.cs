@@ -10,7 +10,6 @@ using ImGuiNET;
 using ECommons.DalamudServices;
 using ClickLib.Exceptions;
 using System.Linq;
-using PunishLib.ImGuiMethods;
 using Dalamud.Interface.Colors;
 using ECommons;
 using ECommons.Reflection;
@@ -49,6 +48,8 @@ internal class MainWindow : Window
 
     private static TextFolderNode RootFolder => P.Config.RootFolder;
 
+    private static TextFolderNode OkRootFolder => P.Config.OkRootFolder;
+
     private static TextFolderNode ListRootFolder => P.Config.ListRootFolder;
 
     private static TextFolderNode TalkRootFolder => P.Config.TalkRootFolder;
@@ -85,6 +86,7 @@ internal class MainWindow : Window
         if (ImGui.BeginTabBar("Settings"))
         {
             DisplayTextOptions();
+            DisplayOkOptions();
             DisplayListOptions();
             DisplayTalkOptions();
             DisplayBotherOptions();
@@ -177,6 +179,21 @@ internal class MainWindow : Window
 
         DisplayTextButtons();
         DisplayTextNodes();
+
+        ImGui.PopID();
+
+        ImGui.EndTabItem();
+    }
+
+    private void DisplayOkOptions()
+    {
+        if (!ImGui.BeginTabItem("Ok"))
+            return;
+
+        ImGui.PushID("OkOptions");
+
+        DisplayOkButtons();
+        DisplayOkNodes();
 
         ImGui.PopID();
 
@@ -294,6 +311,30 @@ internal class MainWindow : Window
         IndentedTextColored(shadedColor, "Check the bulk desynthesis button when using the SalvageDialog feature.");
 
         #endregion
+        #region SalvageResult
+
+        var desynthResultsDialog = P.Config.DesynthesisResults;
+        if (ImGui.Checkbox("SalvageResults", ref desynthResultsDialog))
+        {
+            P.Config.DesynthesisResults = desynthResultsDialog;
+            P.Config.Save();
+        }
+
+        IndentedTextColored(shadedColor, "Automatically closes the SalvageResults window when done desynthing.");
+
+        #endregion
+        #region PurifyResult
+
+        var purifyResultsDialog = P.Config.AetherialReductionResults;
+        if (ImGui.Checkbox("PurifyResult", ref purifyResultsDialog))
+        {
+            P.Config.AetherialReductionResults = purifyResultsDialog;
+            P.Config.Save();
+        }
+
+        IndentedTextColored(shadedColor, "Automatically closes the PurifyResult window when done reducing.");
+
+        #endregion
         #region MaterializeDialog
 
         var materialize = P.Config.MaterializeDialogEnabled;
@@ -370,6 +411,18 @@ internal class MainWindow : Window
         }
 
         IndentedTextColored(shadedColor, "Automatically send a retainer on the same venture as before when receiving an item.");
+
+        #endregion
+        #region RetainerProgress
+
+        var retainerProgressDialog = P.Config.RetainerTransferProgressConfirm;
+        if (ImGui.Checkbox("RetainerItemTransferProgress", ref retainerProgressDialog))
+        {
+            P.Config.RetainerTransferProgressConfirm = retainerProgressDialog;
+            P.Config.Save();
+        }
+
+        IndentedTextColored(shadedColor, "Automatically closes the RetainerItemTransferProgress window when finished entrusting items.");
 
         #endregion
         #region GrandCompanySupplyReward
@@ -590,6 +643,82 @@ internal class MainWindow : Window
 
     // ====================================================================================================
 
+    private static void DisplayOkButtons()
+    {
+        var style = ImGui.GetStyle();
+        var newStyle = new Vector2(style.ItemSpacing.X / 2, style.ItemSpacing.Y);
+        ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, newStyle);
+
+        if (Utils.ImGuiEx.IconButton(FontAwesomeIcon.Plus, "Add new entry"))
+        {
+            var newNode = new OkEntryNode { Enabled = false, Text = "Your text goes here" };
+            OkRootFolder.Children.Add(newNode);
+            P.Config.Save();
+        }
+
+        ImGui.SameLine();
+        if (Utils.ImGuiEx.IconButton(FontAwesomeIcon.SearchPlus, "Add last seen as new entry"))
+        {
+            var io = ImGui.GetIO();
+            var createFolder = io.KeyShift;
+
+            Configuration.CreateOkNode(OkRootFolder, createFolder);
+            P.Config.Save();
+        }
+
+        ImGui.SameLine();
+        if (Utils.ImGuiEx.IconButton(FontAwesomeIcon.FolderPlus, "Add folder"))
+        {
+            var newNode = new TextFolderNode { Name = "Untitled folder" };
+            OkRootFolder.Children.Add(newNode);
+            P.Config.Save();
+        }
+
+        var sb = new StringBuilder();
+        sb.AppendLine("Enter into the input all or part of the text inside a dialog.");
+        sb.AppendLine("For example: \"You cannot carry any more letters\" for the full mailbox dialog.");
+        sb.AppendLine();
+        sb.AppendLine("Alternatively, wrap your text in forward slashes to use as a regex.");
+        sb.AppendLine("As such: \"/.* carry any more letters .*/\"");
+        sb.AppendLine();
+        sb.AppendLine("If it matches, the ok button will be clicked.");
+        sb.AppendLine();
+        sb.AppendLine("Right click a line to view options.");
+        sb.AppendLine("Double click an entry for quick enable/disable.");
+        sb.AppendLine("Ctrl-Shift right click a line to delete it and any children.");
+        sb.AppendLine();
+        sb.AppendLine("\"Add last seen as new entry\" button modifiers:");
+        sb.AppendLine("   Shift-Click to add to a new or first existing folder with the current zone name, restricted to that zone.");
+        sb.AppendLine();
+        sb.AppendLine("Currently supported text addons:");
+        sb.AppendLine("  - SelectOk");
+
+        ImGui.SameLine();
+        Utils.ImGuiEx.IconButton(FontAwesomeIcon.QuestionCircle, sb.ToString());
+        if (ImGui.IsItemHovered()) ImGui.SetTooltip(sb.ToString());
+
+        ImGui.PopStyleVar(); // ItemSpacing
+    }
+
+    private void DisplayOkNodes()
+    {
+        var root = OkRootFolder;
+        TextNodeDragDrop(root);
+
+        if (root.Children.Count == 0)
+        {
+            root.Children.Add(new OkEntryNode() { Enabled = false, Text = "Add some text here!" });
+            P.Config.Save();
+        }
+
+        foreach (var node in root.Children.ToArray())
+        {
+            DisplayTextNode(node, root);
+        }
+    }
+
+    // ====================================================================================================
+
     private static void DisplayListButtons()
     {
         var style = ImGui.GetStyle();
@@ -746,6 +875,10 @@ internal class MainWindow : Window
         {
             DisplayTextEntryNode(textNode);
         }
+        else if (node is OkEntryNode okNode)
+        {
+            DisplayOkEntryNode(okNode);
+        }
         else if (node is ListEntryNode listNode)
         {
             DisplayListEntryNode(listNode);
@@ -780,6 +913,58 @@ internal class MainWindow : Window
             Utils.ImGuiEx.TextTooltip("Invalid Text Regex");
         else if (!validZone)
             Utils.ImGuiEx.TextTooltip("Invalid Zone Regex");
+
+        if (ImGui.IsItemHovered())
+        {
+            if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
+            {
+                node.Enabled = !node.Enabled;
+                P.Config.Save();
+                return;
+            }
+            else if (ImGui.IsMouseClicked(ImGuiMouseButton.Right))
+            {
+                var io = ImGui.GetIO();
+                if (io.KeyCtrl && io.KeyShift)
+                {
+                    if (P.Config.TryFindParent(node, out var parent))
+                    {
+                        parent!.Children.Remove(node);
+                        P.Config.Save();
+                    }
+
+                    return;
+                }
+                else
+                {
+                    ImGui.OpenPopup($"{node.GetHashCode()}-popup");
+                }
+            }
+        }
+
+        TextNodePopup(node);
+        TextNodeDragDrop(node);
+    }
+
+    private void DisplayOkEntryNode(OkEntryNode node)
+    {
+        var validRegex = (node.IsTextRegex && node.TextRegex != null) || !node.IsTextRegex;
+
+        if (!node.Enabled && !validRegex)
+            ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(.5f, 0, 0, 1));
+        else if (!node.Enabled)
+            ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(.5f, .5f, .5f, 1));
+        else if (!validRegex)
+            ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1, 0, 0, 1));
+
+        ImGui.TreeNodeEx($"{node.Name}##{node.Name}-tree", ImGuiTreeNodeFlags.Leaf);
+        ImGui.TreePop();
+
+        if (!node.Enabled || !validRegex)
+            ImGui.PopStyleColor();
+
+        if (!validRegex)
+            Utils.ImGuiEx.TextTooltip("Invalid Text Regex");
 
         if (ImGui.IsItemHovered())
         {
@@ -1048,6 +1233,39 @@ internal class MainWindow : Window
                     entryNode.ZoneText = zoneText;
                     P.Config.Save();
                 }
+            }
+
+            if (node is OkEntryNode okNode)
+            {
+                ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, newItemSpacing);
+
+                var enabled = okNode.Enabled;
+                if (ImGui.Checkbox("Enabled", ref enabled))
+                {
+                    okNode.Enabled = enabled;
+                    P.Config.Save();
+                }
+
+                var trashAltWidth = Utils.ImGuiEx.GetIconButtonWidth(FontAwesomeIcon.TrashAlt);
+
+                ImGui.SameLine(ImGui.GetContentRegionMax().X - trashAltWidth);
+                if (Utils.ImGuiEx.IconButton(FontAwesomeIcon.TrashAlt, "Delete"))
+                {
+                    if (P.Config.TryFindParent(node, out var parentNode))
+                    {
+                        parentNode!.Children.Remove(node);
+                        P.Config.Save();
+                    }
+                }
+
+                var matchText = okNode.Text;
+                if (ImGui.InputText($"##{node.Name}-matchText", ref matchText, 10_000, ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EnterReturnsTrue))
+                {
+                    okNode.Text = matchText;
+                    P.Config.Save();
+                }
+
+                ImGui.PopStyleVar(); // ItemSpacing
             }
 
             if (node is ListEntryNode listNode)

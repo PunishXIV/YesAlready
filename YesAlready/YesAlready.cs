@@ -18,6 +18,7 @@ using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.IoC;
 using Dalamud.Plugin.Services;
 using YesAlready.IPC;
+
 namespace YesAlready;
 
 public class YesAlready : IDalamudPlugin
@@ -133,6 +134,7 @@ public class YesAlready : IDalamudPlugin
 
     internal Dictionary<uint, string> TerritoryNames { get; } = new();
     internal string LastSeenDialogText { get; set; } = string.Empty;
+    internal string LastSeenOkText { get; set; } = string.Empty;
     internal string LastSeenListSelection { get; set; } = string.Empty;
     internal string LastSeenListTarget { get; set; } = string.Empty;
     internal string LastSeenTalkTarget { get; set; } = string.Empty;
@@ -238,6 +240,9 @@ public class YesAlready : IDalamudPlugin
             case "last zone folder no":
                 CommandAddNode(true, true, true);
                 break;
+            case "lastok":
+                CommandAddOkNode(false);
+                break;
             case "lastlist":
                 CommandAddListNode();
                 break;
@@ -286,6 +291,22 @@ public class YesAlready : IDalamudPlugin
         }
 
         Configuration.CreateTextNode(Config.RootFolder, zoneRestricted, createFolder, selectNo);
+        Config.Save();
+
+        Utils.SEString.PrintPluginMessage("Added a new text entry.");
+    }
+
+    private void CommandAddOkNode(bool createFolder)
+    {
+        var text = LastSeenOkText;
+
+        if (text.IsNullOrEmpty())
+        {
+            Svc.Log.Error("No dialog has been seen.");
+            return;
+        }
+
+        Configuration.CreateOkNode(Config.RootFolder, createFolder);
         Config.Save();
 
         Utils.SEString.PrintPluginMessage("Added a new text entry.");
