@@ -41,6 +41,7 @@ public partial class Configuration() : IPluginConfiguration
     public bool GuildLeveDifficultyConfirm { get; set; } = false;
     public bool FallGuysRegisterConfirm { get; set; } = false;
     public bool FallGuysExitConfirm { get; set; } = false;
+    public bool RetainerTransferListConfirm { get; set; } = false;
     public bool RetainerTransferProgressConfirm { get; set; } = false;
     public bool DesynthesisResults {  get; set; } = false;
     public bool AetherialReductionResults { get; set; } = false;
