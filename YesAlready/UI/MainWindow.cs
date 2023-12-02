@@ -568,6 +568,42 @@ internal class MainWindow : Window
         IndentedTextColored(shadedColor, "Automatically confirm the exit prompt when leaving Blunderville.");
 
         #endregion
+        #region FashionCheckQuit
+
+        var fashionQuit = P.Config.FashionCheckQuit;
+        if (ImGui.Checkbox("FashionCheck", ref fashionQuit))
+        {
+            P.Config.FashionCheckQuit = fashionQuit;
+            P.Config.Save();
+        }
+
+        IndentedTextColored(shadedColor, "Automatically confirm the Fashion Reports results.");
+
+        #endregion
+        #region ChocoboRacingQuit
+
+        var chocoboQuit = P.Config.ChocoboRacingQuit;
+        if (ImGui.Checkbox("RaceChocoboResult", ref chocoboQuit))
+        {
+            P.Config.ChocoboRacingQuit = chocoboQuit;
+            P.Config.Save();
+        }
+
+        IndentedTextColored(shadedColor, "Automatically quit Chocobo Racing when the resuls menu appears.");
+
+        #endregion
+        #region LordOfVerminionQuit
+
+        var lovQuit = P.Config.LordOfVerminionQuit;
+        if (ImGui.Checkbox("LovmResult", ref lovQuit))
+        {
+            P.Config.LordOfVerminionQuit = lovQuit;
+            P.Config.Save();
+        }
+
+        IndentedTextColored(shadedColor, "Automatically quit Lord of Verminion when the results menu appears.");
+
+        #endregion
 
         ImGui.PopID();
 
