@@ -414,7 +414,21 @@ internal class MainWindow : Window
         IndentedTextColored(shadedColor, "Automatically send a retainer on the same venture as before when receiving an item.");
 
         #endregion
-        #region RetainerProgress
+        #region RetainerTransferList
+
+        var retainerListDialog = P.Config.RetainerTransferListConfirm;
+        if (ImGui.Checkbox("RetainerItemTransferList", ref retainerListDialog))
+        {
+            P.Config.RetainerTransferListConfirm = retainerListDialog;
+            P.Config.Save();
+        }
+        
+        IndentedTextColored(shadedColor, "Skip the confirmation in the RetainerItemTransferList window to entrust all items to the retainer.");
+        
+        #endregion
+        #region RetainerTransferProgress
+        
+        
 
         var retainerProgressDialog = P.Config.RetainerTransferProgressConfirm;
         if (ImGui.Checkbox("RetainerItemTransferProgress", ref retainerProgressDialog))
