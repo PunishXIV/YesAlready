@@ -13,6 +13,7 @@ internal class AddonSalvageResult : BaseFeature
     {
         base.Enable();
         AddonLifecycle.RegisterListener(AddonEvent.PostUpdate, "SalvageResult", AddonUpdate);
+        AddonLifecycle.RegisterListener(AddonEvent.PostUpdate, "SalvageAutoDialog", AddonUpdate);
     }
 
     public override void Disable()
@@ -28,10 +29,7 @@ internal class AddonSalvageResult : BaseFeature
         if (!P.Active || !P.Config.DesynthesisResults)
             return;
 
-        if (addon->AtkValues[17].Byte == 0)
-        {
-            Svc.Log.Debug("Closing Salvage Auto Results menu");
-            Callback.Fire(addon, true, 1);
-        }
+        Svc.Log.Debug("Closing Salvage Auto Results menu");
+        Callback.Fire(addon, true, 1);
     }
 }
