@@ -57,6 +57,9 @@ internal class AddonSelectYesNoFeature : BaseFeature
             if (!EntryMatchesText(node, text))
                 continue;
 
+            if (!ConditionalIsTrue(node, text))
+                continue;
+
             if (node.ZoneRestricted && !string.IsNullOrEmpty(node.ZoneText))
             {
                 if (!P.TerritoryNames.TryGetValue(Svc.ClientState.TerritoryType, out var zoneName))
@@ -83,6 +86,38 @@ internal class AddonSelectYesNoFeature : BaseFeature
                 AddonSelectYesNoExecute((nint)addon, node.IsYes);
                 return;
             }
+        }
+    }
+
+    private static bool ConditionalIsTrue(TextEntryNode node, string text)
+    {
+        if (node.IsConditional)
+        {
+            Svc.Log.Debug("AddonSelectYesNo: Is conditional");
+            if (node.ConditionalNumberRegex?.IsMatch(text) ?? false)
+            {
+                Svc.Log.Debug("AddonSelectYesNo: Is conditional matches");
+                var result = node.ConditionalNumberRegex?.Match(text);
+                if (result.Success && int.TryParse(result.Value, out int value))
+                {
+                    Svc.Log.Debug($"AddonSelectYesNo: Is conditional - {value}");
+                    return node.ComparisonType switch
+                    {
+                        ComparisonType.LessThan => value < node.ConditionalNumber,
+                        ComparisonType.GreaterThan => value > node.ConditionalNumber,
+                        ComparisonType.LessThanOrEqual => value <= node.ConditionalNumber,
+                        ComparisonType.GreaterThanOrEqual => value >= node.ConditionalNumber,
+                        ComparisonType.Equal => value == node.ConditionalNumber,
+                        _ => throw new Exception("Uncaught enum"),
+                    };
+                }
+            }
+
+            return false;
+        }
+        else
+        {
+            return true;
         }
     }
 

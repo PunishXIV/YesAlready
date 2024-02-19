@@ -12,6 +12,15 @@ public interface ITextNode
     public string Name { get; }
 }
 
+public enum ComparisonType
+{
+    LessThan,
+    LessThanOrEqual,
+    GreaterThan,
+    GreaterThanOrEqual,
+    Equal
+}
+
 public class TextEntryNode : ITextNode
 {
     public bool Enabled { get; set; } = true;
@@ -28,7 +37,6 @@ public class TextEntryNode : ITextNode
     }
 
     public string Text { get; set; } = string.Empty;
-
     [JsonIgnore]
     public bool IsTextRegex => Text.StartsWith("/") && Text.EndsWith("/");
 
@@ -47,6 +55,33 @@ public class TextEntryNode : ITextNode
             }
         }
     }
+
+
+    public bool IsConditional { get; set; } = false;
+    public string ConditionalNumberTemplate { get; set; } = string.Empty;
+    public int ConditionalNumber { get; set; } = 0;
+
+    public ComparisonType ComparisonType { get; set; } = ComparisonType.GreaterThanOrEqual;
+
+    [JsonIgnore]
+    public bool IsConditionalNumberRegex => ConditionalNumberTemplate.StartsWith("/") && ConditionalNumberTemplate.EndsWith("/");
+
+    [JsonIgnore]
+    public Regex? ConditionalNumberRegex
+    {
+        get
+        {
+            try
+            {
+                return new(ConditionalNumberTemplate.Trim('/'), RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+    }
+
 
     public bool ZoneRestricted { get; set; } = false;
 

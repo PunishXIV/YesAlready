@@ -43,6 +43,14 @@ internal class MainWindow : Window
         VirtualKey.SHIFT,
     };
 
+    private static readonly ComparisonType[] ComparisonTypes =
+    [
+        ComparisonType.LessThan,
+        ComparisonType.LessThanOrEqual,
+        ComparisonType.GreaterThan,
+        ComparisonType.GreaterThanOrEqual,
+    ];
+
     private ITextNode? draggedNode = null;
     private string debugClickName = string.Empty;
 
@@ -70,7 +78,7 @@ internal class MainWindow : Window
         if (P.BlockListHandler.Locked)
         {
             ImGuiEx.TextWrapped(ImGuiColors.DalamudRed, $"Yes Already function is paused because following plugins have requested it: {P.BlockListHandler.BlockList.Print()}");
-            if(ImGui.Button("Force unlock"))
+            if (ImGui.Button("Force unlock"))
             {
                 P.BlockListHandler.BlockList.Clear();
             }
@@ -157,9 +165,9 @@ internal class MainWindow : Window
             var config = DalamudReflector.GetService("Dalamud.Configuration.Internal.DalamudConfiguration");
             var dtrList = config.GetFoP<List<string>>("DtrIgnore");
             var enabled = !dtrList.Contains(Svc.PluginInterface.InternalName);
-            if(ImGui.Checkbox("DTR", ref enabled))
+            if (ImGui.Checkbox("DTR", ref enabled))
             {
-                if(enabled)
+                if (enabled)
                 {
                     dtrList.Remove(Svc.PluginInterface.InternalName);
                 }
@@ -169,9 +177,9 @@ internal class MainWindow : Window
                 }
                 config.Call("QueueSave");
             }
-            IndentedTextColored(shadedColor, $"Display the status of the {Name} in the Server Info Bar (DTR Bar). Clicking toggles the plugin.");            
+            IndentedTextColored(shadedColor, $"Display the status of the {Name} in the Server Info Bar (DTR Bar). Clicking toggles the plugin.");
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             ImGuiEx.TextWrapped(ImGuiColors.DalamudRed, $"{e}");
         }
@@ -422,13 +430,13 @@ internal class MainWindow : Window
             P.Config.RetainerTransferListConfirm = retainerListDialog;
             P.Config.Save();
         }
-        
+
         IndentedTextColored(shadedColor, "Skip the confirmation in the RetainerItemTransferList window to entrust all items to the retainer.");
-        
+
         #endregion
         #region RetainerTransferProgress
-        
-        
+
+
 
         var retainerProgressDialog = P.Config.RetainerTransferProgressConfirm;
         if (ImGui.Checkbox("RetainerItemTransferProgress", ref retainerProgressDialog))
@@ -1207,83 +1215,7 @@ internal class MainWindow : Window
         {
             if (node is TextEntryNode entryNode)
             {
-                ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, newItemSpacing);
-
-                var enabled = entryNode.Enabled;
-                if (ImGui.Checkbox("Enabled", ref enabled))
-                {
-                    entryNode.Enabled = enabled;
-                    P.Config.Save();
-                }
-
-                ImGui.SameLine(100f);
-                var isYes = entryNode.IsYes;
-                var title = isYes ? "Click Yes" : "Click No";
-                if (ImGui.Button(title))
-                {
-                    entryNode.IsYes = !isYes;
-                    P.Config.Save();
-                }
-
-                var trashAltWidth = Utils.ImGuiEx.GetIconButtonWidth(FontAwesomeIcon.TrashAlt);
-
-                ImGui.SameLine(ImGui.GetContentRegionMax().X - trashAltWidth);
-                if (Utils.ImGuiEx.IconButton(FontAwesomeIcon.TrashAlt, "Delete"))
-                {
-                    if (P.Config.TryFindParent(node, out var parentNode))
-                    {
-                        parentNode!.Children.Remove(node);
-                        P.Config.Save();
-                    }
-                }
-
-                var matchText = entryNode.Text;
-                if (ImGui.InputText($"##{node.Name}-matchText", ref matchText, 10_000, ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EnterReturnsTrue))
-                {
-                    entryNode.Text = matchText;
-                    P.Config.Save();
-                }
-
-                var zoneRestricted = entryNode.ZoneRestricted;
-                if (ImGui.Checkbox("Zone Restricted", ref zoneRestricted))
-                {
-                    entryNode.ZoneRestricted = zoneRestricted;
-                    P.Config.Save();
-                }
-
-                var searchWidth = Utils.ImGuiEx.GetIconButtonWidth(FontAwesomeIcon.Search);
-                var searchPlusWidth = Utils.ImGuiEx.GetIconButtonWidth(FontAwesomeIcon.SearchPlus);
-
-                ImGui.SameLine(ImGui.GetContentRegionMax().X - searchWidth);
-                if (Utils.ImGuiEx.IconButton(FontAwesomeIcon.Search, "Zone List"))
-                {
-                    P.OpenZoneListUi();
-                }
-
-                ImGui.SameLine(ImGui.GetContentRegionMax().X - searchWidth - searchPlusWidth - newItemSpacing.X);
-                if (Utils.ImGuiEx.IconButton(FontAwesomeIcon.SearchPlus, "Fill with current zone"))
-                {
-                    var currentID = Svc.ClientState.TerritoryType;
-                    if (P.TerritoryNames.TryGetValue(currentID, out var zoneName))
-                    {
-                        entryNode.ZoneText = zoneName;
-                        P.Config.Save();
-                    }
-                    else
-                    {
-                        entryNode.ZoneText = "Could not find name";
-                        P.Config.Save();
-                    }
-                }
-
-                ImGui.PopStyleVar(); // ItemSpacing
-
-                var zoneText = entryNode.ZoneText;
-                if (ImGui.InputText($"##{node.Name}-zoneText", ref zoneText, 10_000, ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EnterReturnsTrue))
-                {
-                    entryNode.ZoneText = zoneText;
-                    P.Config.Save();
-                }
+                DrawYesNoNode(entryNode, newItemSpacing);
             }
 
             if (node is OkEntryNode okNode)
@@ -1517,6 +1449,143 @@ internal class MainWindow : Window
 
             ImGui.EndPopup();
         }
+    }
+
+    private static void DrawYesNoNode(TextEntryNode textNode, Vector2 spacing)
+    {
+        ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, spacing);
+
+        var enabled = textNode.Enabled;
+        if (ImGui.Checkbox("Enabled", ref enabled))
+        {
+            textNode.Enabled = enabled;
+            P.Config.Save();
+        }
+
+        ImGui.SameLine(100f);
+        var isYes = textNode.IsYes;
+        var title = isYes ? "Click Yes" : "Click No";
+        if (ImGui.Button(title))
+        {
+            textNode.IsYes = !isYes;
+            P.Config.Save();
+        }
+
+        var trashAltWidth = Utils.ImGuiEx.GetIconButtonWidth(FontAwesomeIcon.TrashAlt);
+
+        ImGui.SameLine(ImGui.GetContentRegionMax().X - trashAltWidth);
+        if (Utils.ImGuiEx.IconButton(FontAwesomeIcon.TrashAlt, "Delete"))
+        {
+            if (P.Config.TryFindParent(textNode, out var parentNode))
+            {
+                parentNode!.Children.Remove(textNode);
+                P.Config.Save();
+            }
+        }
+
+        var matchText = textNode.Text;
+        if (ImGui.InputText($"##{textNode.Name}-matchText", ref matchText, 10_000, ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EnterReturnsTrue))
+        {
+            textNode.Text = matchText;
+            P.Config.Save();
+        }
+
+        var zoneRestricted = textNode.ZoneRestricted;
+        if (ImGui.Checkbox("Zone Restricted", ref zoneRestricted))
+        {
+            textNode.ZoneRestricted = zoneRestricted;
+            P.Config.Save();
+        }
+
+        var searchWidth = Utils.ImGuiEx.GetIconButtonWidth(FontAwesomeIcon.Search);
+        var searchPlusWidth = Utils.ImGuiEx.GetIconButtonWidth(FontAwesomeIcon.SearchPlus);
+
+        ImGui.SameLine(ImGui.GetContentRegionMax().X - searchWidth);
+        if (Utils.ImGuiEx.IconButton(FontAwesomeIcon.Search, "Zone List"))
+        {
+            P.OpenZoneListUi();
+        }
+
+        ImGui.SameLine(ImGui.GetContentRegionMax().X - searchWidth - searchPlusWidth - spacing.X);
+        if (Utils.ImGuiEx.IconButton(FontAwesomeIcon.SearchPlus, "Fill with current zone"))
+        {
+            var currentID = Svc.ClientState.TerritoryType;
+            if (P.TerritoryNames.TryGetValue(currentID, out var zoneName))
+            {
+                textNode.ZoneText = zoneName;
+                P.Config.Save();
+            }
+            else
+            {
+                textNode.ZoneText = "Could not find name";
+                P.Config.Save();
+            }
+        }
+
+        ImGui.PopStyleVar(); // ItemSpacing
+
+        var zoneText = textNode.ZoneText;
+        if (ImGui.InputText($"##{textNode.Name}-zoneText", ref zoneText, 10_000, ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EnterReturnsTrue))
+        {
+            textNode.ZoneText = zoneText;
+            P.Config.Save();
+        }
+
+        ImGui.NewLine();
+
+        var conditional = textNode.IsConditional;
+        if (ImGui.Checkbox("Is Conditional", ref conditional))
+        {
+            textNode.IsConditional = conditional;
+            P.Config.Save();
+        }
+
+        ImGui.Text("Currently only supports number extraction");
+
+        var conditionalText = textNode.ConditionalNumberTemplate;
+        if (ImGui.InputText($"##{textNode.Name}-conditionalText", ref conditionalText, 10_000, ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EnterReturnsTrue))
+        {
+            textNode.ConditionalNumberTemplate = conditionalText;
+            P.Config.Save();
+        }
+
+        var comparisonType = textNode.ComparisonType;
+        if (ImGui.BeginCombo($"##{textNode.Name}-comparisonType", ComparisonTypeToText(comparisonType)))
+        {
+            foreach (var c in ComparisonTypes)
+            {
+                var isSelected = comparisonType == c;
+                if (ImGui.Selectable(ComparisonTypeToText(c), isSelected))
+                {
+                    textNode.ComparisonType = c;
+                    P.Config.Save();
+                }
+
+                if (isSelected)
+                    ImGui.SetItemDefaultFocus();
+            }
+            ImGui.EndCombo();
+        }
+
+        var conditionalNumber = textNode.ConditionalNumber;
+        if (ImGui.InputInt($"##{textNode.Name}-conditionalNumber", ref conditionalNumber, 1, 10, ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EnterReturnsTrue))
+        {
+            textNode.ConditionalNumber = conditionalNumber;
+            P.Config.Save();
+        }
+    }
+
+    private static string ComparisonTypeToText(ComparisonType comparisonType)
+    {
+        return comparisonType switch
+        {
+            ComparisonType.LessThan => "Less than",
+            ComparisonType.LessThanOrEqual => "Less than or equal",
+            ComparisonType.GreaterThan => "Greater than",
+            ComparisonType.GreaterThanOrEqual => "Greater than or equal",
+            ComparisonType.Equal => "Equal",
+            _ => throw new Exception("Invalid enum value"),
+        };
     }
 
     private void TextNodeDragDrop(ITextNode node)
