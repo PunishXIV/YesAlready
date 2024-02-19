@@ -93,14 +93,14 @@ internal class AddonSelectYesNoFeature : BaseFeature
     {
         if (node.IsConditional)
         {
-            Svc.Log.Debug("Is conditional");
+            Svc.Log.Debug("AddonSelectYesNo: Is conditional");
             if (node.ConditionalNumberRegex?.IsMatch(text) ?? false)
             {
-                Svc.Log.Debug("Is conditional matches");
+                Svc.Log.Debug("AddonSelectYesNo: Is conditional matches");
                 var result = node.ConditionalNumberRegex?.Match(text);
                 if (result.Success && int.TryParse(result.Value, out int value))
                 {
-                    Svc.Log.Debug($"Is conditional: {value}");
+                    Svc.Log.Debug($"AddonSelectYesNo: Is conditional - {value}");
                     return node.ComparisonType switch
                     {
                         ComparisonType.LessThan => value < node.ConditionalNumber,
