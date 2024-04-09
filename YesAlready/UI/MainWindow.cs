@@ -692,6 +692,15 @@ internal class MainWindow : Window
         Utils.ImGuiEx.IconButton(FontAwesomeIcon.QuestionCircle, sb.ToString());
         if (ImGui.IsItemHovered()) ImGui.SetTooltip(sb.ToString());
 
+        ImGui.SameLine();
+        var gimmickConfirm = P.Config.GimmickYesNo;
+        if (ImGui.Checkbox("Auto GimmickYesNo", ref gimmickConfirm))
+        {
+            P.Config.GimmickYesNo = gimmickConfirm;
+            P.Config.Save();
+        }
+        if (ImGui.IsItemHovered()) ImGui.SetTooltip("Automatically confirm any Yesno dialogs that are part of the GimmickYesNo sheet.\nThese are mostly the dungeon Yesnos like \"Unlock this door?\" or \"Pickup this item?\"");
+
         ImGui.PopStyleVar(); // ItemSpacing
     }
 

@@ -5,6 +5,7 @@ using ECommons;
 using ECommons.DalamudServices;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Component.GUI;
+using Lumina.Excel.GeneratedSheets2;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -45,6 +46,13 @@ internal class AddonSelectYesNoFeature : BaseFeature
         if (P.ForcedYesKeyPressed)
         {
             Svc.Log.Debug($"AddonSelectYesNo: Forced yes hotkey pressed");
+            AddonSelectYesNoExecute((nint)addon, true);
+            return;
+        }
+
+        if (P.Config.GimmickYesNo && Svc.Data.GetExcelSheet<GimmickYesNo>().Where(x => !x.Unknown0.RawString.IsNullOrEmpty()).Select(x => x.Unknown0.RawString).ToList().Any(g => g.Equals(text)))
+        {
+            Svc.Log.Debug($"AddonSelectYesNo: Entry is a gimmick");
             AddonSelectYesNoExecute((nint)addon, true);
             return;
         }
