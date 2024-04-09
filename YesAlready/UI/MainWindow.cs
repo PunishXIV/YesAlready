@@ -175,7 +175,7 @@ internal class MainWindow : Window
                 {
                     dtrList.Add(Svc.PluginInterface.InternalName);
                 }
-                config.Call("QueueSave");
+                config.Call("QueueSave", []);
             }
             IndentedTextColored(shadedColor, $"Display the status of the {Name} in the Server Info Bar (DTR Bar). Clicking toggles the plugin.");
         }
