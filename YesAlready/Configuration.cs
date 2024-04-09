@@ -48,6 +48,7 @@ public partial class Configuration() : IPluginConfiguration
     public bool FashionCheckQuit { get; set; } = false;
     public bool LordOfVerminionQuit { get; set; } = false;
     public bool ChocoboRacingQuit { get; set; } = false;
+    public bool PartyFinderJoinConfirm { get; set; } = false;
 
     public static Configuration Load(DirectoryInfo configDirectory)
     {

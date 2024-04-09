@@ -1,13 +1,15 @@
-using System;
-using System.Linq;
-using System.Runtime.InteropServices;
-
 using ClickLib.Clicks;
 using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
+using ECommons;
 using ECommons.DalamudServices;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Component.GUI;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using YesAlready.BaseFeatures;
 
 namespace YesAlready.Features;
@@ -43,6 +45,13 @@ internal class AddonSelectYesNoFeature : BaseFeature
         if (P.ForcedYesKeyPressed)
         {
             Svc.Log.Debug($"AddonSelectYesNo: Forced yes hotkey pressed");
+            AddonSelectYesNoExecute((nint)addon, true);
+            return;
+        }
+
+        if (P.Config.PartyFinderJoinConfirm && GenericHelpers.TryGetAddonByName<AtkUnitBase>("LookingForGroupDetail", out var _) && lfgPatterns.Any(r => r.IsMatch(text)))
+        {
+            Svc.Log.Debug($"AddonSelectYesNo: Entry is party finder join confirmation");
             AddonSelectYesNoExecute((nint)addon, true);
             return;
         }
@@ -155,6 +164,14 @@ internal class AddonSelectYesNoFeature : BaseFeature
         return (node.ZoneIsRegex && (node.ZoneRegex?.IsMatch(zoneName) ?? false)) ||
               (!node.ZoneIsRegex && zoneName.Contains(node.ZoneText));
     }
+
+    private readonly List<Regex> lfgPatterns =
+    [
+        new Regex(@"Join .* party\?"),
+        new Regex(@".*のパーティに参加します。よろしいですか？"),
+        new Regex(@"Der Gruppe von .* beitreten\?"),
+        new Regex(@"Rejoindre l'équipe de .*\?")
+    ];
 
     [StructLayout(LayoutKind.Explicit, Size = 0x10)]
     private struct AddonSelectYesNoOnSetupData
