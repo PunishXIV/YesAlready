@@ -293,7 +293,7 @@ internal class MainWindow : Window
             P.Config.Save();
         }
 
-        IndentedTextColored(shadedColor, $"While this key is held, any Yes/No prompt will always default to yes. Be careful.");
+        IndentedTextColored(shadedColor, $"While this key is held, any Yes/No prompt will always default to yes and all talk dialogue will be skipped. Be careful.");
 
         #endregion
         #region SalvageDialog
@@ -516,6 +516,18 @@ internal class MainWindow : Window
         IndentedTextColored(shadedColor, "Automatically commence duties when ready, but only once.\nRequires Contents Finder Confirm, and disables both after activation.");
 
         #endregion
+        #region PartyFinderJoinConfirm
+
+        var pfConfirm = P.Config.PartyFinderJoinConfirm;
+        if (ImGui.Checkbox("LookingForGroup x SelectYesno", ref pfConfirm))
+        {
+            P.Config.PartyFinderJoinConfirm = pfConfirm;
+            P.Config.Save();
+        }
+
+        IndentedTextColored(shadedColor, "Automatically confirm when joining a party finder group.");
+
+        #endregion
         #region InclusionShop
 
         var inclusionShopRemember = P.Config.InclusionShopRememberEnabled;
@@ -611,17 +623,17 @@ internal class MainWindow : Window
 
         IndentedTextColored(shadedColor, "Automatically quit Lord of Verminion when the results menu appears.");
 
-        #endregion
-        #region PartyFinderJoinConfirm
+        #endregion   
+        #region LotteryWeeklyInput
 
-        var pfConfirm = P.Config.PartyFinderJoinConfirm;
-        if (ImGui.Checkbox("LookingForGroup x SelectYesno", ref pfConfirm))
+        var lotto = P.Config.LotteryWeeklyInput;
+        if (ImGui.Checkbox("LotteryWeeklyInput", ref lotto))
         {
-            P.Config.PartyFinderJoinConfirm = pfConfirm;
+            P.Config.LotteryWeeklyInput = lotto;
             P.Config.Save();
         }
 
-        IndentedTextColored(shadedColor, "Automatically confirm when joining a party finder group.");
+        IndentedTextColored(shadedColor, "Automatically purchase a Jumbo Cactpot ticket with a random number.");
 
         #endregion
 
@@ -887,13 +899,15 @@ internal class MainWindow : Window
         if (Utils.ImGuiEx.IconButton(FontAwesomeIcon.SearchPlus, "Add current target as a new entry"))
         {
             var target = Svc.Targets.Target;
-            var targetName = P.LastSeenTalkTarget = target != null
-                ? Utils.SEString.GetSeStringText(target.Name)
-                : string.Empty;
-
-            var newNode = new TalkEntryNode { Enabled = true, TargetText = targetName };
-            TalkRootFolder.Children.Add(newNode);
-            P.Config.Save();
+            if (target != null)
+            {
+                var targetName = P.LastSeenTalkTarget = Utils.SEString.GetSeStringText(target.Name);
+                var newNode = new TalkEntryNode { Enabled = true, TargetText = targetName };
+                TalkRootFolder.Children.Add(newNode);
+                P.Config.Save();
+            }
+            else
+                Svc.Toasts.ShowError("Unable to add entry: no target selected.");
         }
 
         ImGui.SameLine();

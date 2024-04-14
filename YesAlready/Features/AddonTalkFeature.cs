@@ -44,6 +44,13 @@ internal class AddonTalkFeature : BaseFeature
             ? Utils.SEString.GetSeStringText(target.Name)
             : string.Empty;
 
+        if (P.ForcedYesKeyPressed)
+        {
+            Svc.Log.Debug($"{nameof(AddonTalkFeature)}: Forced yes hotkey pressed");
+            clickTalk.Click();
+            return;
+        }
+
         var nodes = P.Config.GetAllNodes().OfType<TalkEntryNode>();
         foreach (var node in nodes)
         {
