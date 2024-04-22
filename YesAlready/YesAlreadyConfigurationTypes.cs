@@ -10,6 +10,25 @@ namespace YesAlready;
 public interface ITextNode
 {
     public string Name { get; }
+    public bool Enabled { get; set; }
+    [JsonIgnore]
+    public bool IsRegex => Name.StartsWith("/") && Name.EndsWith("/");
+
+    [JsonIgnore]
+    public Regex? Regex
+    {
+        get
+        {
+            try
+            {
+                return new(Name.Trim('/'), RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+    }
 }
 
 public enum ComparisonType
@@ -26,15 +45,9 @@ public class TextEntryNode : ITextNode
     public bool Enabled { get; set; } = true;
 
     [JsonIgnore]
-    public string Name
-    {
-        get
-        {
-            return !string.IsNullOrEmpty(ZoneText)
+    public string Name => !string.IsNullOrEmpty(ZoneText)
                 ? $"({ZoneText}) {Text}"
                 : Text;
-        }
-    }
 
     public string Text { get; set; } = string.Empty;
     [JsonIgnore]
@@ -114,13 +127,7 @@ public class OkEntryNode : ITextNode
     public bool Enabled { get; set; } = true;
 
     [JsonIgnore]
-    public string Name
-    {
-        get
-        {
-            return Text;
-        }
-    }
+    public string Name => Text;
 
     public string Text { get; set; } = string.Empty;
 
@@ -149,15 +156,9 @@ public class ListEntryNode : ITextNode
     public bool Enabled { get; set; } = true;
 
     [JsonIgnore]
-    public string Name
-    {
-        get
-        {
-            return !string.IsNullOrEmpty(TargetText)
+    public string Name => !string.IsNullOrEmpty(TargetText)
                 ? $"({TargetText}) {Text}"
                 : Text;
-        }
-    }
 
     public string Text { get; set; } = string.Empty;
 
@@ -209,13 +210,7 @@ public class TalkEntryNode : ITextNode
     public bool Enabled { get; set; } = true;
 
     [JsonIgnore]
-    public string Name
-    {
-        get
-        {
-            return TargetText;
-        }
-    }
+    public string Name => TargetText;
 
     public string TargetText { get; set; } = string.Empty;
 
@@ -239,12 +234,45 @@ public class TalkEntryNode : ITextNode
     }
 }
 
+public class NumericsEntryNode : ITextNode
+{
+    public bool Enabled { get; set; } = true;
+
+    [JsonIgnore]
+    public string Name => IsPercent ? $"({Percentage}%) {Text}" : $"({Quantity}f) {Text}";
+
+    public string Text { get; set; } = string.Empty;
+    public bool IsPercent { get; set; } = true;
+    public int Percentage { get; set; } = 100;
+    public int Quantity { get; set; } = 0;
+
+    [JsonIgnore]
+    public bool IsTextRegex => Text.StartsWith("/") && Text.EndsWith("/");
+
+    [JsonIgnore]
+    public Regex? TextRegex
+    {
+        get
+        {
+            try
+            {
+                return new(Text.Trim('/'), RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+    }
+}
+
 public class TextFolderNode : ITextNode
 {
     public string Name { get; set; } = string.Empty;
 
     [JsonProperty(ItemConverterType = typeof(ConcreteNodeConverter))]
-    public List<ITextNode> Children { get; } = new();
+    public List<ITextNode> Children { get; } = [];
+    public bool Enabled { get; set; } = true;
 }
 
 public class ConcreteNodeConverter : JsonConverter
@@ -279,6 +307,10 @@ public class ConcreteNodeConverter : JsonConverter
         else if (jType == SimpleName(typeof(TextFolderNode)))
         {
             return CreateObject<TextFolderNode>(jObject, serializer);
+        }
+        else if (jType == SimpleName(typeof(NumericsEntryNode)))
+        {
+            return CreateObject<NumericsEntryNode>(jObject, serializer);
         }
         else
         {

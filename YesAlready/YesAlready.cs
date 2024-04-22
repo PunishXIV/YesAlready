@@ -18,6 +18,7 @@ using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.IoC;
 using Dalamud.Plugin.Services;
 using YesAlready.IPC;
+using ECommons.Automation;
 
 namespace YesAlready;
 
@@ -28,7 +29,7 @@ public class YesAlready : IDalamudPlugin
     public static string Name => "YesAlready";
     private const string Command = "/yesalready";
     private static string[] Aliases => new string[] { "/pyes" };
-    private readonly List<string> registeredCommands = new();
+    private readonly List<string> registeredCommands = [];
     internal Configuration Configuration { get; init; }
     internal WindowSystem Ws;
     internal MainWindow MainWindow;
@@ -40,6 +41,7 @@ public class YesAlready : IDalamudPlugin
 
     private readonly DtrBarEntry dtrEntry;
     internal BlockListHandler BlockListHandler;
+    internal TaskManager TaskManager;
 
     internal bool Active => Config.Enabled && !BlockListHandler.Locked;
 
@@ -83,6 +85,7 @@ public class YesAlready : IDalamudPlugin
         EnableFeatures(true);
 
         dtrEntry ??= Svc.DtrBar.Get("YesAlready");
+        TaskManager = new();
 
         Svc.Framework.Update += FrameworkUpdate;
         Svc.PluginInterface.UiBuilder.Draw += Ws.Draw;
@@ -132,15 +135,17 @@ public class YesAlready : IDalamudPlugin
     public void DrawConfigUI() => MainWindow.IsOpen = !MainWindow.IsOpen;
     internal void OpenZoneListUi() => zoneListWindow.IsOpen = true;
 
-    internal Dictionary<uint, string> TerritoryNames { get; } = new();
+    internal Dictionary<uint, string> TerritoryNames { get; } = [];
     internal string LastSeenDialogText { get; set; } = string.Empty;
     internal string LastSeenOkText { get; set; } = string.Empty;
     internal string LastSeenListSelection { get; set; } = string.Empty;
     internal string LastSeenListTarget { get; set; } = string.Empty;
     internal string LastSeenTalkTarget { get; set; } = string.Empty;
+    internal string LastSeenNumericsText { get; set; } = string.Empty;
     internal DateTime EscapeLastPressed { get; private set; } = DateTime.MinValue;
     internal string EscapeTargetName { get; private set; } = string.Empty;
     internal bool ForcedYesKeyPressed { get; private set; } = false;
+    internal bool ForcedTalkKeyPressed { get; private set; } = false;
     internal bool DisableKeyPressed { get; private set; } = false;
     internal ListEntryNode LastSelectedListNode { get; set; } = new();
 
@@ -184,6 +189,15 @@ public class YesAlready : IDalamudPlugin
         else
         {
             ForcedYesKeyPressed = false;
+        }
+
+        if (Config.ForcedTalkKey != VirtualKey.NO_KEY && Config.SeparateForcedKeys)
+        {
+            ForcedTalkKeyPressed = Svc.KeyState[Config.ForcedTalkKey];
+        }
+        else
+        {
+            ForcedTalkKeyPressed = false;
         }
 
         if (Svc.KeyState[VirtualKey.ESCAPE])

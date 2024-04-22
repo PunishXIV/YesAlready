@@ -42,7 +42,7 @@ internal class AddonSelectOkFeature : BaseFeature
             if (!EntryMatchesText(node, text))
                 continue;
 
-            Svc.Log.Debug("AddonSelectYesNo: Selecting yes");
+            Svc.Log.Debug("AddonSelectOk: Selecting ok");
             ClickSelectOk.Using(new nint(addon)).Ok();
             return;
         }

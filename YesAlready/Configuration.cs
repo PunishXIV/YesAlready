@@ -16,11 +16,14 @@ public partial class Configuration() : IPluginConfiguration
     public bool Enabled { get; set; } = true;
 
     public VirtualKey ForcedYesKey { get; set; } = VirtualKey.NO_KEY;
+    public VirtualKey ForcedTalkKey { get; set; } = VirtualKey.NO_KEY;
     public VirtualKey DisableKey { get; set; } = VirtualKey.NO_KEY;
+    public bool SeparateForcedKeys { get; set; } = false;
     public TextFolderNode RootFolder { get; private set; } = new TextFolderNode { Name = "/" };
     public TextFolderNode OkRootFolder { get; private set; } = new TextFolderNode { Name = "/" };
     public TextFolderNode ListRootFolder { get; private set; } = new TextFolderNode { Name = "/" };
     public TextFolderNode TalkRootFolder { get; private set; } = new TextFolderNode { Name = "/" };
+    public TextFolderNode NumericsRootFolder { get; private set; } = new TextFolderNode { Name = "/" };
     public bool DesynthDialogEnabled { get; set; } = false;
     public bool DesynthBulkDialogEnabled { get; set; } = false;
     public bool MaterializeDialogEnabled { get; set; } = false;
@@ -51,6 +54,16 @@ public partial class Configuration() : IPluginConfiguration
     public bool PartyFinderJoinConfirm { get; set; } = false;
     public bool GimmickYesNo { get; set; } = false;
     public bool LotteryWeeklyInput { get; set; } = false;
+    public bool TradeMultiple { get; set; } = false;
+    public TradeMultipleMode TransmuteMode { get; set; } = TradeMultipleMode.AllSame;
+    public bool KupoOfFortune { get; set; } = false;
+    public bool CustomDeliveries { get; set; } = false;
+
+    public enum TradeMultipleMode
+    {
+        AllSame = 0,
+        AllDifferent = 1,
+    }
 
     public static Configuration Load(DirectoryInfo configDirectory)
     {
@@ -76,11 +89,13 @@ public partial class Configuration() : IPluginConfiguration
             OkRootFolder,
             ListRootFolder,
             TalkRootFolder,
+            NumericsRootFolder,
         }
         .Concat(GetAllNodes(RootFolder.Children))
         .Concat(GetAllNodes(OkRootFolder.Children))
         .Concat(GetAllNodes(ListRootFolder.Children))
-        .Concat(GetAllNodes(TalkRootFolder.Children));
+        .Concat(GetAllNodes(TalkRootFolder.Children))
+        .Concat(GetAllNodes(NumericsRootFolder.Children));
     }
 
     public IEnumerable<ITextNode> GetAllNodes(IEnumerable<ITextNode> nodes)
@@ -152,6 +167,23 @@ public partial class Configuration() : IPluginConfiguration
     public static void CreateOkNode(TextFolderNode folder, bool createFolder)
     {
         var newNode = new OkEntryNode() { Enabled = true, Text = P.LastSeenOkText };
+        var chosenFolder = folder;
+
+        if (createFolder)
+        {
+            if (chosenFolder == default)
+            {
+                chosenFolder = new TextFolderNode { Name = chosenFolder.Name };
+                folder.Children.Add(chosenFolder);
+            }
+        }
+
+        chosenFolder.Children.Add(newNode);
+    }
+
+    public static void CreateNumericsNode(TextFolderNode folder, bool createFolder)
+    {
+        var newNode = new NumericsEntryNode() { Enabled = true, Text = P.LastSeenNumericsText };
         var chosenFolder = folder;
 
         if (createFolder)

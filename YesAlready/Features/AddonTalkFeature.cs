@@ -4,6 +4,7 @@ using System.Linq;
 using ClickLib.Clicks;
 using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
+using ECommons;
 using ECommons.DalamudServices;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Component.GUI;
@@ -16,27 +17,23 @@ internal class AddonTalkFeature : BaseFeature
     public override void Enable()
     {
         base.Enable();
-        AddonLifecycle.RegisterListener(AddonEvent.PostUpdate, "Talk", AddonSetup);
+        AddonLifecycle.RegisterListener(AddonEvent.PostUpdate, "Talk", AddonUpdate);
     }
 
     public override void Disable()
     {
         base.Disable();
-        AddonLifecycle.UnregisterListener(AddonSetup);
+        AddonLifecycle.UnregisterListener(AddonUpdate);
     }
 
     private ClickTalk? clickTalk = null;
     private IntPtr lastTalkAddon = IntPtr.Zero;
 
-    protected unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
+    protected unsafe void AddonUpdate(AddonEvent eventType, AddonArgs addonInfo)
     {
         var addon = (AtkUnitBase*)addonInfo.Addon;
 
-        if (!P.Active)
-            return;
-
-        var addonPtr = (AddonTalk*)addon;
-        if (!addonPtr->AtkUnitBase.IsVisible)
+        if (!P.Active || addon == null || !GenericHelpers.IsAddonReady(addon))
             return;
 
         var target = Svc.Targets.Target;
@@ -44,9 +41,11 @@ internal class AddonTalkFeature : BaseFeature
             ? Utils.SEString.GetSeStringText(target.Name)
             : string.Empty;
 
-        if (P.ForcedYesKeyPressed)
+        if ((P.ForcedYesKeyPressed && !P.Config.SeparateForcedKeys) || P.ForcedTalkKeyPressed)
         {
-            Svc.Log.Debug($"{nameof(AddonTalkFeature)}: Forced yes hotkey pressed");
+            Svc.Log.Debug($"{nameof(AddonTalkFeature)}: Forced hotkey pressed");
+            if (clickTalk == null || lastTalkAddon != (IntPtr)addon)
+                clickTalk = ClickTalk.Using(lastTalkAddon = (IntPtr)addon);
             clickTalk.Click();
             return;
         }
