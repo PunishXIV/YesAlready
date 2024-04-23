@@ -6,8 +6,12 @@ using ECommons;
 using ECommons.Automation;
 using ECommons.DalamudServices;
 using ECommons.Throttlers;
+using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.UI;
+using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using FFXIVClientStructs.FFXIV.Component.GUI;
+using Lumina.Excel.GeneratedSheets;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using YesAlready.BaseFeatures;
@@ -19,21 +23,25 @@ internal class AddonSatisfactionSupplyFeature : BaseFeature
     {
         base.Enable();
         AddonLifecycle.RegisterListener(AddonEvent.PostUpdate, "SatisfactionSupply", AddonUpdate);
+        AddonLifecycle.RegisterListener(AddonEvent.PreSetup, "SatisfactionSupply", Reset);
         Svc.Framework.Update += RequestFill;
         Svc.Framework.Update += RequestComplete;
     }
+
 
     public override void Disable()
     {
         base.Disable();
         AddonLifecycle.UnregisterListener(AddonUpdate);
+        AddonLifecycle.UnregisterListener(Reset);
         Svc.Framework.Update -= RequestFill;
         Svc.Framework.Update -= RequestComplete;
     }
 
+    private static bool Disabled;
     protected static unsafe void AddonUpdate(AddonEvent eventType, AddonArgs args)
     {
-        if (!P.Active || !P.Config.CustomDeliveries)
+        if (!P.Active || !P.Config.CustomDeliveries || Disabled)
             return;
 
         var addon = (AtkUnitBase*)args.Addon;
@@ -41,8 +49,107 @@ internal class AddonSatisfactionSupplyFeature : BaseFeature
 
         var atkValues = new[] { addon->AtkValues[22].Int, addon->AtkValues[31].Int, addon->AtkValues[40].Int };
         foreach (var (index, value) in atkValues.Select((value, index) => (index, value)))
-            if (value != 0 && !GenericHelpers.TryGetAddonByName<AtkUnitBase>("Request", out var ptr))
+        {
+            if (value != 0 && !GenericHelpers.TryGetAddonByName<AtkUnitBase>("Request", out var _))
+            {
+                if (WillOvercap(addon, index))
+                {
+                    Utils.SEString.PrintPluginMessage("Further turn in will overcap scrips.");
+                    Disabled = true;
+                    return;
+                }
                 Callback.Fire(addon, false, 1, index);
+            }
+        }
+    }
+
+    private void Reset(AddonEvent type, AddonArgs args) => Disabled = false;
+
+    private static unsafe bool WillOvercap(AtkUnitBase* addon, int row)
+    {
+        var agent = AgentSatisfactionSupply.Instance();
+        if (agent == null) return true;
+        var item = agent->ItemSpan[row];
+        var invItem = FindItemInInventory(item.Id);
+        var invItemColectability = InventoryManager.Instance()->GetInventoryContainer(invItem.Value.inv)->GetInventorySlot(invItem.Value.slot)->Spiritbond;
+        var wc = InventoryManager.Instance()->GetInventoryItemCount(AgentSatisfactionSupply.Instance()->WhiteCrafterScrriptId);
+        var pc = InventoryManager.Instance()->GetInventoryItemCount(AgentSatisfactionSupply.Instance()->PurpleCrafterScriptId);
+        var wg = InventoryManager.Instance()->GetInventoryItemCount(AgentSatisfactionSupply.Instance()->WhiteGathererScriptId);
+        var pg = InventoryManager.Instance()->GetInventoryItemCount(AgentSatisfactionSupply.Instance()->PurpleGathererScriptId);
+
+        // this is awful
+        if (invItemColectability >= item.Collectability3)
+        {
+            switch (row)
+            {
+                case 0:
+                    if (wc + addon->AtkValues[61].Int > 4000 || pc + addon->AtkValues[64].Int > 4000)
+                        return true;
+                    break;
+                case 1:
+                    if (wg + addon->AtkValues[89].Int > 4000 || pg + addon->AtkValues[92].Int > 4000)
+                        return true;
+                    break;
+                case 2:
+                    if (wg + addon->AtkValues[117].Int > 4000 || pg + addon->AtkValues[120].Int > 4000)
+                        return true;
+                    break;
+            }
+        }
+        if (invItemColectability >= item.Collectability2)
+        {
+            switch (row)
+            {
+                case 0:
+                    if (wc + addon->AtkValues[60].Int > 4000 || pc + addon->AtkValues[63].Int > 4000)
+                        return true;
+                    break;
+                case 1:
+                    if (wg + addon->AtkValues[88].Int > 4000 || pg + addon->AtkValues[91].Int > 4000)
+                        return true;
+                    break;
+                case 2:
+                    if (wg + addon->AtkValues[116].Int > 4000 || pg + addon->AtkValues[119].Int > 4000)
+                        return true;
+                    break;
+            }
+        }
+        if (invItemColectability >= item.Collectability1)
+        {
+            switch (row)
+            {
+                case 0:
+                    if (wc + addon->AtkValues[59].Int > 4000 || pc + addon->AtkValues[62].Int > 4000)
+                        return true;
+                    break;
+                case 1:
+                    if (wg + addon->AtkValues[87].Int > 4000 || pg + addon->AtkValues[90].Int > 4000)
+                        return true;
+                    break;
+                case 2:
+                    if (wg + addon->AtkValues[115].Int > 4000 || pg + addon->AtkValues[118].Int > 4000)
+                        return true;
+                    break;
+            }
+        }
+        return false;
+    }
+
+    private static unsafe (InventoryType inv, int slot)? FindItemInInventory(uint itemId)
+    {
+        IEnumerable<InventoryType> x = [InventoryType.Inventory1, InventoryType.Inventory2, InventoryType.Inventory3, InventoryType.Inventory4];
+        foreach (var inv in x)
+        {
+            var cont = InventoryManager.Instance()->GetInventoryContainer(inv);
+            for (var i = 0; i < cont->Size; ++i)
+            {
+                if (cont->GetInventorySlot(i)->ItemID == itemId)
+                {
+                    return (inv, i);
+                }
+            }
+        }
+        return null;
     }
 
     private static List<int> SlotsFilled { get; set; } = [];
