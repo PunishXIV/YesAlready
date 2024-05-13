@@ -24,7 +24,7 @@ internal class AddonLotteryWeeklyInput : BaseFeature
     {
         var addon = (AtkUnitBase*)addonInfo.Addon;
 
-        if (!P.Active || !P.Config.LordOfVerminionQuit)
+        if (!P.Active || !P.Config.LotteryWeeklyInput)
             return;
 
         Callback.Fire(addon, true, new Random().Next(0, 10000));
