@@ -10,7 +10,7 @@
         <Platforms>x64</Platforms>
         <LangVersion>preview</LangVersion>
         <PluginName>YesAlready</PluginName>
-        <DalamudDevPlugins>$(appdata)\XIVLauncher\dev\$(PluginName)\</DalamudDevPlugins>
+        <DalamudDevPlugins>$(appdata)\XIVLauncher\devPlugins\$(PluginName)\</DalamudDevPlugins>
         <DalamudLibPath>$(appdata)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
         <DalamudPluginPath>$(appdata)\XIVLauncher\installedPlugins\$(PluginName)\$(version)</DalamudPluginPath>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
