@@ -28,7 +28,7 @@ internal class AddonTalkFeature : BaseFeature
 
     private ClickTalk? clickTalk = null;
     private IntPtr lastTalkAddon = IntPtr.Zero;
-    private string lastTalkTarget = String.Empty;
+    private string lastTalkTarget = string.Empty;
     private bool matched = false;
 
     protected unsafe void AddonUpdate(AddonEvent eventType, AddonArgs addonInfo)
