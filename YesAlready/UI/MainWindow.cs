@@ -1,5 +1,6 @@
 using ClickLib.Exceptions;
 using Dalamud.Game.ClientState.Keys;
+using Dalamud.Game.Text;
 using Dalamud.Interface;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility;
@@ -595,37 +596,72 @@ internal class MainWindow : Window
         IndentedTextColored(shadedColor, "Automatically turn in any available collectables for Custom Deliveries.");
 
         #endregion
+        #region MKSRecordQuit
+
+        var ccquit = P.Config.MKSRecordQuit;
+        if (ImGui.Checkbox("MKSRecord", ref ccquit))
+        {
+            P.Config.MKSRecordQuit = ccquit;
+            P.Config.Save();
+        }
+
+        IndentedTextColored(shadedColor, "Automatically leave the Crystalline Conflict match when the results appear.");
+
+        #endregion
     }
 
+    private XivChatType? selectedChannel;
     private void DisplayMiscOptions()
     {
         using var tab = ImRaii.TabItem("Settings");
         if (!tab) return;
-        using var idScope = ImRaii.PushId("Server info bar");
-
-        try
+        using (ImRaii.PushId("Server info bar"))
         {
-            var config = DalamudReflector.GetService("Dalamud.Configuration.Internal.DalamudConfiguration");
-            var dtrList = config.GetFoP<List<string>>("DtrIgnore");
-            var enabled = !dtrList.Contains(Svc.PluginInterface.InternalName);
-            if (ImGui.Checkbox("DTR", ref enabled))
+            try
             {
-                if (enabled)
+                var config = DalamudReflector.GetService("Dalamud.Configuration.Internal.DalamudConfiguration");
+                var dtrList = config.GetFoP<List<string>>("DtrIgnore");
+                var enabled = !dtrList.Contains(Svc.PluginInterface.InternalName);
+                if (ImGui.Checkbox("DTR", ref enabled))
                 {
-                    dtrList.Remove(Svc.PluginInterface.InternalName);
+                    if (enabled)
+                    {
+                        dtrList.Remove(Svc.PluginInterface.InternalName);
+                    }
+                    else
+                    {
+                        dtrList.Add(Svc.PluginInterface.InternalName);
+                    }
+                    config.Call("QueueSave", []);
                 }
-                else
-                {
-                    dtrList.Add(Svc.PluginInterface.InternalName);
-                }
-                config.Call("QueueSave", []);
+                IndentedTextColored(shadedColor, $"Display the status of the {Name} in the Server Info Bar (DTR Bar). Clicking toggles the plugin.");
             }
-            IndentedTextColored(shadedColor, $"Display the status of the {Name} in the Server Info Bar (DTR Bar). Clicking toggles the plugin.");
+            catch (Exception e)
+            {
+                ImGuiEx.TextWrapped(ImGuiColors.DalamudRed, $"{e}");
+            }
         }
-        catch (Exception e)
+
+        using (var combo = ImRaii.Combo("###ChatChannelSelect", $"{Enum.GetName(typeof(XivChatType), P.Config.MessageChannel)}"))
         {
-            ImGuiEx.TextWrapped(ImGuiColors.DalamudRed, $"{e}");
+            if (combo)
+            {
+                foreach (var type in Enum.GetValues<XivChatType>())
+                {
+                    using (ImRaii.PushId(type.ToString()))
+                    {
+                        var selected = ImGui.Selectable($"{type}", type == selectedChannel);
+
+                        if (selected)
+                        {
+                            P.Config.MessageChannel = type;
+                            P.Config.Save();
+                        }
+                    }
+                }
+            }
         }
+        IndentedTextColored(shadedColor, $"Select the chat channel for {Name} messages to output to.");
     }
 
     // ====================================================================================================

@@ -4,6 +4,7 @@ using System.Linq;
 
 using Dalamud.Configuration;
 using Dalamud.Game.ClientState.Keys;
+using Dalamud.Game.Text;
 using Dalamud.Plugin;
 using ECommons.DalamudServices;
 using Newtonsoft.Json;
@@ -14,6 +15,7 @@ public partial class Configuration() : IPluginConfiguration
 {
     public int Version { get; set; } = 1;
     public bool Enabled { get; set; } = true;
+    public XivChatType MessageChannel { get; set; } = Svc.PluginInterface.GeneralChatType;
 
     public VirtualKey ForcedYesKey { get; set; } = VirtualKey.NO_KEY;
     public VirtualKey ForcedTalkKey { get; set; } = VirtualKey.NO_KEY;
@@ -58,6 +60,7 @@ public partial class Configuration() : IPluginConfiguration
     public TradeMultipleMode TransmuteMode { get; set; } = TradeMultipleMode.AllSame;
     public bool KupoOfFortune { get; set; } = false;
     public bool CustomDeliveries { get; set; } = false;
+    public bool MKSRecordQuit { get; set; } = false;
 
     public enum TradeMultipleMode
     {
