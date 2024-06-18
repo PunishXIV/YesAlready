@@ -64,6 +64,13 @@ internal class AddonSelectYesNoFeature : BaseFeature
             return;
         }
 
+        if (P.Config.ReturnOnlyWhenAlive && returnPatterns.Any(r => r.IsMatch(text)) && !Svc.ClientState.LocalPlayer.IsDead)
+        {
+            Svc.Log.Debug($"AddonSelectYesNo: Entry is return confirmation and player is alive");
+            AddonSelectYesNoExecute((nint)addon, true);
+            return;
+        }
+
         var zoneWarnOnce = true;
         var nodes = P.Config.GetAllNodes().OfType<TextEntryNode>();
         foreach (var node in nodes)
@@ -179,6 +186,16 @@ internal class AddonSelectYesNoFeature : BaseFeature
         new Regex(@".*のパーティに参加します。よろしいですか？"),
         new Regex(@"Der Gruppe von .* beitreten\?"),
         new Regex(@"Rejoindre l'équipe de .*\?")
+        // if someone could add the chinese and korean translations that'd be nice
+    ];
+
+    private readonly List<Regex> returnPatterns =
+    [
+        new Regex(@"Return to .*\?"),
+        new Regex(@"ホームポイントに戻りますか？"),
+        new Regex(@"Zum Heimatpunkt .* zurückkehren\?"),
+        new Regex(@"Vous avez perdu conscience. Aller à votre point de retour .*\?")
+        // if someone could add the chinese and korean translations that'd be nice
     ];
 
     [StructLayout(LayoutKind.Explicit, Size = 0x10)]

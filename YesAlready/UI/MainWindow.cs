@@ -608,6 +608,18 @@ internal class MainWindow : Window
         IndentedTextColored(shadedColor, "Automatically leave the Crystalline Conflict match when the results appear.");
 
         #endregion
+        #region MKSRecordQuit
+
+        var aliveRet = P.Config.ReturnOnlyWhenAlive;
+        if (ImGui.Checkbox("Return x SelectYesno", ref aliveRet))
+        {
+            P.Config.ReturnOnlyWhenAlive = aliveRet;
+            P.Config.Save();
+        }
+
+        IndentedTextColored(shadedColor, "Automatically accept the return prompt only when the player is alive.");
+
+        #endregion
     }
 
     private XivChatType? selectedChannel;

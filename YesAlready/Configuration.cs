@@ -61,6 +61,7 @@ public partial class Configuration() : IPluginConfiguration
     public bool KupoOfFortune { get; set; } = false;
     public bool CustomDeliveries { get; set; } = false;
     public bool MKSRecordQuit { get; set; } = false;
+    public bool ReturnOnlyWhenAlive { get; set; } = false;
 
     public enum TradeMultipleMode
     {
