@@ -1,5 +1,3 @@
-using ECommons.DalamudServices;
-
 namespace YesAlready.IPC
 {
     internal static class YesAlreadyIPC

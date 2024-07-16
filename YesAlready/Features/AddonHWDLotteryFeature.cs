@@ -11,16 +11,16 @@ internal class AddonHWDLotteryFeature : BaseFeature
     public override void Enable()
     {
         base.Enable();
-        AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "HWDLottery", AddonSetup);
-        AddonLifecycle.RegisterListener(AddonEvent.PostUpdate, "HWDLottery", AddonUpdate);
+        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "HWDLottery", AddonSetup);
+        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostUpdate, "HWDLottery", AddonUpdate);
     }
 
 
     public override void Disable()
     {
         base.Disable();
-        AddonLifecycle.UnregisterListener(AddonSetup);
-        AddonLifecycle.UnregisterListener(AddonUpdate);
+        Svc.AddonLifecycle.UnregisterListener(AddonSetup);
+        Svc.AddonLifecycle.UnregisterListener(AddonUpdate);
     }
 
     protected static unsafe void AddonSetup(AddonEvent eventType, AddonArgs args)
@@ -45,7 +45,7 @@ internal class AddonHWDLotteryFeature : BaseFeature
         {
             var eventData = new AtkEvent();
             var inputData = stackalloc int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-            addon->ReceiveEvent(AtkEventType.ButtonClick, 0, &eventData, (nint)inputData);
+            addon->ReceiveEvent(AtkEventType.ButtonClick, 0, &eventData);
         }
     }
 }

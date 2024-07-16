@@ -1,5 +1,4 @@
 using Dalamud.Interface;
-using ECommons.DalamudServices;
 using ImGuiNET;
 using System.Numerics;
 using System.Text;
@@ -69,7 +68,7 @@ public static class Talk
 
     public static void DisplayTalkEntryNode(TalkEntryNode node)
     {
-        var validTarget = (node.TargetIsRegex && node.TargetRegex != null) || !node.TargetIsRegex;
+        var validTarget = node.TargetIsRegex && node.TargetRegex != null || !node.TargetIsRegex;
 
         if (!node.Enabled && !validTarget)
             ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(.5f, 0, 0, 1));

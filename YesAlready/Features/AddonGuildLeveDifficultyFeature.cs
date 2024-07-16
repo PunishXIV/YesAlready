@@ -11,12 +11,13 @@ internal class AddonGuildLeveDifficultyFeature : BaseFeature
     public override void Enable()
     {
         base.Enable();
-        AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "GuildLeveDifficulty", AddonSetup);
+        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "GuildLeveDifficulty", AddonSetup);
     }
 
-    public override void Disable() {
+    public override void Disable()
+    {
         base.Disable();
-        AddonLifecycle.UnregisterListener(AddonSetup);
+        Svc.AddonLifecycle.UnregisterListener(AddonSetup);
     }
 
     protected static unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)

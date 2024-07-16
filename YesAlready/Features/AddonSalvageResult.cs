@@ -1,8 +1,7 @@
-using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
 using Dalamud.Game.Addon.Lifecycle;
-using ECommons.Automation;
-using ECommons.DalamudServices;
-using FFXIVClientStructs.FFXIV.Component.GUI;
+using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
+using ECommons;
+using ECommons.UIHelpers.AddonMasterImplementations;
 using YesAlready.BaseFeatures;
 
 namespace YesAlready.Features;
@@ -12,24 +11,29 @@ internal class AddonSalvageResult : BaseFeature
     public override void Enable()
     {
         base.Enable();
-        AddonLifecycle.RegisterListener(AddonEvent.PostUpdate, "SalvageResult", AddonUpdate);
-        AddonLifecycle.RegisterListener(AddonEvent.PostUpdate, "SalvageAutoDialog", AddonUpdate);
+        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "SalvageResult", AddonSetup);
+        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostUpdate, "SalvageAutoDialog", AddonUpdate);
     }
 
     public override void Disable()
     {
         base.Disable();
-        AddonLifecycle.UnregisterListener(AddonUpdate);
+        Svc.AddonLifecycle.UnregisterListener(AddonSetup);
+        Svc.AddonLifecycle.UnregisterListener(AddonUpdate);
+    }
+
+    protected static unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
+    {
+        if (!P.Active || !P.Config.DesynthesisResults || !GenericHelpers.IsAddonReady(addonInfo.Base())) return;
+        var addon = new AddonMaster.SalvageResult(addonInfo.Base());
+        addon.Close();
     }
 
     protected static unsafe void AddonUpdate(AddonEvent eventType, AddonArgs addonInfo)
     {
-        var addon = (AtkUnitBase*)addonInfo.Addon;
-
-        if (!P.Active || !P.Config.DesynthesisResults)
-            return;
-
-        Svc.Log.Debug("Closing Salvage Auto Results menu");
-        Callback.Fire(addon, true, 1);
+        if (!P.Active || !P.Config.DesynthesisResults || !GenericHelpers.IsAddonReady(addonInfo.Base())) return;
+        var addon = new AddonMaster.SalvageAutoDialog(addonInfo.Base());
+        if (addon.DesynthesisInactive)
+            addon.EndDesynthesis();
     }
 }

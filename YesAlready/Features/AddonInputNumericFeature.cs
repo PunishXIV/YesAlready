@@ -1,7 +1,6 @@
 using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
 using ECommons.Automation;
-using ECommons.DalamudServices;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using System;
 using System.Linq;
@@ -13,13 +12,13 @@ internal class AddonInputNumericFeature : BaseFeature
     public override void Enable()
     {
         base.Enable();
-        AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "InputNumeric", AddonSetup);
+        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "InputNumeric", AddonSetup);
     }
 
     public override void Disable()
     {
         base.Disable();
-        AddonLifecycle.UnregisterListener(AddonSetup);
+        Svc.AddonLifecycle.UnregisterListener(AddonSetup);
     }
 
     protected static unsafe void AddonSetup(AddonEvent eventType, AddonArgs args)
@@ -43,13 +42,10 @@ internal class AddonInputNumericFeature : BaseFeature
 
             Svc.Log.Debug("AddonInputNumeric: Selecting ok");
             var value = Math.Clamp(node.IsPercent ? (uint)Math.Ceiling(max * (node.Percentage / 100f)) : (uint)node.Quantity, min, max);
-            Callback.Fire(addon, true, value);
+            Callback.Fire(addon, true, (int)value);
             return;
         }
     }
     private static bool EntryMatchesText(NumericsEntryNode node, string text)
-    {
-        return (node.IsTextRegex && (node.TextRegex?.IsMatch(text) ?? false)) ||
-              (!node.IsTextRegex && text.Contains(node.Text));
-    }
+        => node.IsTextRegex && (node.TextRegex?.IsMatch(text) ?? false) || !node.IsTextRegex && text.Contains(node.Text);
 }

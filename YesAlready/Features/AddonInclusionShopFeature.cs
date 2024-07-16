@@ -3,7 +3,7 @@ using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
 using Dalamud.Hooking;
 using Dalamud.Utility.Signatures;
-using ECommons.DalamudServices;
+using ECommons.EzHookManager;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using YesAlready.BaseFeatures;
 using YesAlready.Utils;
@@ -11,18 +11,18 @@ using ValueType = FFXIVClientStructs.FFXIV.Component.GUI.ValueType;
 
 namespace YesAlready.Features;
 
-internal class AddonInclusionShopFeature : BaseFeature, IDisposable
+internal class AddonInclusionShopFeature : BaseFeature
 {
     public override void Enable()
     {
         base.Enable();
-        AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "InclusionShop", AddonSetup);
+        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "InclusionShop", AddonSetup);
     }
 
     public override void Disable()
     {
         base.Disable();
-        AddonLifecycle.UnregisterListener(AddonSetup);
+        Svc.AddonLifecycle.UnregisterListener(AddonSetup);
     }
 
     protected unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
@@ -41,20 +41,13 @@ internal class AddonInclusionShopFeature : BaseFeature, IDisposable
         addon->FireCallback(2, subcategoryValues);
     }
 
-    [Signature("48 89 5C 24 ?? 57 48 83 EC 20 48 8B DA 4D 8B D0 32 D2", DetourName = nameof(AgentReceiveEventDetour))]
-    private readonly Hook<AgentReceiveEventDelegate> agentReceiveEventHook = null!;
+    [EzHook("40 53 48 83 EC ?? 48 8B DA 4D 8B D0", detourName: nameof(AgentReceiveEventDetour), true)]
+    private readonly EzHook<AgentReceiveEventDelegate> agentReceiveEventHook = null!;
     private unsafe delegate IntPtr AgentReceiveEventDelegate(IntPtr agent, IntPtr eventData, AtkValue* values, uint valueCount, ulong eventKind);
 
     public AddonInclusionShopFeature()
     {
-        Svc.Hook.InitializeFromAttributes(this);
-        agentReceiveEventHook.Enable();
-    }
-
-    public void Dispose()
-    {
-        agentReceiveEventHook.Disable();
-        agentReceiveEventHook.Dispose();
+        EzSignatureHelper.Initialize(this);
     }
 
     private unsafe IntPtr AgentReceiveEventDetour(IntPtr agent, IntPtr eventData, AtkValue* values, uint valueCount, ulong eventKind)

@@ -1,7 +1,6 @@
-using ClickLib.Clicks;
 using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
-using FFXIVClientStructs.FFXIV.Component.GUI;
+using ECommons.UIHelpers.AddonMasterImplementations;
 using YesAlready.BaseFeatures;
 
 namespace YesAlready.Features;
@@ -11,22 +10,21 @@ internal class AddonContentsFinderConfirmFeature : BaseFeature
     public override void Enable()
     {
         base.Enable();
-        AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "ContentsFinderConfirm", AddonSetup);
+        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "ContentsFinderConfirm", AddonSetup);
     }
 
-    public override void Disable() {
+    public override void Disable()
+    {
         base.Disable();
-        AddonLifecycle.UnregisterListener(AddonSetup);
+        Svc.AddonLifecycle.UnregisterListener(AddonSetup);
     }
 
     protected static unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
     {
-        var addon = (AtkUnitBase*)addonInfo.Addon;
+        if (!P.Active || !P.Config.ContentsFinderConfirmEnabled) return;
 
-        if (!P.Active || !P.Config.ContentsFinderConfirmEnabled)
-            return;
-
-        ClickContentsFinderConfirm.Using((nint)addon).Commence();
+        var addon = new AddonMaster.ContentsFinderConfirm(addonInfo.Base());
+        addon.Commence();
 
         if (P.Config.ContentsFinderOneTimeConfirmEnabled)
         {

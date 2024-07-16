@@ -5,8 +5,6 @@ using System.Linq;
 using Dalamud.Configuration;
 using Dalamud.Game.ClientState.Keys;
 using Dalamud.Game.Text;
-using Dalamud.Plugin;
-using ECommons.DalamudServices;
 using Newtonsoft.Json;
 
 namespace YesAlready;
@@ -29,6 +27,8 @@ public partial class Configuration() : IPluginConfiguration
     public bool DesynthDialogEnabled { get; set; } = false;
     public bool DesynthBulkDialogEnabled { get; set; } = false;
     public bool MaterializeDialogEnabled { get; set; } = false;
+    public bool MaterialAttachDialogEnabled { get; set; } = false;
+    public bool OnlyMeldWhenGuaranteed { get; set; } = true;
     public bool MateriaRetrieveDialogEnabled { get; set; } = false;
     public bool ItemInspectionResultEnabled { get; set; } = false;
     public int ItemInspectionResultRateLimiter { get; set; } = 0;
@@ -48,20 +48,21 @@ public partial class Configuration() : IPluginConfiguration
     public bool FallGuysExitConfirm { get; set; } = false;
     public bool RetainerTransferListConfirm { get; set; } = false;
     public bool RetainerTransferProgressConfirm { get; set; } = false;
-    public bool DesynthesisResults {  get; set; } = false;
+    public bool DesynthesisResults { get; set; } = false;
     public bool AetherialReductionResults { get; set; } = false;
     public bool FashionCheckQuit { get; set; } = false;
     public bool LordOfVerminionQuit { get; set; } = false;
     public bool ChocoboRacingQuit { get; set; } = false;
     public bool PartyFinderJoinConfirm { get; set; } = false;
     public bool GimmickYesNo { get; set; } = false;
+    public bool AutoCollectable { get; set; } = false;
     public bool LotteryWeeklyInput { get; set; } = false;
     public bool TradeMultiple { get; set; } = false;
     public TradeMultipleMode TransmuteMode { get; set; } = TradeMultipleMode.AllSame;
     public bool KupoOfFortune { get; set; } = false;
     public bool CustomDeliveries { get; set; } = false;
     public bool MKSRecordQuit { get; set; } = false;
-    public bool ReturnOnlyWhenAlive { get; set; } = false;
+    public bool DataCentreTravelConfirmEnabled { get; set; } = false;
 
     public enum TradeMultipleMode
     {
@@ -81,9 +82,7 @@ public partial class Configuration() : IPluginConfiguration
         return conf ?? new Configuration();
     }
 
-    public void Save() => pi.SavePluginConfig(this);
-
-    public static void Initialize(DalamudPluginInterface pluginInterface) => pi = pluginInterface;
+    public void Save() => Svc.PluginInterface.SavePluginConfig(this);
 
     public IEnumerable<ITextNode> GetAllNodes()
     {

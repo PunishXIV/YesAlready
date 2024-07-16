@@ -2,7 +2,6 @@ using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Memory;
-using ECommons.DalamudServices;
 using System;
 using System.Linq;
 

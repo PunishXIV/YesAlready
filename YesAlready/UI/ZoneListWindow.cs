@@ -1,35 +1,25 @@
+using Dalamud.Interface.Utility.Raii;
+using Dalamud.Interface.Windowing;
+using ImGuiNET;
 using System.Linq;
 using System.Numerics;
-
-using Dalamud.Interface.Windowing;
-using ECommons.DalamudServices;
-using ImGuiNET;
 
 namespace YesAlready.Interface;
 
 internal class ZoneListWindow : Window
 {
+    public static string Title = $"{Name} Zone List";
     private bool sortZoneByName = false;
-
-    public ZoneListWindow()
-        : base("Yes Already Zone List")
+    public ZoneListWindow() : base(Title)
     {
         Size = new Vector2(525, 600);
         SizeCondition = ImGuiCond.FirstUseEver;
     }
 
-    public override void PreDraw()
-    {
-        ImGui.PushStyleColor(ImGuiCol.ResizeGrip, 0);
-    }
-
-    public override void PostDraw()
-    {
-        ImGui.PopStyleColor();
-    }
-
     public override void Draw()
     {
+        using var _ = ImRaii.PushColor(ImGuiCol.ResizeGrip, 0);
+
         ImGui.Text($"Current ID: {Svc.ClientState.TerritoryType}");
 
         ImGui.Checkbox("Sort by Name", ref sortZoneByName);

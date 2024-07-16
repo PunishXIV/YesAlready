@@ -70,6 +70,8 @@ public class TextEntryNode : ITextNode
     }
 
 
+    public bool RequiresPlayerConditions { get; set; } = false;
+    public string PlayerConditions { get; set; } = string.Empty;
     public bool IsConditional { get; set; } = false;
     public string ConditionalNumberTemplate { get; set; } = string.Empty;
     public int ConditionalNumber { get; set; } = 0;
@@ -264,6 +266,29 @@ public class NumericsEntryNode : ITextNode
             }
         }
     }
+
+    //public bool TargetRestricted { get; set; } = false;
+
+    //public string TargetText { get; set; } = string.Empty;
+
+    //[JsonIgnore]
+    //public bool TargetIsRegex => TargetText.StartsWith("/") && TargetText.EndsWith("/");
+
+    //[JsonIgnore]
+    //public Regex? TargetRegex
+    //{
+    //    get
+    //    {
+    //        try
+    //        {
+    //            return new(TargetText.Trim('/'), RegexOptions.Compiled | RegexOptions.IgnoreCase);
+    //        }
+    //        catch
+    //        {
+    //            return null;
+    //        }
+    //    }
+    //}
 }
 
 public class TextFolderNode : ITextNode

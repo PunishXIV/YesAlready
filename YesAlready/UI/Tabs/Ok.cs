@@ -67,7 +67,7 @@ public static class Ok
 
     public static void DisplayOkEntryNode(OkEntryNode node)
     {
-        var validRegex = (node.IsTextRegex && node.TextRegex != null) || !node.IsTextRegex;
+        var validRegex = node.IsTextRegex && node.TextRegex != null || !node.IsTextRegex;
 
         if (!node.Enabled && !validRegex)
             ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(.5f, 0, 0, 1));

@@ -1,10 +1,7 @@
-using System.Linq;
-
-using ClickLib.Clicks;
 using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
-using ECommons.DalamudServices;
-using FFXIVClientStructs.FFXIV.Component.GUI;
+using ECommons.UIHelpers.AddonMasterImplementations;
+using System.Linq;
 using YesAlready.BaseFeatures;
 
 namespace YesAlready.Features;
@@ -14,23 +11,21 @@ internal class AddonSelectOkFeature : BaseFeature
     public override void Enable()
     {
         base.Enable();
-        AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "SelectOk", AddonSetup);
+        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "SelectOk", AddonSetup);
     }
 
     public override void Disable()
     {
         base.Disable();
-        AddonLifecycle.UnregisterListener(AddonSetup);
+        Svc.AddonLifecycle.UnregisterListener(AddonSetup);
     }
 
     protected unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
     {
-        var addon = (AtkUnitBase*)addonInfo.Addon;
+        if (!P.Active) return;
 
-        if (!P.Active)
-            return;
-
-        var text = P.LastSeenOkText = Utils.SEString.GetSeStringText(new nint(addon->AtkValues[0].String));
+        var addon = new AddonMaster.SelectOk(addonInfo.Base());
+        var text = P.LastSeenOkText = addon.Text;
         Svc.Log.Debug($"AddonSelectOk: text={text}");
 
         var nodes = P.Config.GetAllNodes().OfType<OkEntryNode>();
@@ -43,14 +38,11 @@ internal class AddonSelectOkFeature : BaseFeature
                 continue;
 
             Svc.Log.Debug("AddonSelectOk: Selecting ok");
-            ClickSelectOk.Using(new nint(addon)).Ok();
+            addon.Ok();
             return;
         }
     }
 
     private static bool EntryMatchesText(OkEntryNode node, string text)
-    {
-        return (node.IsTextRegex && (node.TextRegex?.IsMatch(text) ?? false)) ||
-              (!node.IsTextRegex && text.Contains(node.Text));
-    }
+        => node.IsTextRegex && (node.TextRegex?.IsMatch(text) ?? false) || !node.IsTextRegex && text.Contains(node.Text);
 }

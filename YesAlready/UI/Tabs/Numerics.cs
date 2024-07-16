@@ -97,8 +97,6 @@ public static class Numerics
 
         ImGui.PopStyleVar(); // ItemSpacing
 
-        ImGui.NewLine();
-
         var percent = node.IsPercent;
         if (ImGui.Checkbox("Percentage", ref percent))
         {
@@ -127,5 +125,39 @@ public static class Numerics
                 P.Config.Save();
             }
         }
+
+        //var targetRestricted = node.TargetRestricted;
+        //if (ImGui.Checkbox("Target Restricted", ref targetRestricted))
+        //{
+        //    node.TargetRestricted = targetRestricted;
+        //    P.Config.Save();
+        //}
+
+        //var searchPlusWidth = Utils.ImGuiEx.GetIconButtonWidth(FontAwesomeIcon.SearchPlus);
+
+        //ImGui.SameLine(ImGui.GetContentRegionMax().X - searchPlusWidth);
+        //if (Utils.ImGuiEx.IconButton(FontAwesomeIcon.SearchPlus, "Fill with current target"))
+        //{
+        //    var target = Svc.Targets.Target;
+        //    var name = target?.Name?.TextValue ?? string.Empty;
+
+        //    if (!string.IsNullOrEmpty(name))
+        //    {
+        //        node.TargetText = name;
+        //        P.Config.Save();
+        //    }
+        //    else
+        //    {
+        //        node.TargetText = "Could not find target";
+        //        P.Config.Save();
+        //    }
+        //}
+
+        //var targetText = node.TargetText;
+        //if (ImGui.InputText($"##{node.Name}-targetText", ref targetText, 10_000, ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EnterReturnsTrue))
+        //{
+        //    node.TargetText = targetText;
+        //    P.Config.Save();
+        //}
     }
 }

@@ -1,5 +1,5 @@
 using Dalamud.Interface;
-using ECommons.DalamudServices;
+using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 using System.Numerics;
 using System.Text;
@@ -63,8 +63,8 @@ public static class Lists
 
     public static void DisplayListEntryNode(ListEntryNode node)
     {
-        var validRegex = (node.IsTextRegex && node.TextRegex != null) || !node.IsTextRegex;
-        var validTarget = !node.TargetRestricted || (node.TargetIsRegex && node.TargetRegex != null) || !node.TargetIsRegex;
+        var validRegex = node.IsTextRegex && node.TextRegex != null || !node.IsTextRegex;
+        var validTarget = !node.TargetRestricted || node.TargetIsRegex && node.TargetRegex != null || !node.TargetIsRegex;
 
         if (!node.Enabled && (!validRegex || !validTarget))
             ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(.5f, 0, 0, 1));

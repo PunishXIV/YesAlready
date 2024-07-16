@@ -1,4 +1,3 @@
-using ClickLib.Exceptions;
 using Dalamud.Game.ClientState.Keys;
 using Dalamud.Game.Text;
 using Dalamud.Interface;
@@ -7,8 +6,6 @@ using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using ECommons;
-using ECommons.DalamudServices;
-using ECommons.ImGuiMethods;
 using ECommons.Reflection;
 using ImGuiNET;
 using System;
@@ -16,6 +13,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using YesAlready.UI.Tabs;
+using YesAlready.Utils;
 
 namespace YesAlready.UI;
 
@@ -54,7 +52,6 @@ internal class MainWindow : Window
     ];
 
     private static ITextNode? DraggedNode;
-    private string debugClickName = string.Empty;
 
     private static TextFolderNode YesNoRootFolder => P.Config.RootFolder;
     private static TextFolderNode OkRootFolder => P.Config.OkRootFolder;
@@ -67,16 +64,9 @@ internal class MainWindow : Window
 
     public override void Draw()
     {
-#if DEBUG
-        UiBuilder_TestButton();
-        if (ImGui.Button("Enable Features")) EnableFeatures(true);
-        ImGui.SameLine();
-        if (ImGui.Button("Disable Features")) EnableFeatures(false);
-#endif
-
         if (P.BlockListHandler.Locked)
         {
-            ImGuiEx.TextWrapped(ImGuiColors.DalamudRed, $"Yes Already function is paused because following plugins have requested it: {P.BlockListHandler.BlockList.Print()}");
+            ECommons.ImGuiMethods.ImGuiEx.TextWrapped(ImGuiColors.DalamudRed, $"Yes Already function is paused because following plugins have requested it: {P.BlockListHandler.BlockList.Print()}");
             if (ImGui.Button("Force unlock"))
             {
                 P.BlockListHandler.BlockList.Clear();
@@ -102,47 +92,6 @@ internal class MainWindow : Window
             DisplayMiscOptions();
         }
     }
-
-    private static void IndentedTextColored(Vector4 color, string text)
-    {
-        var indent = 27f * ImGuiHelpers.GlobalScale;
-        ImGui.Indent(indent);
-        ImGui.PushStyleColor(ImGuiCol.Text, color);
-        ImGui.TextWrapped(text);
-        ImGui.PopStyleColor();
-        ImGui.Unindent(indent);
-    }
-
-    #region Testing
-
-    private void UiBuilder_TestButton()
-    {
-        ImGui.InputText("ClickName", ref debugClickName, 100);
-        ImGui.SameLine();
-        if (ImGuiEx.IconButton(FontAwesomeIcon.Check, "Submit"))
-        {
-            try
-            {
-                debugClickName ??= string.Empty;
-                ClickLib.Click.SendClick(debugClickName.Trim());
-                Svc.Log.Info($"Clicked {debugClickName} successfully.");
-            }
-            catch (ClickNotFoundError ex)
-            {
-                Svc.Log.Error(ex.Message);
-            }
-            catch (InvalidClickException ex)
-            {
-                Svc.Log.Error(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                Svc.Log.Error(ex.Message);
-            }
-        }
-    }
-
-    #endregion
 
     // ====================================================================================================
 
@@ -178,7 +127,7 @@ internal class MainWindow : Window
             P.Config.Save();
         }
 
-        IndentedTextColored(shadedColor, $"While this key is held, the plugin is disabled.");
+        ImGuiEx.IndentedTextColored($"While this key is held, the plugin is disabled.");
 
         #endregion
         #region Forced Yes hotkey
@@ -217,7 +166,7 @@ internal class MainWindow : Window
             }
         }
 
-        IndentedTextColored(shadedColor, $"While this key is held, any Yes/No prompt will always default to yes and all talk dialogue will be skipped. Be careful.");
+        ImGuiEx.IndentedTextColored($"While this key is held, any Yes/No prompt will always default to yes and all talk dialogue will be skipped. Be careful.");
 
         #endregion
         #region SalvageDialog
@@ -229,7 +178,7 @@ internal class MainWindow : Window
             P.Config.Save();
         }
 
-        IndentedTextColored(shadedColor, "Remove the Desynthesis menu confirmation.");
+        ImGuiEx.IndentedTextColored("Remove the Desynthesis menu confirmation.");
 
         #endregion
         #region SalvageDialog (Bulk)
@@ -241,7 +190,7 @@ internal class MainWindow : Window
             P.Config.Save();
         }
 
-        IndentedTextColored(shadedColor, "Check the bulk desynthesis button when using the SalvageDialog feature.");
+        ImGuiEx.IndentedTextColored("Check the bulk desynthesis button when using the SalvageDialog feature.");
 
         #endregion
         #region SalvageResult
@@ -253,7 +202,7 @@ internal class MainWindow : Window
             P.Config.Save();
         }
 
-        IndentedTextColored(shadedColor, "Automatically closes the SalvageResults window when done desynthing.");
+        ImGuiEx.IndentedTextColored("Automatically closes the SalvageResults window when done desynthing.");
 
         #endregion
         #region PurifyResult
@@ -265,7 +214,31 @@ internal class MainWindow : Window
             P.Config.Save();
         }
 
-        IndentedTextColored(shadedColor, "Automatically closes the PurifyResult window when done reducing.");
+        ImGuiEx.IndentedTextColored("Automatically closes the PurifyResult window when done reducing.");
+
+        #endregion
+        #region MateriaAttachDialog
+
+        var meld = P.Config.MaterialAttachDialogEnabled;
+        if (ImGui.Checkbox("MateriaAttachDialog", ref meld))
+        {
+            P.Config.MaterialAttachDialogEnabled = meld;
+            P.Config.Save();
+        }
+
+        ImGuiEx.IndentedTextColored("Remove the materia melding confirmation menu.");
+
+        if (P.Config.MaterialAttachDialogEnabled)
+        {
+            ImGui.Indent();
+            var onlySuccess = P.Config.OnlyMeldWhenGuaranteed;
+            if (ImGui.Checkbox("Only function when the success rate is guaranteed (100%)", ref onlySuccess))
+            {
+                P.Config.OnlyMeldWhenGuaranteed = onlySuccess;
+                P.Config.Save();
+            }
+            ImGui.Unindent();
+        }
 
         #endregion
         #region MaterializeDialog
@@ -277,7 +250,7 @@ internal class MainWindow : Window
             P.Config.Save();
         }
 
-        IndentedTextColored(shadedColor, "Remove the create new (extract) materia confirmation.");
+        ImGuiEx.IndentedTextColored("Remove the create new (extract) materia confirmation.");
 
         #endregion
         #region MateriaRetrieveDialog
@@ -289,7 +262,7 @@ internal class MainWindow : Window
             P.Config.Save();
         }
 
-        IndentedTextColored(shadedColor, "Remove the retrieve materia confirmation.");
+        ImGuiEx.IndentedTextColored("Remove the retrieve materia confirmation.");
 
         #endregion
         #region ItemInspectionResult
@@ -301,9 +274,9 @@ internal class MainWindow : Window
             P.Config.Save();
         }
 
-        IndentedTextColored(shadedColor, "Eureka/Bozja lockboxes, forgotten fragments, and more.\nWarning: this does not check if you are maxed on items.");
+        ImGuiEx.IndentedTextColored("Eureka/Bozja lockboxes, forgotten fragments, and more.\nWarning: this does not check if you are maxed on items.");
 
-        IndentedTextColored(shadedColor, "Rate limiter (pause after N items)");
+        ImGuiEx.IndentedTextColored("Rate limiter (pause after N items)");
         ImGui.SameLine();
 
         ImGui.PushItemWidth(100f * ImGuiHelpers.GlobalScale);
@@ -331,7 +304,7 @@ internal class MainWindow : Window
             P.Config.Save();
         }
 
-        IndentedTextColored(shadedColor, "Skip the confirmation in the final dialog before sending out a retainer.");
+        ImGuiEx.IndentedTextColored("Skip the confirmation in the final dialog before sending out a retainer.");
 
         #endregion
         #region RetainerTaskResult
@@ -343,7 +316,7 @@ internal class MainWindow : Window
             P.Config.Save();
         }
 
-        IndentedTextColored(shadedColor, "Automatically send a retainer on the same venture as before when receiving an item.");
+        ImGuiEx.IndentedTextColored("Automatically send a retainer on the same venture as before when receiving an item.");
 
         #endregion
         #region RetainerTransferList
@@ -355,12 +328,10 @@ internal class MainWindow : Window
             P.Config.Save();
         }
 
-        IndentedTextColored(shadedColor, "Skip the confirmation in the RetainerItemTransferList window to entrust all items to the retainer.");
+        ImGuiEx.IndentedTextColored("Skip the confirmation in the RetainerItemTransferList window to entrust all items to the retainer.");
 
         #endregion
         #region RetainerTransferProgress
-
-
 
         var retainerProgressDialog = P.Config.RetainerTransferProgressConfirm;
         if (ImGui.Checkbox("RetainerItemTransferProgress", ref retainerProgressDialog))
@@ -369,7 +340,7 @@ internal class MainWindow : Window
             P.Config.Save();
         }
 
-        IndentedTextColored(shadedColor, "Automatically closes the RetainerItemTransferProgress window when finished entrusting items.");
+        ImGuiEx.IndentedTextColored("Automatically closes the RetainerItemTransferProgress window when finished entrusting items.");
 
         #endregion
         #region GrandCompanySupplyReward
@@ -381,7 +352,7 @@ internal class MainWindow : Window
             P.Config.Save();
         }
 
-        IndentedTextColored(shadedColor, "Skip the confirmation when submitting Grand Company expert delivery items.");
+        ImGuiEx.IndentedTextColored("Skip the confirmation when submitting Grand Company expert delivery items.");
 
         #endregion
         #region ShopCardDialog
@@ -393,7 +364,7 @@ internal class MainWindow : Window
             P.Config.Save();
         }
 
-        IndentedTextColored(shadedColor, "Automatically confirm selling Triple Triad cards in the saucer.");
+        ImGuiEx.IndentedTextColored("Automatically confirm selling Triple Triad cards in the saucer.");
 
         #endregion
         #region JournalResultComplete
@@ -405,7 +376,7 @@ internal class MainWindow : Window
             P.Config.Save();
         }
 
-        IndentedTextColored(shadedColor, "Automatically confirm quest reward acceptance when there is nothing to choose.");
+        ImGuiEx.IndentedTextColored("Automatically confirm quest reward acceptance when there is nothing to choose.");
 
         #endregion
         #region ContentFinderConfirm
@@ -421,7 +392,7 @@ internal class MainWindow : Window
             P.Config.Save();
         }
 
-        IndentedTextColored(shadedColor, "Automatically commence duties when ready.");
+        ImGuiEx.IndentedTextColored("Automatically commence duties when ready.");
 
         #endregion
         #region ContentFinderOneTimeConfirm
@@ -437,19 +408,7 @@ internal class MainWindow : Window
             P.Config.Save();
         }
 
-        IndentedTextColored(shadedColor, "Automatically commence duties when ready, but only once.\nRequires Contents Finder Confirm, and disables both after activation.");
-
-        #endregion
-        #region PartyFinderJoinConfirm
-
-        var pfConfirm = P.Config.PartyFinderJoinConfirm;
-        if (ImGui.Checkbox("LookingForGroup x SelectYesno", ref pfConfirm))
-        {
-            P.Config.PartyFinderJoinConfirm = pfConfirm;
-            P.Config.Save();
-        }
-
-        IndentedTextColored(shadedColor, "Automatically confirm when joining a party finder group.");
+        ImGuiEx.IndentedTextColored("Automatically commence duties when ready, but only once.\nRequires Contents Finder Confirm, and disables both after activation.");
 
         #endregion
         #region InclusionShop
@@ -461,7 +420,7 @@ internal class MainWindow : Window
             P.Config.Save();
         }
 
-        IndentedTextColored(shadedColor, "Remember the last panel visited on the scrip exchange window.");
+        ImGuiEx.IndentedTextColored("Remember the last panel visited on the scrip exchange window.");
 
         #endregion
         #region GuildLeveDifficulty
@@ -473,7 +432,7 @@ internal class MainWindow : Window
             P.Config.Save();
         }
 
-        IndentedTextColored(shadedColor, "Automatically confirms guild leves upon initiation at the highest difficulty.");
+        ImGuiEx.IndentedTextColored("Automatically confirms guild leves upon initiation at the highest difficulty.");
 
         #endregion
         #region ShopExchangeItemDialog
@@ -485,7 +444,7 @@ internal class MainWindow : Window
             P.Config.Save();
         }
 
-        IndentedTextColored(shadedColor, "Automatically exchange items/currencies in various shops (e.g. scrip vendors).");
+        ImGuiEx.IndentedTextColored("Automatically exchange items/currencies in various shops (e.g. scrip vendors).");
 
         #endregion
         #region FallGuysRegisterConfirm
@@ -497,7 +456,7 @@ internal class MainWindow : Window
             P.Config.Save();
         }
 
-        IndentedTextColored(shadedColor, "Automatically register for Blunderville when speaking with the Blunderville Registrar.");
+        ImGuiEx.IndentedTextColored("Automatically register for Blunderville when speaking with the Blunderville Registrar.");
 
         #endregion
         #region FallGuysExitConfirm
@@ -509,7 +468,7 @@ internal class MainWindow : Window
             P.Config.Save();
         }
 
-        IndentedTextColored(shadedColor, "Automatically confirm the exit prompt when leaving Blunderville.");
+        ImGuiEx.IndentedTextColored("Automatically confirm the exit prompt when leaving Blunderville.");
 
         #endregion
         #region FashionCheckQuit
@@ -521,7 +480,7 @@ internal class MainWindow : Window
             P.Config.Save();
         }
 
-        IndentedTextColored(shadedColor, "Automatically confirm the Fashion Reports results.");
+        ImGuiEx.IndentedTextColored("Automatically confirm the Fashion Reports results.");
 
         #endregion
         #region ChocoboRacingQuit
@@ -533,7 +492,7 @@ internal class MainWindow : Window
             P.Config.Save();
         }
 
-        IndentedTextColored(shadedColor, "Automatically quit Chocobo Racing when the resuls menu appears.");
+        ImGuiEx.IndentedTextColored("Automatically quit Chocobo Racing when the resuls menu appears.");
 
         #endregion
         #region LordOfVerminionQuit
@@ -545,7 +504,7 @@ internal class MainWindow : Window
             P.Config.Save();
         }
 
-        IndentedTextColored(shadedColor, "Automatically quit Lord of Verminion when the results menu appears.");
+        ImGuiEx.IndentedTextColored("Automatically quit Lord of Verminion when the results menu appears.");
 
         #endregion   
         #region LotteryWeeklyInput
@@ -557,7 +516,7 @@ internal class MainWindow : Window
             P.Config.Save();
         }
 
-        IndentedTextColored(shadedColor, "Automatically purchase a Jumbo Cactpot ticket with a random number.");
+        ImGuiEx.IndentedTextColored("Automatically purchase a Jumbo Cactpot ticket with a random number.");
 
         #endregion
         //#region TradeMultiple
@@ -569,7 +528,7 @@ internal class MainWindow : Window
         //    P.Config.Save();
         //}
 
-        //IndentedTextColored(shadedColor, "Automatically turn in materia to be transmuted. Will transmute any and all materia in inventory.");
+        //ImGuiEx.IndentedTextColored("Automatically turn in materia to be transmuted. Will transmute any and all materia in inventory.");
 
         //#endregion
         #region HWDLottery
@@ -581,7 +540,7 @@ internal class MainWindow : Window
             P.Config.Save();
         }
 
-        IndentedTextColored(shadedColor, "Automatically select a kupo of fortune reward. This will instantly complete a single kupo ticket but is unable to continue to the next automatically.");
+        ImGuiEx.IndentedTextColored("Automatically select a kupo of fortune reward. This will instantly complete a single kupo ticket but is unable to continue to the next automatically.");
 
         #endregion
         #region SatisfactionSupply
@@ -593,7 +552,7 @@ internal class MainWindow : Window
             P.Config.Save();
         }
 
-        IndentedTextColored(shadedColor, "Automatically turn in any available collectables for Custom Deliveries.");
+        ImGuiEx.IndentedTextColored("Automatically turn in any available collectables for Custom Deliveries.");
 
         #endregion
         #region MKSRecordQuit
@@ -605,24 +564,24 @@ internal class MainWindow : Window
             P.Config.Save();
         }
 
-        IndentedTextColored(shadedColor, "Automatically leave the Crystalline Conflict match when the results appear.");
+        ImGuiEx.IndentedTextColored("Automatically leave the Crystalline Conflict match when the results appear.");
 
         #endregion
-        #region MKSRecordQuit
+        #region DataCentreTravelConfirm
 
-        var aliveRet = P.Config.ReturnOnlyWhenAlive;
-        if (ImGui.Checkbox("Return x SelectYesno", ref aliveRet))
+        var dkt = P.Config.DataCentreTravelConfirmEnabled;
+        if (ImGui.Checkbox("DataCentreTravelConfirm", ref dkt))
         {
-            P.Config.ReturnOnlyWhenAlive = aliveRet;
+            P.Config.DataCentreTravelConfirmEnabled = dkt;
             P.Config.Save();
         }
 
-        IndentedTextColored(shadedColor, "Automatically accept the return prompt only when the player is alive.");
+        ImGuiEx.IndentedTextColored("Automatically accept the Data Center travel confirmation.");
 
         #endregion
     }
 
-    private XivChatType? selectedChannel;
+    private readonly XivChatType? selectedChannel;
     private void DisplayMiscOptions()
     {
         using var tab = ImRaii.TabItem("Settings");
@@ -646,11 +605,11 @@ internal class MainWindow : Window
                     }
                     config.Call("QueueSave", []);
                 }
-                IndentedTextColored(shadedColor, $"Display the status of the {Name} in the Server Info Bar (DTR Bar). Clicking toggles the plugin.");
+                ImGuiEx.IndentedTextColored($"Display the status of the {Name} in the Server Info Bar (DTR Bar). Clicking toggles the plugin.");
             }
             catch (Exception e)
             {
-                ImGuiEx.TextWrapped(ImGuiColors.DalamudRed, $"{e}");
+                ECommons.ImGuiMethods.ImGuiEx.TextWrapped(ImGuiColors.DalamudRed, $"{e}");
             }
         }
 
@@ -673,7 +632,7 @@ internal class MainWindow : Window
                 }
             }
         }
-        IndentedTextColored(shadedColor, $"Select the chat channel for {Name} messages to output to.");
+        ImGuiEx.IndentedTextColored($"Select the chat channel for {Name} messages to output to.");
     }
 
     // ====================================================================================================
@@ -714,7 +673,7 @@ internal class MainWindow : Window
 
     private static void DisplayEntryNode<T>(ITextNode node)
     {
-        var validRegex = (node.IsRegex && node.Regex != null) || !node.IsRegex;
+        var validRegex = node.IsRegex && node.Regex != null || !node.IsRegex;
 
         if (!node.Enabled && !validRegex)
             ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(.5f, 0, 0, 1));
@@ -730,7 +689,7 @@ internal class MainWindow : Window
             ImGui.PopStyleColor();
 
         if (!validRegex)
-            Utils.ImGuiEx.TextTooltip("Invalid Text Regex");
+            ImGuiEx.TextTooltip("Invalid Text Regex");
 
         if (ImGui.IsItemHovered())
         {
@@ -830,7 +789,7 @@ internal class MainWindow : Window
             {
                 ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, spacing);
 
-                if (Utils.ImGuiEx.IconButton(FontAwesomeIcon.Plus, "Add entry"))
+                if (ImGuiEx.IconButton(FontAwesomeIcon.Plus, "Add entry"))
                 {
                     if (root == YesNoRootFolder)
                     {
@@ -847,7 +806,7 @@ internal class MainWindow : Window
                 }
 
                 ImGui.SameLine();
-                if (Utils.ImGuiEx.IconButton(FontAwesomeIcon.SearchPlus, "Add last seen as new entry"))
+                if (ImGuiEx.IconButton(FontAwesomeIcon.SearchPlus, "Add last seen as new entry"))
                 {
                     if (root == YesNoRootFolder)
                     {
@@ -880,16 +839,16 @@ internal class MainWindow : Window
                 }
 
                 ImGui.SameLine();
-                if (Utils.ImGuiEx.IconButton(FontAwesomeIcon.FolderPlus, "Add folder"))
+                if (ImGuiEx.IconButton(FontAwesomeIcon.FolderPlus, "Add folder"))
                 {
                     var newNode = new TextFolderNode { Name = "Untitled folder" };
                     folderNode.Children.Add(newNode);
                     P.Config.Save();
                 }
 
-                var trashWidth = Utils.ImGuiEx.GetIconButtonWidth(FontAwesomeIcon.TrashAlt);
+                var trashWidth = ImGuiEx.GetIconButtonWidth(FontAwesomeIcon.TrashAlt);
                 ImGui.SameLine(ImGui.GetContentRegionMax().X - trashWidth);
-                if (Utils.ImGuiEx.IconButton(FontAwesomeIcon.TrashAlt, "Delete"))
+                if (ImGuiEx.IconButton(FontAwesomeIcon.TrashAlt, "Delete"))
                 {
                     if (P.Config.TryFindParent(node, out var parentNode))
                     {

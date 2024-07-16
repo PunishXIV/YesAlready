@@ -1,4 +1,3 @@
-using ECommons.DalamudServices;
 using System.Collections.Generic;
 
 namespace YesAlready.IPC
@@ -9,7 +8,7 @@ namespace YesAlready.IPC
         internal HashSet<string> BlockList;
         internal bool Locked => BlockList.Count != 0;
 
-        internal BlockListHandler() 
+        internal BlockListHandler()
         {
             BlockList = Svc.PluginInterface.GetOrCreateData<HashSet<string>>(BlockListNamespace, () => []);
             BlockList.Clear();

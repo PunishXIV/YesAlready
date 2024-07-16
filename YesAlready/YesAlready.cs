@@ -1,65 +1,62 @@
+using Dalamud.Game.ClientState.Keys;
 using Dalamud.Game.Command;
+using Dalamud.Game.Gui.Dtr;
+using Dalamud.Game.Text.SeStringHandling;
+using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
-using ECommons;
-using ECommons.DalamudServices;
-using YesAlready.UI;
-using System.Collections.Generic;
-using System;
-using Dalamud.Game.ClientState.Keys;
-using System.Text;
-using YesAlready.Interface;
-using Dalamud.Game.Text.SeStringHandling;
-using ClickLib;
-using YesAlready.BaseFeatures;
-using System.Reflection;
-using Dalamud.Game.Gui.Dtr;
-using Dalamud.Game.Text.SeStringHandling.Payloads;
-using Dalamud.IoC;
 using Dalamud.Plugin.Services;
+using ECommons;
+using ECommons.Automation.LegacyTaskManager;
+using ECommons.EzHookManager;
+using ECommons.SimpleGui;
+using FFXIVClientStructs.FFXIV.Component.GUI;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Text;
+using YesAlready.BaseFeatures;
+using YesAlready.Interface;
 using YesAlready.IPC;
-using ECommons.Automation;
+using YesAlready.UI;
+using ValueType = FFXIVClientStructs.FFXIV.Component.GUI.ValueType;
 
 namespace YesAlready;
 
 public class YesAlready : IDalamudPlugin
 {
-    [PluginService] public static IAddonLifecycle AddonLifecycle { get; private set; }
-
     public static string Name => "YesAlready";
     private const string Command = "/yesalready";
-    private static string[] Aliases => new string[] { "/pyes" };
+    private static string[] Aliases => ["/pyes"];
     private readonly List<string> registeredCommands = [];
     internal Configuration Configuration { get; init; }
-    internal WindowSystem Ws;
-    internal MainWindow MainWindow;
     internal Configuration Config;
-    internal ZoneListWindow zoneListWindow;
 
     internal static YesAlready P;
-    internal static DalamudPluginInterface pi;
 
-    private readonly DtrBarEntry dtrEntry;
+    private readonly IDtrBarEntry dtrEntry;
     internal BlockListHandler BlockListHandler;
     internal TaskManager TaskManager;
 
+    private unsafe delegate void* FireCallbackDelegate(AtkUnitBase* atkUnitBase, int valueCount, AtkValue* atkValues, byte updateVisibility);
+    [EzHook("E8 ?? ?? ?? ?? 0F B6 E8 8B 44 24 20", detourName: nameof(FireCallbackDetour), true)]
+    private readonly EzHook<FireCallbackDelegate> FireCallbackHook = null!;
+
     internal bool Active => Config.Enabled && !BlockListHandler.Locked;
 
-    public YesAlready(DalamudPluginInterface pluginInterface)
+    public YesAlready(IDalamudPluginInterface pluginInterface)
     {
         P = this;
-        pi = pluginInterface;
-        ECommonsMain.Init(pi, P);
-        Ws = new();
-        MainWindow = new();
-        zoneListWindow = new();
-        Ws.AddWindow(MainWindow);
-        Ws.AddWindow(zoneListWindow);
+        ECommonsMain.Init(pluginInterface, P);
+
+        EzConfigGui.Init(new MainWindow().Draw);
+        EzConfigGui.WindowSystem.AddWindow(new ZoneListWindow());
+        EzConfigGui.WindowSystem.AddWindow(new ConditionsListWindow());
         BlockListHandler = new();
 
-        Config = pi.GetPluginConfig() as Configuration ?? new Configuration();
-        Configuration.Initialize(Svc.PluginInterface);
-
+        Config = Svc.PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
         Svc.Commands.AddHandler(Command, new CommandInfo(OnCommand)
         {
             HelpMessage = "Opens the plugin window.",
@@ -80,7 +77,6 @@ public class YesAlready : IDalamudPlugin
             }
         }
 
-        Click.Initialize();
         LoadTerritories();
         EnableFeatures(true);
 
@@ -88,8 +84,9 @@ public class YesAlready : IDalamudPlugin
         TaskManager = new();
 
         Svc.Framework.Update += FrameworkUpdate;
-        Svc.PluginInterface.UiBuilder.Draw += Ws.Draw;
-        Svc.PluginInterface.UiBuilder.OpenConfigUi += DrawConfigUI;
+        Svc.PluginInterface.UiBuilder.OpenMainUi += DrawConfigUI;
+
+        EzSignatureHelper.Initialize(this);
     }
 
     public static void EnableFeatures(bool enable)
@@ -112,34 +109,30 @@ public class YesAlready : IDalamudPlugin
     public void Dispose()
     {
         foreach (var c in registeredCommands)
-        {
             Svc.Commands.RemoveHandler(c);
-        }
+
         registeredCommands.Clear();
         dtrEntry.Remove();
 
         Svc.Framework.Update -= FrameworkUpdate;
 
-        Svc.PluginInterface.UiBuilder.Draw -= Ws.Draw;
-        Svc.PluginInterface.UiBuilder.OpenConfigUi -= DrawConfigUI;
+        Svc.PluginInterface.UiBuilder.OpenMainUi -= DrawConfigUI;
 
-        Ws.RemoveAllWindows();
-        MainWindow = null;
-        zoneListWindow = null;
-        Ws = null;
         ECommonsMain.Dispose();
-        pi = null;
         P = null;
     }
 
-    public void DrawConfigUI() => MainWindow.IsOpen = !MainWindow.IsOpen;
-    internal void OpenZoneListUi() => zoneListWindow.IsOpen = true;
+    public void DrawConfigUI() => EzConfigGui.Window.IsOpen ^= true;
+    internal void OpenZoneListUi() => EzConfigGui.WindowSystem.Windows.First(w => w.WindowName == ZoneListWindow.Title).IsOpen ^= true;
+    internal void OpenConditionsListUi() => EzConfigGui.WindowSystem.Windows.First(w => w.WindowName == ConditionsListWindow.Title).IsOpen ^= true;
 
     internal Dictionary<uint, string> TerritoryNames { get; } = [];
     internal string LastSeenDialogText { get; set; } = string.Empty;
     internal string LastSeenOkText { get; set; } = string.Empty;
     internal string LastSeenListSelection { get; set; } = string.Empty;
+    internal int LastSeenListIndex { get; set; }
     internal string LastSeenListTarget { get; set; } = string.Empty;
+    internal (int Index, string Text)[] LastSeenListEntries { get; set; } = [];
     internal string LastSeenTalkTarget { get; set; } = string.Empty;
     internal string LastSeenNumericsText { get; set; } = string.Empty;
     internal DateTime EscapeLastPressed { get; private set; } = DateTime.MinValue;
@@ -167,54 +160,63 @@ public class YesAlready : IDalamudPlugin
     }
 
     private bool wasDisableKeyPressed;
-    private void FrameworkUpdate(object framework)
+    private void FrameworkUpdate(IFramework framework)
     {
-        // This doesn't respect the plugin being turned off manually.
-        if (Config.DisableKey != VirtualKey.NO_KEY)
-            DisableKeyPressed = Svc.KeyState[Config.DisableKey];
-        else
-            DisableKeyPressed = false;
+        if (dtrEntry.Shown)
+        {
+            dtrEntry.Text = new SeString(new TextPayload($"{Name}: {(P.Config.Enabled ? (P.BlockListHandler.Locked ? "Paused" : "On") : "Off")}"));
+            dtrEntry.OnClick = () => P.Config.Enabled ^= true;
+        }
 
-        if (DisableKeyPressed && !wasDisableKeyPressed)
+        if (!P.Active && !wasDisableKeyPressed) return;
+        DisableKeyPressed = Config.DisableKey != VirtualKey.NO_KEY && Svc.KeyState[Config.DisableKey];
+
+        if (P.Active && DisableKeyPressed && !wasDisableKeyPressed)
             P.Config.Enabled = false;
-        else if (!DisableKeyPressed && wasDisableKeyPressed)
+        else if (!P.Active && !DisableKeyPressed && wasDisableKeyPressed)
             P.Config.Enabled = true;
 
         wasDisableKeyPressed = DisableKeyPressed;
 
-        if (Config.ForcedYesKey != VirtualKey.NO_KEY)
-        {
-            ForcedYesKeyPressed = Svc.KeyState[Config.ForcedYesKey];
-        }
-        else
-        {
-            ForcedYesKeyPressed = false;
-        }
+        ForcedYesKeyPressed = Config.ForcedYesKey != VirtualKey.NO_KEY && Svc.KeyState[Config.ForcedYesKey];
 
-        if (Config.ForcedTalkKey != VirtualKey.NO_KEY && Config.SeparateForcedKeys)
-        {
-            ForcedTalkKeyPressed = Svc.KeyState[Config.ForcedTalkKey];
-        }
-        else
-        {
-            ForcedTalkKeyPressed = false;
-        }
+        ForcedTalkKeyPressed = Config.ForcedTalkKey != VirtualKey.NO_KEY && Config.SeparateForcedKeys && Svc.KeyState[Config.ForcedTalkKey];
 
         if (Svc.KeyState[VirtualKey.ESCAPE])
         {
             EscapeLastPressed = DateTime.Now;
 
             var target = Svc.Targets.Target;
-            EscapeTargetName = target != null
-                ? Utils.SEString.GetSeStringText(target.Name)
-                : string.Empty;
+            EscapeTargetName = target != null ? target.Name.ExtractText() : string.Empty;
         }
+    }
 
-        if (dtrEntry.Shown)
+    private unsafe void* FireCallbackDetour(AtkUnitBase* atkUnitBase, int valueCount, AtkValue* atkValues, byte updateVisibility)
+    {
+        if (atkUnitBase->NameString is not ("SelectString" or "SelectIconString"))
+            return FireCallbackHook.Original(atkUnitBase, valueCount, atkValues, updateVisibility);
+
+        try
         {
-            dtrEntry.Text = new SeString(new TextPayload($"{Name}: {(P.Config.Enabled ? (P.BlockListHandler.Locked?"Paused":"On") : "Off")}"));
-            dtrEntry.OnClick = () => P.Config.Enabled ^= true;
+            var atkValueList = Enumerable.Range(0, valueCount)
+                .Select<int, object>(i => atkValues[i].Type switch
+                {
+                    ValueType.Int => atkValues[i].Int,
+                    ValueType.String => Marshal.PtrToStringUTF8(new IntPtr(atkValues[i].String)),
+                    ValueType.UInt => atkValues[i].UInt,
+                    ValueType.Bool => atkValues[i].Byte != 0,
+                    _ => $"Unknown Type: {atkValues[i].Type}"
+                })
+                .ToList();
+            Svc.Log.Debug($"Callback triggered on {atkUnitBase->NameString} with values: {string.Join(", ", atkValueList.Select(value => value.ToString()))}");
+            LastSeenListIndex = atkValues[0].Int;
         }
+        catch
+        {
+            Svc.Log.Debug($"Exception in {nameof(FireCallbackDetour)}");
+            return FireCallbackHook.Original(atkUnitBase, valueCount, atkValues, updateVisibility);
+        }
+        return FireCallbackHook.Original(atkUnitBase, valueCount, atkValues, updateVisibility);
     }
 
     #region Commands
@@ -223,7 +225,7 @@ public class YesAlready : IDalamudPlugin
     {
         if (arguments.IsNullOrEmpty())
         {
-            MainWindow.IsOpen = !MainWindow.IsOpen;
+            EzConfigGui.Window.IsOpen ^= true;
             return;
         }
 

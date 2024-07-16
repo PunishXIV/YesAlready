@@ -1,9 +1,6 @@
-using System;
-
-using ClickLib.Clicks;
 using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
-using FFXIVClientStructs.FFXIV.Component.GUI;
+using ECommons.UIHelpers.AddonMasterImplementations;
 using YesAlready.BaseFeatures;
 
 namespace YesAlready.Features;
@@ -13,22 +10,19 @@ internal class AddonGrandCompanySupplyRewardFeature : BaseFeature
     public override void Enable()
     {
         base.Enable();
-        AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "GrandCompanySupplyReward", AddonSetup);
+        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "GrandCompanySupplyReward", AddonSetup);
     }
 
     public override void Disable()
     {
         base.Disable();
-        AddonLifecycle.UnregisterListener(AddonSetup);
+        Svc.AddonLifecycle.UnregisterListener(AddonSetup);
     }
 
     protected static unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
     {
-        var addon = (AtkUnitBase*)addonInfo.Addon;
-
-        if (!P.Active || !P.Config.GrandCompanySupplyReward)
-            return;
-
-        ClickGrandCompanySupplyReward.Using((IntPtr)addon).Deliver();
+        if (!P.Active || !P.Config.GrandCompanySupplyReward) return;
+        var addon = new AddonMaster.GrandCompanySupplyReward(addonInfo.Base());
+        addon.Deliver();
     }
 }

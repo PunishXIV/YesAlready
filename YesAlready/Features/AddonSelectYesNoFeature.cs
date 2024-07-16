@@ -1,15 +1,14 @@
-using ClickLib.Clicks;
 using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
+using Dalamud.Game.ClientState.Conditions;
+using Dalamud.Memory;
 using ECommons;
-using ECommons.DalamudServices;
-using FFXIVClientStructs.FFXIV.Client.UI;
+using ECommons.UIHelpers.AddonMasterImplementations;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using Lumina.Excel.GeneratedSheets2;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using YesAlready.BaseFeatures;
 
@@ -20,55 +19,67 @@ internal class AddonSelectYesNoFeature : BaseFeature
     public override void Enable()
     {
         base.Enable();
-        AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "SelectYesno", AddonSetup);
+        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "SelectYesno", AddonSetup);
     }
 
     public override void Disable()
     {
         base.Disable();
-        AddonLifecycle.UnregisterListener(AddonSetup);
+        Svc.AddonLifecycle.UnregisterListener(AddonSetup);
     }
 
     protected unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
     {
-        var addon = (AtkUnitBase*)addonInfo.Addon;
+        if (!P.Active) return;
 
-        if (!P.Active)
-            return;
+        var addon = new AddonMaster.SelectYesno(addonInfo.Base());
 
-        var dataPtr = (AddonSelectYesNoOnSetupData*)addon;
-        if (dataPtr == null)
-            return;
-
-        var text = P.LastSeenDialogText = Utils.SEString.GetSeStringText(new nint(addon->AtkValues[0].String));
+        var text = P.LastSeenDialogText = addon.TextLegacy;
         Svc.Log.Debug($"AddonSelectYesNo: text={text}");
 
         if (P.ForcedYesKeyPressed)
         {
             Svc.Log.Debug($"AddonSelectYesNo: Forced yes hotkey pressed");
-            AddonSelectYesNoExecute((nint)addon, true);
+            addon.Yes();
             return;
         }
 
         if (P.Config.GimmickYesNo && Svc.Data.GetExcelSheet<GimmickYesNo>().Where(x => !x.Unknown0.RawString.IsNullOrEmpty()).Select(x => x.Unknown0.RawString).ToList().Any(g => g.Equals(text)))
         {
             Svc.Log.Debug($"AddonSelectYesNo: Entry is a gimmick");
-            AddonSelectYesNoExecute((nint)addon, true);
+            addon.Yes();
             return;
         }
 
         if (P.Config.PartyFinderJoinConfirm && GenericHelpers.TryGetAddonByName<AtkUnitBase>("LookingForGroupDetail", out var _) && lfgPatterns.Any(r => r.IsMatch(text)))
         {
             Svc.Log.Debug($"AddonSelectYesNo: Entry is party finder join confirmation");
-            AddonSelectYesNoExecute((nint)addon, true);
+            addon.Yes();
             return;
         }
 
-        if (P.Config.ReturnOnlyWhenAlive && returnPatterns.Any(r => r.IsMatch(text)) && !Svc.ClientState.LocalPlayer.IsDead)
+        if (P.Config.AutoCollectable && collectablePatterns.Any(text.Contains))
         {
-            Svc.Log.Debug($"AddonSelectYesNo: Entry is return confirmation and player is alive");
-            AddonSelectYesNoExecute((nint)addon, true);
-            return;
+            Svc.Log.Debug($"AddonSelectYesNo: Entry is collectable");
+            var fish = Svc.Data.GetExcelSheet<Item>().FirstOrDefault(x => !x.Singular.RawString.IsNullOrEmpty() && MemoryHelper.ReadSeStringNullTerminated(new nint(addon.Addon->AtkValues[15].String)).ExtractText().Contains(x.Singular.RawString, StringComparison.InvariantCultureIgnoreCase), null);
+            Svc.Log.Debug($"Detected fish [{fish}] {fish.Name.RawString}");
+            if (fish.RowId != 0 && int.TryParse(Regex.Match(text, @"\d+").Value, out var value))
+            {
+                var min = Svc.Data.GetExcelSheet<CollectablesShopItem>().First(x => x.Item.Value.RowId == fish.RowId).CollectablesShopRefine.Value.LowCollectability;
+                Svc.Log.Debug($"Minimum collectability required is {min}, value detected is {value}");
+                if (value >= min)
+                {
+                    Svc.Log.Debug($"AddonSelectYesNo: Entry is [{fish}] {fish.Name.RawString} with a sufficient collectability of {value}");
+                    addon.Yes();
+                    return;
+                }
+                else
+                {
+                    Svc.Log.Debug($"AddonSelectYesNo: Entry is [{fish}] {fish.Name.RawString} with an insufficient collectability of {value}");
+                    addon.No();
+                    return;
+                }
+            }
         }
 
         var zoneWarnOnce = true;
@@ -100,14 +111,35 @@ internal class AddonSelectYesNoFeature : BaseFeature
                 if (!string.IsNullOrEmpty(zoneName) && EntryMatchesZoneName(node, zoneName))
                 {
                     Svc.Log.Debug($"AddonSelectYesNo: Matched on {node.Text} ({node.ZoneText})");
-                    AddonSelectYesNoExecute((nint)addon, node.IsYes);
+                    if (node.IsYes)
+                        addon.Yes();
+                    else
+                        addon.No();
                     return;
                 }
+            }
+            else if (node.RequiresPlayerConditions && !string.IsNullOrEmpty(node.PlayerConditions))
+            {
+                var conditions = node.PlayerConditions.Replace(" ", "").Split(',');
+                Svc.Log.Debug($"conditions: {string.Join(", ", conditions)}");
+                if (conditions.All(condition => Enum.TryParse<ConditionFlag>(condition.StartsWith('!') ? condition[1..] : condition, out var flag) && (condition.StartsWith('!') ? !Svc.Condition[flag] : Svc.Condition[flag])))
+                {
+                    Svc.Log.Debug($"AddonSelectYesNo: Matched on {node.Text} and all conditions are true");
+                    if (node.IsYes)
+                        addon.Yes();
+                    else
+                        addon.No();
+                }
+                else
+                    Svc.Log.Debug($"AddonSelectYesNo: Matched on {node.Text}, but not all conditions were met");
             }
             else
             {
                 Svc.Log.Debug($"AddonSelectYesNo: Matched on {node.Text}");
-                AddonSelectYesNoExecute((nint)addon, node.IsYes);
+                if (node.IsYes)
+                    addon.Yes();
+                else
+                    addon.No();
                 return;
             }
         }
@@ -145,40 +177,11 @@ internal class AddonSelectYesNoFeature : BaseFeature
         }
     }
 
-    private unsafe void AddonSelectYesNoExecute(IntPtr addon, bool yes)
-    {
-        if (yes)
-        {
-            var addonPtr = (AddonSelectYesno*)addon;
-            var yesButton = addonPtr->YesButton;
-            if (yesButton != null && !yesButton->IsEnabled)
-            {
-                Svc.Log.Debug("AddonSelectYesNo: Enabling yes button");
-                var flagsPtr = (ushort*)&yesButton->AtkComponentBase.OwnerNode->AtkResNode.NodeFlags;
-                *flagsPtr ^= 1 << 5;
-            }
-
-            Svc.Log.Debug("AddonSelectYesNo: Selecting yes");
-            ClickSelectYesNo.Using(addon).Yes();
-        }
-        else
-        {
-            Svc.Log.Debug("AddonSelectYesNo: Selecting no");
-            ClickSelectYesNo.Using(addon).No();
-        }
-    }
-
     private static bool EntryMatchesText(TextEntryNode node, string text)
-    {
-        return (node.IsTextRegex && (node.TextRegex?.IsMatch(text) ?? false)) ||
-              (!node.IsTextRegex && text.Contains(node.Text));
-    }
+        => node.IsTextRegex && (node.TextRegex?.IsMatch(text) ?? false) || !node.IsTextRegex && text.Contains(node.Text);
 
     private static bool EntryMatchesZoneName(TextEntryNode node, string zoneName)
-    {
-        return (node.ZoneIsRegex && (node.ZoneRegex?.IsMatch(zoneName) ?? false)) ||
-              (!node.ZoneIsRegex && zoneName.Contains(node.ZoneText));
-    }
+        => node.ZoneIsRegex && (node.ZoneRegex?.IsMatch(zoneName) ?? false) || !node.ZoneIsRegex && zoneName.Contains(node.ZoneText);
 
     private readonly List<Regex> lfgPatterns =
     [
@@ -189,19 +192,12 @@ internal class AddonSelectYesNoFeature : BaseFeature
         // if someone could add the chinese and korean translations that'd be nice
     ];
 
-    private readonly List<Regex> returnPatterns =
+    private readonly List<string> collectablePatterns =
     [
-        new Regex(@"Return to .*\?"),
-        new Regex(@"ホームポイントに戻りますか？"),
-        new Regex(@"Zum Heimatpunkt .* zurückkehren\?"),
-        new Regex(@"Vous avez perdu conscience. Aller à votre point de retour .*\?")
+        "collectability of",
+        "収集価値",
+        "Sammlerwert",
+        "Valeur de collection"
         // if someone could add the chinese and korean translations that'd be nice
     ];
-
-    [StructLayout(LayoutKind.Explicit, Size = 0x10)]
-    private struct AddonSelectYesNoOnSetupData
-    {
-        [FieldOffset(0x8)]
-        public IntPtr TextPtr;
-    }
 }

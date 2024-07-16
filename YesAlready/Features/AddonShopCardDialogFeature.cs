@@ -1,8 +1,6 @@
-using ClickLib.Clicks;
 using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
-using FFXIVClientStructs.FFXIV.Client.UI;
-using FFXIVClientStructs.FFXIV.Component.GUI;
+using ECommons.UIHelpers.AddonMasterImplementations;
 using YesAlready.BaseFeatures;
 
 namespace YesAlready.Features;
@@ -12,26 +10,20 @@ internal class AddonShopCardDialogFeature : BaseFeature
     public override void Enable()
     {
         base.Enable();
-        AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "ShopCardDialog", AddonSetup);
+        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "ShopCardDialog", AddonSetup);
     }
 
     public override void Disable()
     {
         base.Disable();
-        AddonLifecycle.UnregisterListener(AddonSetup);
+        Svc.AddonLifecycle.UnregisterListener(AddonSetup);
     }
 
     protected unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
     {
-        var addon = (AtkUnitBase*)addonInfo.Addon;
-
-        if (!P.Active || !P.Config.ShopCardDialog)
-            return;
-
-        var addonPtr = (AddonShopCardDialog*)addon;
-        if (addonPtr->CardQuantityInput != null)
-            addonPtr->CardQuantityInput->SetValue(addonPtr->CardQuantityInput->Data.Max);
-
-        ClickShopCardDialog.Using((nint)addon).Sell();
+        if (!P.Active || !P.Config.ShopCardDialog) return;
+        var addon = new AddonMaster.ShopCardDialog(addonInfo.Base());
+        addon.Quantity = addon.MaxQuantity;
+        addon.Sell();
     }
 }

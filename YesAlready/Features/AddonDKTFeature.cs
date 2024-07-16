@@ -1,18 +1,17 @@
-using Dalamud.Game.Addon.Lifecycle;
+﻿using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
-using ECommons;
 using ECommons.Automation;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using YesAlready.BaseFeatures;
 
 namespace YesAlready.Features;
-
-internal class AddonFashionCheckFeature : BaseFeature
+internal class AddonDKTFeature : BaseFeature
 {
     public override void Enable()
     {
         base.Enable();
-        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "FashionCheck", AddonSetup);
+        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "LobbyDKTCheck", AddonSetup);
+        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "LobbyDKTCheckExec", AddonSetup);
     }
 
     public override void Disable()
@@ -23,10 +22,11 @@ internal class AddonFashionCheckFeature : BaseFeature
 
     protected static unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
     {
-        if (!P.Active || !P.Config.FashionCheckQuit)
+        var addon = (AtkUnitBase*)addonInfo.Addon;
+
+        if (!P.Active || !P.Config.DataCentreTravelConfirmEnabled)
             return;
 
-        if (!GenericHelpers.TryGetAddonByName<AtkUnitBase>("ContentsInfo", out var _)) // do not fire when the timers window is also open
-            Callback.Fire(addonInfo.Base(), true, -1);
+        Callback.Fire(addon, true, 0);
     }
 }

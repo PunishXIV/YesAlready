@@ -1,17 +1,15 @@
-using ClickLib.Clicks;
 using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
 using Dalamud.Plugin.Services;
 using ECommons;
 using ECommons.Automation;
-using ECommons.DalamudServices;
+using ECommons.Logging;
 using ECommons.Throttlers;
+using ECommons.UIHelpers.AddonMasterImplementations;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using FFXIVClientStructs.FFXIV.Component.GUI;
-using Lumina.Excel.GeneratedSheets;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using YesAlready.BaseFeatures;
@@ -22,8 +20,8 @@ internal class AddonSatisfactionSupplyFeature : BaseFeature
     public override void Enable()
     {
         base.Enable();
-        AddonLifecycle.RegisterListener(AddonEvent.PostUpdate, "SatisfactionSupply", AddonUpdate);
-        AddonLifecycle.RegisterListener(AddonEvent.PreSetup, "SatisfactionSupply", Reset);
+        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostUpdate, "SatisfactionSupply", AddonUpdate);
+        Svc.AddonLifecycle.RegisterListener(AddonEvent.PreSetup, "SatisfactionSupply", Reset);
         Svc.Framework.Update += RequestFill;
         Svc.Framework.Update += RequestComplete;
     }
@@ -32,8 +30,8 @@ internal class AddonSatisfactionSupplyFeature : BaseFeature
     public override void Disable()
     {
         base.Disable();
-        AddonLifecycle.UnregisterListener(AddonUpdate);
-        AddonLifecycle.UnregisterListener(Reset);
+        Svc.AddonLifecycle.UnregisterListener(AddonUpdate);
+        Svc.AddonLifecycle.UnregisterListener(Reset);
         Svc.Framework.Update -= RequestFill;
         Svc.Framework.Update -= RequestComplete;
     }
@@ -69,13 +67,13 @@ internal class AddonSatisfactionSupplyFeature : BaseFeature
     {
         var agent = AgentSatisfactionSupply.Instance();
         if (agent == null) return true;
-        var item = agent->ItemSpan[row];
+        var item = agent->Items[row];
         var invItem = FindItemInInventory(item.Id);
         var invItemColectability = InventoryManager.Instance()->GetInventoryContainer(invItem.Value.inv)->GetInventorySlot(invItem.Value.slot)->Spiritbond;
-        var wc = InventoryManager.Instance()->GetInventoryItemCount(AgentSatisfactionSupply.Instance()->WhiteCrafterScrriptId);
-        var pc = InventoryManager.Instance()->GetInventoryItemCount(AgentSatisfactionSupply.Instance()->PurpleCrafterScriptId);
-        var wg = InventoryManager.Instance()->GetInventoryItemCount(AgentSatisfactionSupply.Instance()->WhiteGathererScriptId);
-        var pg = InventoryManager.Instance()->GetInventoryItemCount(AgentSatisfactionSupply.Instance()->PurpleGathererScriptId);
+        var wc = InventoryManager.Instance()->GetInventoryItemCount(AgentSatisfactionSupply.Instance()->CrafterScripId1);
+        var pc = InventoryManager.Instance()->GetInventoryItemCount(AgentSatisfactionSupply.Instance()->CrafterScripId2);
+        var wg = InventoryManager.Instance()->GetInventoryItemCount(AgentSatisfactionSupply.Instance()->GathererScripId1);
+        var pg = InventoryManager.Instance()->GetInventoryItemCount(AgentSatisfactionSupply.Instance()->GathererScripId2);
 
         // this is awful
         if (invItemColectability >= item.Collectability3)
@@ -143,7 +141,7 @@ internal class AddonSatisfactionSupplyFeature : BaseFeature
             var cont = InventoryManager.Instance()->GetInventoryContainer(inv);
             for (var i = 0; i < cont->Size; ++i)
             {
-                if (cont->GetInventorySlot(i)->ItemID == itemId)
+                if (cont->GetInventorySlot(i)->ItemId == itemId)
                 {
                     return (inv, i);
                 }
@@ -188,7 +186,7 @@ internal class AddonSatisfactionSupplyFeature : BaseFeature
         if (contextMenu is null || !contextMenu->IsVisible)
         {
             var slot = i - 1;
-            var unk = (44 * i) + (i - 1);
+            var unk = 44 * i + (i - 1);
 
             Callback.Fire(&addon->AtkUnitBase, false, 2, slot, 0, 0);
 
@@ -209,36 +207,23 @@ internal class AddonSatisfactionSupplyFeature : BaseFeature
         if (!P.Active || !P.Config.CustomDeliveries || !GenericHelpers.TryGetAddonByName<AddonRequest>("SatisfactionSupply", out var _))
             return;
 
-        if (GenericHelpers.TryGetAddonByName<AddonRequest>("Request", out var request) && GenericHelpers.IsAddonReady(&request->AtkUnitBase))
+        if (GenericHelpers.TryGetAddonByName<AtkUnitBase>("Request", out var addon) && GenericHelpers.IsAddonReady(addon))
         {
             if (RequestAllow == 0)
-            {
                 RequestAllow = Svc.PluginInterface.UiBuilder.FrameCount + 4;
-            }
+
             if (Svc.PluginInterface.UiBuilder.FrameCount < RequestAllow) return;
-            var questAddon = (AtkUnitBase*)request;
-            if (questAddon->UldManager.NodeListCount <= 16) return;
-            var buttonNode = (AtkComponentNode*)questAddon->UldManager.NodeList[4];
-            if (buttonNode->Component->UldManager.NodeListCount <= 2) return;
-            var textComponent = (AtkTextNode*)buttonNode->Component->UldManager.NodeList[2];
-            if (textComponent->AtkResNode.Color.A != 255) return;
-            for (var i = 16; i <= 12; i--)
-            {
-                if (((AtkComponentNode*)questAddon->UldManager.NodeList[i])->AtkResNode.IsVisible
-                    && ((AtkComponentNode*)questAddon->UldManager.NodeList[i - 6])->AtkResNode.IsVisible) return;
-            }
-            if (request->HandOverButton != null && request->HandOverButton->IsEnabled)
+            var m = new AddonMaster.Request(addon);
+            if (m.IsHandOverEnabled && m.IsFilled)
             {
                 if (EzThrottler.Throttle("Handin"))
                 {
-                    Svc.Log.Debug("Handing over request");
-                    ClickRequest.Using((nint)request).HandOver();
+                    PluginLog.Debug("Handing over request");
+                    m.HandOver();
                 }
             }
         }
         else
-        {
             RequestAllow = 0;
-        }
     }
 }

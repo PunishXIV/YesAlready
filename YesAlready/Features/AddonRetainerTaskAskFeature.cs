@@ -1,7 +1,6 @@
-using ClickLib.Clicks;
 using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
-using FFXIVClientStructs.FFXIV.Component.GUI;
+using ECommons.UIHelpers.AddonMasterImplementations;
 using YesAlready.BaseFeatures;
 
 namespace YesAlready.Features;
@@ -11,22 +10,20 @@ internal class AddonRetainerTaskAskFeature : BaseFeature
     public override void Enable()
     {
         base.Enable();
-        AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "RetainerTaskAsk", AddonSetup);
+        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "RetainerTaskAsk", AddonSetup);
     }
 
     public override void Disable()
     {
         base.Disable();
-        AddonLifecycle.UnregisterListener(AddonSetup);
+        Svc.AddonLifecycle.UnregisterListener(AddonSetup);
     }
 
     protected static unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
     {
-        var addon = (AtkUnitBase*)addonInfo.Addon;
-
-        if (!P.Active || !P.Config.RetainerTaskAskEnabled)
-            return;
-
-        ClickRetainerTaskAsk.Using((nint)addon).Assign();
+        if (!P.Active || !P.Config.RetainerTaskAskEnabled) return;
+        var addon = new AddonMaster.RetainerTaskAsk(addonInfo.Base());
+        P.TaskManager.Enqueue(() => addon.AssignButton->IsEnabled); // must be throttled, there's a little delay after setup before this is enabled
+        P.TaskManager.Enqueue(addon.Assign);
     }
 }

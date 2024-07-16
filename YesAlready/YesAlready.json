@@ -7,7 +7,7 @@
   "RepoUrl": "https://github.com/croizat/YesAlready2",
   "IconUrl": "https://github.com/daemitus/YesAlready/raw/master/res/icon.png",
   "ApplicableVersion": "any",
-  "DalamudApiLevel": 9,
+  "DalamudApiLevel": 10,
   "Tags": [
     "punish",
     "plugin"

@@ -1,9 +1,6 @@
-using ClickLib.Clicks;
 using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
-using ECommons.DalamudServices;
-using FFXIVClientStructs.FFXIV.Client.UI;
-using FFXIVClientStructs.FFXIV.Component.GUI;
+using ECommons.UIHelpers.AddonMasterImplementations;
 using Lumina.Excel.GeneratedSheets;
 using YesAlready.BaseFeatures;
 
@@ -14,27 +11,25 @@ internal class AddonRetainerTaskResultFeature : BaseFeature
     public override void Enable()
     {
         base.Enable();
-        AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "RetainerTaskResult", AddonSetup);
+        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "RetainerTaskResult", AddonSetup);
     }
 
     public override void Disable()
     {
         base.Disable();
-        AddonLifecycle.UnregisterListener(AddonSetup);
+        Svc.AddonLifecycle.UnregisterListener(AddonSetup);
     }
 
     protected unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
     {
-        var addon = (AtkUnitBase*)addonInfo.Addon;
+        if (!P.Active || !P.Config.RetainerTaskResultEnabled) return;
 
-        if (!P.Active || !P.Config.RetainerTaskResultEnabled)
-            return;
-
-        var addonPtr = (AddonRetainerTaskResult*)addon;
-        var buttonText = addonPtr->ReassignButton->ButtonTextNode->NodeText.ToString();
+        var addon = new AddonMaster.RetainerTaskResult(addonInfo.Base());
+        var buttonText = addon.ReassignButton->ButtonTextNode->NodeText.ToString();
         if (buttonText == Svc.Data.GetExcelSheet<Addon>(Svc.ClientState.ClientLanguage).GetRow(2365).Text)
             return;
 
-        ClickRetainerTaskResult.Using((nint)addon).Reassign();
+        P.TaskManager.Enqueue(() => addon.ReassignButton->IsEnabled); // must be throttled, there's a little delay after setup before this is enabled
+        P.TaskManager.Enqueue(addon.Reassign);
     }
 }
