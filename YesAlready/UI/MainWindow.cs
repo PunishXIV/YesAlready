@@ -180,17 +180,16 @@ internal class MainWindow : Window
 
         #endregion
         #region SalvageDialog (Bulk)
-        using (ImRaii.Disabled())
-        {
-            var desynthBulkDialog = P.Config.DesynthBulkDialogEnabled;
-            if (ImGui.Checkbox("SalvageDialog (Bulk)", ref desynthBulkDialog))
-            {
-                P.Config.DesynthBulkDialogEnabled = desynthBulkDialog;
-                P.Config.Save();
-            }
 
-            ImGuiEx.IndentedTextColored("Check the bulk desynthesis button when using the SalvageDialog feature.\nThis feature has been incorporated into vanilla. The checkbox state is now remembered.");
+        var desynthBulkDialog = P.Config.DesynthBulkDialogEnabled;
+        if (ImGui.Checkbox("SalvageDialog (Bulk)", ref desynthBulkDialog))
+        {
+            P.Config.DesynthBulkDialogEnabled = desynthBulkDialog;
+            P.Config.Save();
         }
+
+        ImGuiEx.IndentedTextColored("Check the bulk desynthesis button when using the SalvageDialog feature.");
+
         #endregion
         #region SalvageResult
 

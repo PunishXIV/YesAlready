@@ -12,6 +12,7 @@ internal class AddonSalvageDialogFeature : BaseFeature
     {
         base.Enable();
         Svc.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "SalvageDialog", AddonSetup);
+        Svc.AddonLifecycle.RegisterListener(AddonEvent.PreSetup, "SalvageDialog", AddonSetup);
     }
 
     public override void Disable()
@@ -25,11 +26,19 @@ internal class AddonSalvageDialogFeature : BaseFeature
         if (!P.Active || !GenericHelpers.IsAddonReady(addonInfo.Base())) return;
 
         var addon = new AddonMaster.SalvageDialog(addonInfo.Base());
-
-        if (P.Config.DesynthDialogEnabled)
+        switch (eventType)
         {
-            addon.Checkbox();
-            addon.Desynthesize();
+            case AddonEvent.PreSetup:
+                if (P.Config.DesynthBulkDialogEnabled)
+                    addon.Addon->AtkValues[20].SetBool(true);
+                break;
+            case AddonEvent.PostSetup:
+                if (P.Config.DesynthDialogEnabled)
+                {
+                    addon.Checkbox();
+                    addon.Desynthesize();
+                }
+                break;
         }
     }
 }
