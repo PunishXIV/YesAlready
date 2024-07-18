@@ -1,5 +1,7 @@
 using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
+using Dalamud.Memory;
+using ECommons;
 using ECommons.Automation;
 using Lumina.Excel.GeneratedSheets;
 using System.Linq;
@@ -23,10 +25,10 @@ internal class AddonPurifyResult : BaseFeature
 
     protected static unsafe void AddonUpdate(AddonEvent eventType, AddonArgs addonInfo)
     {
-        if (!P.Active || !P.Config.AetherialReductionResults) return;
+        if (!P.Active || !P.Config.AetherialReductionResults || !GenericHelpers.IsAddonReady(addonInfo.Base())) return;
 
         var addon = addonInfo.Base();
-        if (addon->UldManager.NodeList[17]->GetAsAtkTextNode()->NodeText.ToString() == Svc.Data.GetExcelSheet<Addon>().First(x => x.RowId == 2171).Text.RawString)
+        if (MemoryHelper.ReadSeString(&addon->GetTextNodeById(2)->NodeText).ExtractText() == Svc.Data.GetExcelSheet<Addon>().First(x => x.RowId == 2171).Text.RawString)
         {
             Svc.Log.Debug("Closing Purify Results menu");
             Callback.Fire(addon, true, -1);

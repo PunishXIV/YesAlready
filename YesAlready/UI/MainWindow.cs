@@ -25,8 +25,6 @@ internal class MainWindow : Window
         SizeCondition = ImGuiCond.FirstUseEver;
     }
 
-    private readonly Vector4 shadedColor = new(0.68f, 0.68f, 0.68f, 1.0f);
-
     private readonly string[] hotkeyChoices =
     [
         "None",
@@ -182,16 +180,17 @@ internal class MainWindow : Window
 
         #endregion
         #region SalvageDialog (Bulk)
-
-        var desynthBulkDialog = P.Config.DesynthBulkDialogEnabled;
-        if (ImGui.Checkbox("SalvageDialog (Bulk)", ref desynthBulkDialog))
+        using (ImRaii.Disabled())
         {
-            P.Config.DesynthBulkDialogEnabled = desynthBulkDialog;
-            P.Config.Save();
+            var desynthBulkDialog = P.Config.DesynthBulkDialogEnabled;
+            if (ImGui.Checkbox("SalvageDialog (Bulk)", ref desynthBulkDialog))
+            {
+                P.Config.DesynthBulkDialogEnabled = desynthBulkDialog;
+                P.Config.Save();
+            }
+
+            ImGuiEx.IndentedTextColored("Check the bulk desynthesis button when using the SalvageDialog feature.\nThis feature has been incorporated into vanilla. The checkbox state is now remembered.");
         }
-
-        ImGuiEx.IndentedTextColored("Check the bulk desynthesis button when using the SalvageDialog feature.");
-
         #endregion
         #region SalvageResult
 

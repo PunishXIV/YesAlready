@@ -26,9 +26,6 @@ internal class AddonSalvageDialogFeature : BaseFeature
 
         var addon = new AddonMaster.SalvageDialog(addonInfo.Base());
 
-        if (P.Config.DesynthBulkDialogEnabled)
-            addon.Checkbox();
-
         if (P.Config.DesynthDialogEnabled)
         {
             addon.Checkbox();
