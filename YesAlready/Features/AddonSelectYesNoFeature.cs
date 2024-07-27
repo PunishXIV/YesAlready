@@ -65,20 +65,26 @@ internal class AddonSelectYesNoFeature : BaseFeature
             Svc.Log.Debug($"Detected fish [{fish}] {fish.Name.RawString}");
             if (fish.RowId != 0 && int.TryParse(Regex.Match(text, @"\d+").Value, out var value))
             {
-                var min = Svc.Data.GetExcelSheet<CollectablesShopItem>().First(x => x.Item.Value.RowId == fish.RowId).CollectablesShopRefine.Value.LowCollectability;
-                Svc.Log.Debug($"Minimum collectability required is {min}, value detected is {value}");
-                if (value >= min)
+                var collectability = Svc.Data.GetExcelSheet<CollectablesShopItem>().FirstOrDefault(x => x.Item.Value.RowId == fish.RowId, null);
+                if (collectability != null)
                 {
-                    Svc.Log.Debug($"AddonSelectYesNo: Entry is [{fish}] {fish.Name.RawString} with a sufficient collectability of {value}");
-                    addon.Yes();
-                    return;
+                    var min = collectability.CollectablesShopRefine.Value.LowCollectability;
+                    Svc.Log.Debug($"Minimum collectability required is {min}, value detected is {value}");
+                    if (value >= min)
+                    {
+                        Svc.Log.Debug($"AddonSelectYesNo: Entry is [{fish}] {fish.Name.RawString} with a sufficient collectability of {value}");
+                        addon.Yes();
+                        return;
+                    }
+                    else
+                    {
+                        Svc.Log.Debug($"AddonSelectYesNo: Entry is [{fish}] {fish.Name.RawString} with an insufficient collectability of {value}");
+                        addon.No();
+                        return;
+                    }
                 }
                 else
-                {
-                    Svc.Log.Debug($"AddonSelectYesNo: Entry is [{fish}] {fish.Name.RawString} with an insufficient collectability of {value}");
-                    addon.No();
-                    return;
-                }
+                    Svc.Log.Debug($"Failed to find matching CollectablesShopItem for [{fish.RowId}] {fish.Name.RawString}.");
             }
         }
 
