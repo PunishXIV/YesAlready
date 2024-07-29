@@ -18,8 +18,12 @@ internal class AddonSelectIconStringFeature : OnSetupSelectListFeature
 
     private void SetEntry(AddonEvent type, AddonArgs args)
     {
-        P.LastSeenListSelection = P.LastSeenListIndex < P.LastSeenListEntries.Length ? P.LastSeenListEntries?[P.LastSeenListIndex].Text : string.Empty;
-        P.LastSeenListTarget = P.LastSeenListTarget = Svc.Targets.Target != null ? Svc.Targets.Target.Name.ExtractText() : string.Empty;
+        try
+        {
+            P.LastSeenListSelection = P.LastSeenListIndex < P.LastSeenListEntries.Length ? P.LastSeenListEntries?[P.LastSeenListIndex].Text : string.Empty;
+            P.LastSeenListTarget = P.LastSeenListTarget = Svc.Targets.Target != null ? Svc.Targets.Target.Name.ExtractText() : string.Empty;
+        }
+        catch { }
     }
 
     public override void Disable()
@@ -36,7 +40,6 @@ internal class AddonSelectIconStringFeature : OnSetupSelectListFeature
         var addon = new AddonMaster.SelectIconString(addonInfo.Base());
         P.LastSeenListEntries = addon.Entries.Select(x => (x.Index, x.Text)).ToArray();
 
-        //SetupOnItemSelectedHook(&addon.Addon->PopupMenu.PopupMenu);
         var index = GetMatchingIndex(addon.Entries.Select(x => x.Text).ToArray());
         if (index != null)
             addon.Entries[(int)index].Select();
