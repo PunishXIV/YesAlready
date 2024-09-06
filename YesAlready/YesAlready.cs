@@ -3,7 +3,6 @@ using Dalamud.Game.Command;
 using Dalamud.Game.Gui.Dtr;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
-using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using ECommons;
@@ -211,9 +210,9 @@ public class YesAlready : IDalamudPlugin
             Svc.Log.Debug($"Callback triggered on {atkUnitBase->NameString} with values: {string.Join(", ", atkValueList.Select(value => value.ToString()))}");
             LastSeenListIndex = atkValues[0].Int;
         }
-        catch
+        catch (Exception ex)
         {
-            Svc.Log.Debug($"Exception in {nameof(FireCallbackDetour)}");
+            Svc.Log.Error($"Exception in {nameof(FireCallbackDetour)}: {ex.Message}");
             return FireCallbackHook.Original(atkUnitBase, valueCount, atkValues, updateVisibility);
         }
         return FireCallbackHook.Original(atkUnitBase, valueCount, atkValues, updateVisibility);
