@@ -108,473 +108,385 @@ internal class MainWindow : Window
         if (!tab) return;
         using var idScope = ImRaii.PushId($"BothersOptions");
 
-        #region Disable hotkey
+        #region 1. Hotkey Settings
 
-        if (!hotkeyValues.Contains(P.Config.DisableKey))
+        if (ImGui.CollapsingHeader("1. Hotkey Settings"))
         {
-            P.Config.DisableKey = VirtualKey.NO_KEY;
-            P.Config.Save();
-        }
+            // 1. Disable Hotkey
+            if (!hotkeyValues.Contains(P.Config.DisableKey))
+            {
+                P.Config.DisableKey = VirtualKey.NO_KEY;
+                P.Config.Save();
+            }
 
-        var disableHotkeyIndex = Array.IndexOf(hotkeyValues, P.Config.DisableKey);
+            var disableHotkeyIndex = Array.IndexOf(hotkeyValues, P.Config.DisableKey);
 
-        ImGui.SetNextItemWidth(85);
-        if (ImGui.Combo("Disable Hotkey", ref disableHotkeyIndex, hotkeyChoices, hotkeyChoices.Length))
-        {
-            P.Config.DisableKey = hotkeyValues[disableHotkeyIndex];
-            P.Config.Save();
-        }
-
-        ImGuiEx.IndentedTextColored($"While this key is held, the plugin is disabled.");
-
-        #endregion
-        #region Forced Yes hotkey
-
-        if (!hotkeyValues.Contains(P.Config.ForcedYesKey))
-        {
-            P.Config.ForcedYesKey = VirtualKey.NO_KEY;
-            P.Config.Save();
-        }
-
-        var forcedYesHotkeyIndex = Array.IndexOf(hotkeyValues, P.Config.ForcedYesKey);
-
-        ImGui.SetNextItemWidth(85);
-        if (ImGui.Combo("Forced Yes Hotkey", ref forcedYesHotkeyIndex, hotkeyChoices, hotkeyChoices.Length))
-        {
-            P.Config.ForcedYesKey = hotkeyValues[forcedYesHotkeyIndex];
-            P.Config.Save();
-        }
-
-        ImGui.SameLine();
-        var separateForcedKeys = P.Config.SeparateForcedKeys;
-        if (ImGui.Checkbox("Separate Yes/Talk", ref separateForcedKeys))
-        {
-            P.Config.SeparateForcedKeys = separateForcedKeys;
-            P.Config.Save();
-        }
-
-        if (P.Config.SeparateForcedKeys)
-        {
-            var forcedTalkHotkeyIndex = Array.IndexOf(hotkeyValues, P.Config.ForcedTalkKey);
             ImGui.SetNextItemWidth(85);
-            if (ImGui.Combo("Forced Talk Hotkey", ref forcedTalkHotkeyIndex, hotkeyChoices, hotkeyChoices.Length))
+            if (ImGui.Combo("Disable Hotkey", ref disableHotkeyIndex, hotkeyChoices, hotkeyChoices.Length))
             {
-                P.Config.ForcedTalkKey = hotkeyValues[forcedTalkHotkeyIndex];
+                P.Config.DisableKey = hotkeyValues[disableHotkeyIndex];
                 P.Config.Save();
             }
-        }
 
-        ImGuiEx.IndentedTextColored($"While this key is held, any Yes/No prompt will always default to yes and all talk dialogue will be skipped. Be careful.");
+            ImGuiEx.IndentedTextColored("1. While this key is held, the plugin is disabled.");
 
-        #endregion
-        #region SalvageDialog
-
-        var desynthDialog = P.Config.DesynthDialogEnabled;
-        if (ImGui.Checkbox("SalvageDialog", ref desynthDialog))
-        {
-            P.Config.DesynthDialogEnabled = desynthDialog;
-            P.Config.Save();
-        }
-
-        ImGuiEx.IndentedTextColored("Remove the Desynthesis menu confirmation.");
-
-        #endregion
-        #region SalvageDialog (Bulk)
-
-        var desynthBulkDialog = P.Config.DesynthBulkDialogEnabled;
-        if (ImGui.Checkbox("SalvageDialog (Bulk)", ref desynthBulkDialog))
-        {
-            P.Config.DesynthBulkDialogEnabled = desynthBulkDialog;
-            P.Config.Save();
-        }
-
-        ImGuiEx.IndentedTextColored("Check the bulk desynthesis button when using the SalvageDialog feature.");
-
-        #endregion
-        #region SalvageResult
-
-        var desynthResultsDialog = P.Config.DesynthesisResults;
-        if (ImGui.Checkbox("SalvageResults", ref desynthResultsDialog))
-        {
-            P.Config.DesynthesisResults = desynthResultsDialog;
-            P.Config.Save();
-        }
-
-        ImGuiEx.IndentedTextColored("Automatically closes the SalvageResults window when done desynthing.");
-
-        #endregion
-        #region PurifyResult
-
-        var purifyResultsDialog = P.Config.AetherialReductionResults;
-        if (ImGui.Checkbox("PurifyResult", ref purifyResultsDialog))
-        {
-            P.Config.AetherialReductionResults = purifyResultsDialog;
-            P.Config.Save();
-        }
-
-        ImGuiEx.IndentedTextColored("Automatically closes the PurifyResult window when done reducing.");
-
-        #endregion
-        #region MateriaAttachDialog
-
-        var meld = P.Config.MaterialAttachDialogEnabled;
-        if (ImGui.Checkbox("MateriaAttachDialog", ref meld))
-        {
-            P.Config.MaterialAttachDialogEnabled = meld;
-            P.Config.Save();
-        }
-
-        ImGuiEx.IndentedTextColored("Remove the materia melding confirmation menu.");
-
-        if (P.Config.MaterialAttachDialogEnabled)
-        {
-            ImGui.Indent();
-            var onlySuccess = P.Config.OnlyMeldWhenGuaranteed;
-            if (ImGui.Checkbox("Only function when the success rate is guaranteed (100%)", ref onlySuccess))
+            // 2. Forced Yes Hotkey
+            if (!hotkeyValues.Contains(P.Config.ForcedYesKey))
             {
-                P.Config.OnlyMeldWhenGuaranteed = onlySuccess;
+                P.Config.ForcedYesKey = VirtualKey.NO_KEY;
                 P.Config.Save();
             }
-            ImGui.Unindent();
-        }
 
-        #endregion
-        #region MaterializeDialog
+            var forcedYesHotkeyIndex = Array.IndexOf(hotkeyValues, P.Config.ForcedYesKey);
 
-        var materialize = P.Config.MaterializeDialogEnabled;
-        if (ImGui.Checkbox("MaterializeDialog", ref materialize))
-        {
-            P.Config.MaterializeDialogEnabled = materialize;
-            P.Config.Save();
-        }
-
-        ImGuiEx.IndentedTextColored("Remove the create new (extract) materia confirmation.");
-
-        #endregion
-        #region MateriaRetrieveDialog
-
-        var materiaRetrieve = P.Config.MateriaRetrieveDialogEnabled;
-        if (ImGui.Checkbox("MateriaRetrieveDialog", ref materiaRetrieve))
-        {
-            P.Config.MateriaRetrieveDialogEnabled = materiaRetrieve;
-            P.Config.Save();
-        }
-
-        ImGuiEx.IndentedTextColored("Remove the retrieve materia confirmation.");
-
-        #endregion
-        #region ItemInspectionResult
-
-        var itemInspection = P.Config.ItemInspectionResultEnabled;
-        if (ImGui.Checkbox("ItemInspectionResult", ref itemInspection))
-        {
-            P.Config.ItemInspectionResultEnabled = itemInspection;
-            P.Config.Save();
-        }
-
-        ImGuiEx.IndentedTextColored("Eureka/Bozja lockboxes, forgotten fragments, and more.\nWarning: this does not check if you are maxed on items.");
-
-        ImGuiEx.IndentedTextColored("Rate limiter (pause after N items)");
-        ImGui.SameLine();
-
-        ImGui.PushItemWidth(100f * ImGuiHelpers.GlobalScale);
-        var itemInspectionResultLimiter = P.Config.ItemInspectionResultRateLimiter;
-        if (ImGui.InputInt("###itemInspectionResultRateLimiter", ref itemInspectionResultLimiter))
-        {
-            if (itemInspectionResultLimiter < 0)
+            ImGui.SetNextItemWidth(85);
+            if (ImGui.Combo("Forced Yes Hotkey", ref forcedYesHotkeyIndex, hotkeyChoices, hotkeyChoices.Length))
             {
-                itemInspectionResultLimiter = 0;
-            }
-            else
-            {
-                P.Config.ItemInspectionResultRateLimiter = itemInspectionResultLimiter;
+                P.Config.ForcedYesKey = hotkeyValues[forcedYesHotkeyIndex];
                 P.Config.Save();
             }
+
+            ImGui.SameLine();
+            var separateForcedKeys = P.Config.SeparateForcedKeys;
+            if (ImGui.Checkbox("Separate Yes/Talk", ref separateForcedKeys))
+            {
+                P.Config.SeparateForcedKeys = separateForcedKeys;
+                P.Config.Save();
+            }
+
+            if (P.Config.SeparateForcedKeys)
+            {
+                var forcedTalkHotkeyIndex = Array.IndexOf(hotkeyValues, P.Config.ForcedTalkKey);
+                ImGui.SetNextItemWidth(85);
+                if (ImGui.Combo("Forced Talk Hotkey", ref forcedTalkHotkeyIndex, hotkeyChoices, hotkeyChoices.Length))
+                {
+                    P.Config.ForcedTalkKey = hotkeyValues[forcedTalkHotkeyIndex];
+                    P.Config.Save();
+                }
+            }
+
+            ImGuiEx.IndentedTextColored("2. While this key is held, any Yes/No prompt will always default to yes, and all talk dialogue will be skipped. Be careful.");
         }
 
         #endregion
-        #region RetainerTaskAsk
+        #region 2. Desynthesis Settings
 
-        var retainerTaskAsk = P.Config.RetainerTaskAskEnabled;
-        if (ImGui.Checkbox("RetainerTaskAsk", ref retainerTaskAsk))
+        if (ImGui.CollapsingHeader("2. Desynthesis Settings"))
         {
-            P.Config.RetainerTaskAskEnabled = retainerTaskAsk;
-            P.Config.Save();
-        }
+            // 3. SalvageDialog
+            var desynthDialog = P.Config.DesynthDialogEnabled;
+            if (ImGui.Checkbox("SalvageDialog", ref desynthDialog))
+            {
+                P.Config.DesynthDialogEnabled = desynthDialog;
+                P.Config.Save();
+            }
+            ImGuiEx.IndentedTextColored("3. Remove the Desynthesis menu confirmation.");
 
-        ImGuiEx.IndentedTextColored("Skip the confirmation in the final dialog before sending out a retainer.");
+            // 4. SalvageDialog (Bulk)
+            var desynthBulkDialog = P.Config.DesynthBulkDialogEnabled;
+            if (ImGui.Checkbox("SalvageDialog (Bulk)", ref desynthBulkDialog))
+            {
+                P.Config.DesynthBulkDialogEnabled = desynthBulkDialog;
+                P.Config.Save();
+            }
+            ImGuiEx.IndentedTextColored("4. Check the bulk desynthesis button when using the SalvageDialog feature.");
+
+            // 5. SalvageResults
+            var desynthResultsDialog = P.Config.DesynthesisResults;
+            if (ImGui.Checkbox("SalvageResults", ref desynthResultsDialog))
+            {
+                P.Config.DesynthesisResults = desynthResultsDialog;
+                P.Config.Save();
+            }
+            ImGuiEx.IndentedTextColored("5. Automatically closes the SalvageResults window when done desynthesizing.");
+        }
 
         #endregion
-        #region RetainerTaskResult
+        #region 3. Materia Settings
 
-        var retainerTaskResult = P.Config.RetainerTaskResultEnabled;
-        if (ImGui.Checkbox("RetainerTaskResult", ref retainerTaskResult))
+        if (ImGui.CollapsingHeader("3. Materia Settings"))
         {
-            P.Config.RetainerTaskResultEnabled = retainerTaskResult;
-            P.Config.Save();
-        }
+            // 6. MateriaAttachDialog
+            var meld = P.Config.MaterialAttachDialogEnabled;
+            if (ImGui.Checkbox("MateriaAttachDialog", ref meld))
+            {
+                P.Config.MaterialAttachDialogEnabled = meld;
+                P.Config.Save();
+            }
+            ImGuiEx.IndentedTextColored("6. Remove the materia melding confirmation menu.");
 
-        ImGuiEx.IndentedTextColored("Automatically send a retainer on the same venture as before when receiving an item.");
+            // 7. MaterializeDialog
+            var materialize = P.Config.MaterializeDialogEnabled;
+            if (ImGui.Checkbox("MaterializeDialog", ref materialize))
+            {
+                P.Config.MaterializeDialogEnabled = materialize;
+                P.Config.Save();
+            }
+            ImGuiEx.IndentedTextColored("7. Remove the create new (extract) materia confirmation.");
+
+            // 8. MateriaRetrieveDialog
+            var materiaRetrieve = P.Config.MateriaRetrieveDialogEnabled;
+            if (ImGui.Checkbox("MateriaRetrieveDialog", ref materiaRetrieve))
+            {
+                P.Config.MateriaRetrieveDialogEnabled = materiaRetrieve;
+                P.Config.Save();
+            }
+            ImGuiEx.IndentedTextColored("8. Remove the retrieve materia confirmation.");
+        }
 
         #endregion
-        #region RetainerTransferList
+        #region 4. Retainer Settings
 
-        var retainerListDialog = P.Config.RetainerTransferListConfirm;
-        if (ImGui.Checkbox("RetainerItemTransferList", ref retainerListDialog))
+        if (ImGui.CollapsingHeader("4. Retainer Settings"))
         {
-            P.Config.RetainerTransferListConfirm = retainerListDialog;
-            P.Config.Save();
-        }
+            // 9. RetainerTaskAsk
+            var retainerTaskAsk = P.Config.RetainerTaskAskEnabled;
+            if (ImGui.Checkbox("RetainerTaskAsk", ref retainerTaskAsk))
+            {
+                P.Config.RetainerTaskAskEnabled = retainerTaskAsk;
+                P.Config.Save();
+            }
+            ImGuiEx.IndentedTextColored("9. Skip the confirmation in the final dialog before sending out a retainer.");
 
-        ImGuiEx.IndentedTextColored("Skip the confirmation in the RetainerItemTransferList window to entrust all items to the retainer.");
+            // 10. RetainerTaskResult
+            var retainerTaskResult = P.Config.RetainerTaskResultEnabled;
+            if (ImGui.Checkbox("RetainerTaskResult", ref retainerTaskResult))
+            {
+                P.Config.RetainerTaskResultEnabled = retainerTaskResult;
+                P.Config.Save();
+            }
+            ImGuiEx.IndentedTextColored("10. Automatically send a retainer on the same venture as before when receiving an item.");
+
+            // 11. RetainerItemTransferList
+            var retainerListDialog = P.Config.RetainerTransferListConfirm;
+            if (ImGui.Checkbox("RetainerItemTransferList", ref retainerListDialog))
+            {
+                P.Config.RetainerTransferListConfirm = retainerListDialog;
+                P.Config.Save();
+            }
+            ImGuiEx.IndentedTextColored("11. Skip the confirmation in the RetainerItemTransferList window to entrust all items to the retainer.");
+
+            // 12. RetainerItemTransferProgress
+            var retainerProgressDialog = P.Config.RetainerTransferProgressConfirm;
+            if (ImGui.Checkbox("RetainerItemTransferProgress", ref retainerProgressDialog))
+            {
+                P.Config.RetainerTransferProgressConfirm = retainerProgressDialog;
+                P.Config.Save();
+            }
+            ImGuiEx.IndentedTextColored("12. Automatically closes the RetainerItemTransferProgress window when finished entrusting items.");
+        }
 
         #endregion
-        #region RetainerTransferProgress
+        #region 5. Duties
 
-        var retainerProgressDialog = P.Config.RetainerTransferProgressConfirm;
-        if (ImGui.Checkbox("RetainerItemTransferProgress", ref retainerProgressDialog))
+        if (ImGui.CollapsingHeader("5. Duties"))
         {
-            P.Config.RetainerTransferProgressConfirm = retainerProgressDialog;
-            P.Config.Save();
-        }
+            // 13. ContentsFinderConfirm
+            var contentsFinderConfirm = P.Config.ContentsFinderConfirmEnabled;
+            if (ImGui.Checkbox("ContentsFinderConfirm", ref contentsFinderConfirm))
+            {
+                P.Config.ContentsFinderConfirmEnabled = contentsFinderConfirm;
 
-        ImGuiEx.IndentedTextColored("Automatically closes the RetainerItemTransferProgress window when finished entrusting items.");
+                if (!contentsFinderConfirm)
+                    P.Config.ContentsFinderOneTimeConfirmEnabled = false;
+
+                P.Config.Save();
+            }
+            ImGuiEx.IndentedTextColored("13. Automatically commence duties when ready.");
+
+            // 14. ContentsFinderOneTimeConfirm
+            var contentsFinderOneTimeConfirm = P.Config.ContentsFinderOneTimeConfirmEnabled;
+            if (ImGui.Checkbox("ContentsFinderOneTimeConfirm", ref contentsFinderOneTimeConfirm))
+            {
+                P.Config.ContentsFinderOneTimeConfirmEnabled = contentsFinderOneTimeConfirm;
+
+                if (contentsFinderOneTimeConfirm)
+                    P.Config.ContentsFinderConfirmEnabled = true;
+
+                P.Config.Save();
+            }
+            ImGuiEx.IndentedTextColored("14. Automatically commence duties when ready, but only once. Requires Contents Finder Confirm, and disables both after activation.");
+        }
 
         #endregion
-        #region GrandCompanySupplyReward
+        #region 6. PvP and Competitions
 
-        var grandCompanySupplyReward = P.Config.GrandCompanySupplyReward;
-        if (ImGui.Checkbox("GrandCompanySupplyReward", ref grandCompanySupplyReward))
+        if (ImGui.CollapsingHeader("6. PvP and Competitions"))
         {
-            P.Config.GrandCompanySupplyReward = grandCompanySupplyReward;
-            P.Config.Save();
-        }
+            // 15. MKSRecord
+            var ccquit = P.Config.MKSRecordQuit;
+            if (ImGui.Checkbox("MKSRecord", ref ccquit))
+            {
+                P.Config.MKSRecordQuit = ccquit;
+                P.Config.Save();
+            }
+            ImGuiEx.IndentedTextColored("15. Automatically leave the Crystalline Conflict match when the results appear.");
 
-        ImGuiEx.IndentedTextColored("Skip the confirmation when submitting Grand Company expert delivery items.");
+            // 16. RaceChocoboResult
+            var chocoboQuit = P.Config.ChocoboRacingQuit;
+            if (ImGui.Checkbox("RaceChocoboResult", ref chocoboQuit))
+            {
+                P.Config.ChocoboRacingQuit = chocoboQuit;
+                P.Config.Save();
+            }
+            ImGuiEx.IndentedTextColored("16. Automatically quit Chocobo Racing when the results menu appears.");
+
+            // 17. LovmResult
+            var lovQuit = P.Config.LordOfVerminionQuit;
+            if (ImGui.Checkbox("LovmResult", ref lovQuit))
+            {
+                P.Config.LordOfVerminionQuit = lovQuit;
+                P.Config.Save();
+            }
+            ImGuiEx.IndentedTextColored("17. Automatically quit Lord of Verminion when the results menu appears.");
+        }
 
         #endregion
-        #region ShopCardDialog
+        #region 7. Minigames and Special Events
 
-        var shopCard = P.Config.ShopCardDialog;
-        if (ImGui.Checkbox("ShopCardDialog", ref shopCard))
+        if (ImGui.CollapsingHeader("7. Minigames and Special Events"))
         {
-            P.Config.ShopCardDialog = shopCard;
-            P.Config.Save();
-        }
+            // 18. LotteryWeeklyInput
+            var lotto = P.Config.LotteryWeeklyInput;
+            if (ImGui.Checkbox("LotteryWeeklyInput", ref lotto))
+            {
+                P.Config.LotteryWeeklyInput = lotto;
+                P.Config.Save();
+            }
+            ImGuiEx.IndentedTextColored("18. Automatically purchase a Jumbo Cactpot ticket with a random number.");
 
-        ImGuiEx.IndentedTextColored("Automatically confirm selling Triple Triad cards in the saucer.");
+            // 19. HWDLottery
+            var kupo = P.Config.KupoOfFortune;
+            if (ImGui.Checkbox("HWDLottery", ref kupo))
+            {
+                P.Config.KupoOfFortune = kupo;
+                P.Config.Save();
+            }
+            ImGuiEx.IndentedTextColored("19. Automatically select a kupo of fortune reward. This will instantly complete a single kupo ticket but is unable to continue to the next automatically.");
+
+            // 20. SatisfactionSupply
+            var deliveries = P.Config.CustomDeliveries;
+            if (ImGui.Checkbox("SatisfactionSupply", ref deliveries))
+            {
+                P.Config.CustomDeliveries = deliveries;
+                P.Config.Save();
+            }
+            ImGuiEx.IndentedTextColored("20. Automatically turn in any available collectibles for Custom Deliveries.");
+        }
 
         #endregion
-        #region JournalResultComplete
+        #region Other
 
-        var journalResultComplete = P.Config.JournalResultCompleteEnabled;
-        if (ImGui.Checkbox("JournalResultComplete", ref journalResultComplete))
+        if (ImGui.CollapsingHeader("Other"))
         {
-            P.Config.JournalResultCompleteEnabled = journalResultComplete;
-            P.Config.Save();
+            // 21. PurifyResult
+            var purifyResultsDialog = P.Config.AetherialReductionResults;
+            if (ImGui.Checkbox("PurifyResult", ref purifyResultsDialog))
+            {
+                P.Config.AetherialReductionResults = purifyResultsDialog;
+                P.Config.Save();
+            }
+            ImGuiEx.IndentedTextColored("21. Automatically closes the PurifyResult window when done reducing.");
+
+            // 22. ItemInspectionResult
+            var itemInspection = P.Config.ItemInspectionResultEnabled;
+            if (ImGui.Checkbox("ItemInspectionResult", ref itemInspection))
+            {
+                P.Config.ItemInspectionResultEnabled = itemInspection;
+                P.Config.Save();
+            }
+            ImGuiEx.IndentedTextColored("22. Eureka/Bozja lockboxes, forgotten fragments, and more. Warning: this does not check if you are maxed on items. Rate limiter (pause after N items).");
+
+            // 23. GrandCompanySupplyReward
+            var grandCompanySupplyReward = P.Config.GrandCompanySupplyReward;
+            if (ImGui.Checkbox("GrandCompanySupplyReward", ref grandCompanySupplyReward))
+            {
+                P.Config.GrandCompanySupplyReward = grandCompanySupplyReward;
+                P.Config.Save();
+            }
+            ImGuiEx.IndentedTextColored("23. Skip the confirmation when submitting Grand Company expert delivery items.");
+
+            // 24. ShopCardDialog
+            var shopCard = P.Config.ShopCardDialog;
+            if (ImGui.Checkbox("ShopCardDialog", ref shopCard))
+            {
+                P.Config.ShopCardDialog = shopCard;
+                P.Config.Save();
+            }
+            ImGuiEx.IndentedTextColored("24. Automatically confirm selling Triple Triad cards in the saucer.");
+
+            // 25. JournalResultComplete
+            var journalResultComplete = P.Config.JournalResultCompleteEnabled;
+            if (ImGui.Checkbox("JournalResultComplete", ref journalResultComplete))
+            {
+                P.Config.JournalResultCompleteEnabled = journalResultComplete;
+                P.Config.Save();
+            }
+            ImGuiEx.IndentedTextColored("25. Automatically confirm quest reward acceptance when there is nothing to choose.");
+
+            // 26. InclusionShopRemember
+            var inclusionShopRemember = P.Config.InclusionShopRememberEnabled;
+            if (ImGui.Checkbox("InclusionShopRemember", ref inclusionShopRemember))
+            {
+                P.Config.InclusionShopRememberEnabled = inclusionShopRemember;
+                P.Config.Save();
+            }
+            ImGuiEx.IndentedTextColored("26. Remember the last panel visited on the scrip exchange window.");
+
+            // 27. GuildLeveDifficulty
+            var guildLeveDifficulty = P.Config.GuildLeveDifficultyConfirm;
+            if (ImGui.Checkbox("GuildLeveDifficulty", ref guildLeveDifficulty))
+            {
+                P.Config.GuildLeveDifficultyConfirm = guildLeveDifficulty;
+                P.Config.Save();
+            }
+            ImGuiEx.IndentedTextColored("27. Automatically confirms guild leves upon initiation at the highest difficulty.");
+
+            // 28. ShopExchangeItemDialog
+            var shopItemExchange = P.Config.ShopExchangeItemDialogEnabled;
+            if (ImGui.Checkbox("ShopExchangeItemDialog", ref shopItemExchange))
+            {
+                P.Config.ShopExchangeItemDialogEnabled = shopItemExchange;
+                P.Config.Save();
+            }
+            ImGuiEx.IndentedTextColored("28. Automatically exchange items/currencies in various shops (e.g., scrip vendors).");
+
+            // 29. FGSEnterDialog
+            var fgsEnter = P.Config.FallGuysRegisterConfirm;
+            if (ImGui.Checkbox("FGSEnterDialog", ref fgsEnter))
+            {
+                P.Config.FallGuysRegisterConfirm = fgsEnter;
+                P.Config.Save();
+            }
+            ImGuiEx.IndentedTextColored("29. Automatically register for Blunderville when speaking with the Blunderville Registrar.");
+
+            // 30. FGSExitDialog
+            var fgsExit = P.Config.FallGuysExitConfirm;
+            if (ImGui.Checkbox("FGSExitDialog", ref fgsExit))
+            {
+                P.Config.FallGuysExitConfirm = fgsExit;
+                P.Config.Save();
+            }
+            ImGuiEx.IndentedTextColored("30. Automatically confirm the exit prompt when leaving Blunderville.");
+
+            // 31. FashionCheck
+            var fashionQuit = P.Config.FashionCheckQuit;
+            if (ImGui.Checkbox("FashionCheck", ref fashionQuit))
+            {
+                P.Config.FashionCheckQuit = fashionQuit;
+                P.Config.Save();
+            }
+            ImGuiEx.IndentedTextColored("31. Automatically confirm the Fashion Reports results.");
+
+            // 32. DataCentreTravelConfirm
+            var dkt = P.Config.DataCentreTravelConfirmEnabled;
+            if (ImGui.Checkbox("DataCentreTravelConfirm", ref dkt))
+            {
+                P.Config.DataCentreTravelConfirmEnabled = dkt;
+                P.Config.Save();
+            }
+            ImGuiEx.IndentedTextColored("32. Automatically accept the Data Center travel confirmation.");
         }
-
-        ImGuiEx.IndentedTextColored("Automatically confirm quest reward acceptance when there is nothing to choose.");
-
-        #endregion
-        #region ContentFinderConfirm
-
-        var contentsFinderConfirm = P.Config.ContentsFinderConfirmEnabled;
-        if (ImGui.Checkbox("ContentsFinderConfirm", ref contentsFinderConfirm))
-        {
-            P.Config.ContentsFinderConfirmEnabled = contentsFinderConfirm;
-
-            if (!contentsFinderConfirm)
-                P.Config.ContentsFinderOneTimeConfirmEnabled = false;
-
-            P.Config.Save();
-        }
-
-        ImGuiEx.IndentedTextColored("Automatically commence duties when ready.");
-
-        #endregion
-        #region ContentFinderOneTimeConfirm
-
-        var contentsFinderOneTimeConfirm = P.Config.ContentsFinderOneTimeConfirmEnabled;
-        if (ImGui.Checkbox("ContentsFinderOneTimeConfirm", ref contentsFinderOneTimeConfirm))
-        {
-            P.Config.ContentsFinderOneTimeConfirmEnabled = contentsFinderOneTimeConfirm;
-
-            if (contentsFinderOneTimeConfirm)
-                P.Config.ContentsFinderConfirmEnabled = true;
-
-            P.Config.Save();
-        }
-
-        ImGuiEx.IndentedTextColored("Automatically commence duties when ready, but only once.\nRequires Contents Finder Confirm, and disables both after activation.");
-
-        #endregion
-        #region InclusionShop
-
-        var inclusionShopRemember = P.Config.InclusionShopRememberEnabled;
-        if (ImGui.Checkbox("InclusionShopRemember", ref inclusionShopRemember))
-        {
-            P.Config.InclusionShopRememberEnabled = inclusionShopRemember;
-            P.Config.Save();
-        }
-
-        ImGuiEx.IndentedTextColored("Remember the last panel visited on the scrip exchange window.");
-
-        #endregion
-        #region GuildLeveDifficulty
-
-        var guildLeveDifficulty = P.Config.GuildLeveDifficultyConfirm;
-        if (ImGui.Checkbox("GuildLeveDifficulty", ref guildLeveDifficulty))
-        {
-            P.Config.GuildLeveDifficultyConfirm = guildLeveDifficulty;
-            P.Config.Save();
-        }
-
-        ImGuiEx.IndentedTextColored("Automatically confirms guild leves upon initiation at the highest difficulty.");
-
-        #endregion
-        #region ShopExchangeItemDialog
-
-        var shopItemExchange = P.Config.ShopExchangeItemDialogEnabled;
-        if (ImGui.Checkbox("ShopExchangeItemDialog", ref shopItemExchange))
-        {
-            P.Config.ShopExchangeItemDialogEnabled = shopItemExchange;
-            P.Config.Save();
-        }
-
-        ImGuiEx.IndentedTextColored("Automatically exchange items/currencies in various shops (e.g. scrip vendors).");
-
-        #endregion
-        #region FallGuysRegisterConfirm
-
-        var fgsEnter = P.Config.FallGuysRegisterConfirm;
-        if (ImGui.Checkbox("FGSEnterDialog", ref fgsEnter))
-        {
-            P.Config.FallGuysRegisterConfirm = fgsEnter;
-            P.Config.Save();
-        }
-
-        ImGuiEx.IndentedTextColored("Automatically register for Blunderville when speaking with the Blunderville Registrar.");
-
-        #endregion
-        #region FallGuysExitConfirm
-
-        var fgsExit = P.Config.FallGuysExitConfirm;
-        if (ImGui.Checkbox("FGSExitDialog", ref fgsExit))
-        {
-            P.Config.FallGuysExitConfirm = fgsExit;
-            P.Config.Save();
-        }
-
-        ImGuiEx.IndentedTextColored("Automatically confirm the exit prompt when leaving Blunderville.");
-
-        #endregion
-        #region FashionCheckQuit
-
-        var fashionQuit = P.Config.FashionCheckQuit;
-        if (ImGui.Checkbox("FashionCheck", ref fashionQuit))
-        {
-            P.Config.FashionCheckQuit = fashionQuit;
-            P.Config.Save();
-        }
-
-        ImGuiEx.IndentedTextColored("Automatically confirm the Fashion Reports results.");
-
-        #endregion
-        #region ChocoboRacingQuit
-
-        var chocoboQuit = P.Config.ChocoboRacingQuit;
-        if (ImGui.Checkbox("RaceChocoboResult", ref chocoboQuit))
-        {
-            P.Config.ChocoboRacingQuit = chocoboQuit;
-            P.Config.Save();
-        }
-
-        ImGuiEx.IndentedTextColored("Automatically quit Chocobo Racing when the resuls menu appears.");
-
-        #endregion
-        #region LordOfVerminionQuit
-
-        var lovQuit = P.Config.LordOfVerminionQuit;
-        if (ImGui.Checkbox("LovmResult", ref lovQuit))
-        {
-            P.Config.LordOfVerminionQuit = lovQuit;
-            P.Config.Save();
-        }
-
-        ImGuiEx.IndentedTextColored("Automatically quit Lord of Verminion when the results menu appears.");
-
-        #endregion   
-        #region LotteryWeeklyInput
-
-        var lotto = P.Config.LotteryWeeklyInput;
-        if (ImGui.Checkbox("LotteryWeeklyInput", ref lotto))
-        {
-            P.Config.LotteryWeeklyInput = lotto;
-            P.Config.Save();
-        }
-
-        ImGuiEx.IndentedTextColored("Automatically purchase a Jumbo Cactpot ticket with a random number.");
-
-        #endregion
-        //#region TradeMultiple
-
-        //var transmute = P.Config.TradeMultiple;
-        //if (ImGui.Checkbox("TradeMultiple", ref transmute))
-        //{
-        //    P.Config.TradeMultiple = transmute;
-        //    P.Config.Save();
-        //}
-
-        //ImGuiEx.IndentedTextColored("Automatically turn in materia to be transmuted. Will transmute any and all materia in inventory.");
-
-        //#endregion
-        #region HWDLottery
-
-        var kupo = P.Config.KupoOfFortune;
-        if (ImGui.Checkbox("HWDLottery", ref kupo))
-        {
-            P.Config.KupoOfFortune = kupo;
-            P.Config.Save();
-        }
-
-        ImGuiEx.IndentedTextColored("Automatically select a kupo of fortune reward. This will instantly complete a single kupo ticket but is unable to continue to the next automatically.");
-
-        #endregion
-        #region SatisfactionSupply
-
-        var deliveries = P.Config.CustomDeliveries;
-        if (ImGui.Checkbox("SatisfactionSupply", ref deliveries))
-        {
-            P.Config.CustomDeliveries = deliveries;
-            P.Config.Save();
-        }
-
-        ImGuiEx.IndentedTextColored("Automatically turn in any available collectables for Custom Deliveries.");
-
-        #endregion
-        #region MKSRecordQuit
-
-        var ccquit = P.Config.MKSRecordQuit;
-        if (ImGui.Checkbox("MKSRecord", ref ccquit))
-        {
-            P.Config.MKSRecordQuit = ccquit;
-            P.Config.Save();
-        }
-
-        ImGuiEx.IndentedTextColored("Automatically leave the Crystalline Conflict match when the results appear.");
-
-        #endregion
-        #region DataCentreTravelConfirm
-
-        var dkt = P.Config.DataCentreTravelConfirmEnabled;
-        if (ImGui.Checkbox("DataCentreTravelConfirm", ref dkt))
-        {
-            P.Config.DataCentreTravelConfirmEnabled = dkt;
-            P.Config.Save();
-        }
-
-        ImGuiEx.IndentedTextColored("Automatically accept the Data Center travel confirmation.");
 
         #endregion
     }
