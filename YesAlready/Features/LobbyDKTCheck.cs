@@ -1,17 +1,16 @@
 ﻿using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
 using ECommons.Automation;
-using System.Linq;
 using YesAlready.BaseFeatures;
 
 namespace YesAlready.Features;
-public class CustomAddonCallbacks : BaseFeature
+internal class LobbyDKTCheck : BaseFeature
 {
     public override void Enable()
     {
         base.Enable();
-        foreach (var addon in P.Config.CustomBothers)
-            Svc.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, addon.Addon, AddonSetup);
+        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "LobbyDKTCheck", AddonSetup);
+        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "LobbyDKTCheckExec", AddonSetup);
     }
 
     public override void Disable()
@@ -22,10 +21,7 @@ public class CustomAddonCallbacks : BaseFeature
 
     protected static unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
     {
-        if (!P.Active) return;
-
-        var addon = addonInfo.Base();
-        var callbacks = P.Config.CustomBothers.First(x => x.Addon == addonInfo.AddonName).CallbackParams;
-        Callback.Fire(addon, true, callbacks);
+        if (!P.Active || !P.Config.DataCentreTravelConfirmEnabled) return;
+        Callback.Fire(addonInfo.Base(), true, 0);
     }
 }

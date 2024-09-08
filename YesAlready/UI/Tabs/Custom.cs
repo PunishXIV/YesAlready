@@ -1,6 +1,7 @@
 ﻿using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 using System.Collections.Generic;
+using System.Linq;
 using static YesAlready.Configuration;
 
 namespace YesAlready.UI.Tabs;
@@ -22,7 +23,7 @@ public static class Custom
             P.Config.Save();
         }
 
-        foreach (var bother in P.Config.CustomBothers)
+        foreach (var bother in P.Config.CustomBothers.ToList())
         {
             var name = bother.Addon;
             if (ImGui.InputText("Addon Name", ref name, 50))

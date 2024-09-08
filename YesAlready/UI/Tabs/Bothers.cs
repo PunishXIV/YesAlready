@@ -162,9 +162,9 @@ public static class Bothers
         }
 
         #endregion
-        #region Retainers
+        #region Retainers & Submersibles
 
-        if (ImGui.CollapsingHeader("Retainers"))
+        if (ImGui.CollapsingHeader("Retainers and Submersibles"))
         {
             var retainerTaskAsk = P.Config.RetainerTaskAskEnabled;
             if (ImGui.Checkbox("RetainerTaskAsk", ref retainerTaskAsk))
@@ -197,6 +197,26 @@ public static class Bothers
                 P.Config.Save();
             }
             ImGuiEx.IndentedTextColored("Automatically closes the RetainerItemTransferProgress window when finished entrusting items.");
+
+            var finalize = P.Config.AirShipExplorationResultFinalize;
+            if (ImGui.Checkbox("AirShipExplorationResult - Finalize", ref finalize))
+            {
+                if (finalize && P.Config.AirShipExplorationResultRedeploy)
+                    P.Config.AirShipExplorationResultRedeploy = false;
+                P.Config.AirShipExplorationResultFinalize = finalize;
+                P.Config.Save();
+            }
+            ImGuiEx.IndentedTextColored("Automatically finalize submersible reports when the AirShipExplorationResult window opens.");
+
+            var redeploy = P.Config.AirShipExplorationResultRedeploy;
+            if (ImGui.Checkbox("AirShipExplorationResult - Redeploy", ref redeploy))
+            {
+                if (redeploy && P.Config.AirShipExplorationResultFinalize)
+                    P.Config.AirShipExplorationResultFinalize = false;
+                P.Config.AirShipExplorationResultRedeploy = redeploy;
+                P.Config.Save();
+            }
+            ImGuiEx.IndentedTextColored("Automatically redeploy submersibles when the AirShipExplorationResult window opens.");
         }
 
         #endregion
@@ -240,7 +260,7 @@ public static class Bothers
                 P.Config.MKSRecordQuit = ccquit;
                 P.Config.Save();
             }
-            ImGuiEx.IndentedTextColored("15. Automatically leave the Crystalline Conflict match when the results appear.");
+            ImGuiEx.IndentedTextColored("Automatically leave the Crystalline Conflict match when the results appear.");
 
             var flquit = P.Config.FrontlineRecordQuit;
             if (ImGui.Checkbox("FrontlineRecord", ref flquit))
@@ -248,7 +268,7 @@ public static class Bothers
                 P.Config.FrontlineRecordQuit = flquit;
                 P.Config.Save();
             }
-            ImGuiEx.IndentedTextColored("15. Automatically leave the Frontline match when the results appear.");
+            ImGuiEx.IndentedTextColored("Automatically leave the Frontline match when the results appear.");
         }
 
         #endregion

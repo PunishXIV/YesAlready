@@ -67,6 +67,7 @@ internal class MainWindow : Window
             DisplayGenericOptions("Talk", Talk.DrawButtons, () => DisplayNodes(TalkRootFolder, () => new TalkEntryNode { Enabled = false, TargetText = "Your text goes here" }));
             DisplayGenericOptions("Numerics", Numerics.DrawButtons, () => DisplayNodes(NumericsRootFolder, () => new NumericsEntryNode() { Enabled = false, Text = "Add some text here!" }));
             Bothers.Draw();
+            Custom.Draw();
             DisplayMiscOptions();
         }
     }

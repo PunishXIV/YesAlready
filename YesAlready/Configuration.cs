@@ -64,6 +64,8 @@ public partial class Configuration() : IPluginConfiguration
     public bool MKSRecordQuit { get; set; } = false;
     public bool FrontlineRecordQuit { get; set; } = false;
     public bool DataCentreTravelConfirmEnabled { get; set; } = false;
+    public bool AirShipExplorationResultFinalize { get; set; } = false;
+    public bool AirShipExplorationResultRedeploy { get; set; } = false;
 
     public List<CustomBother> CustomBothers { get; set; } = [];
 
