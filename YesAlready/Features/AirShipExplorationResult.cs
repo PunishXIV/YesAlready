@@ -1,6 +1,5 @@
 using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
-using ECommons.Automation;
 using YesAlready.BaseFeatures;
 
 namespace YesAlready.Features;
@@ -21,8 +20,10 @@ internal class AirShipExplorationResult : BaseFeature
 
     protected static unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
     {
-        if (!P.Active || !P.Config.FallGuysExitConfirm) return;
-        new AddonMaster.AirShipExplorationResult(addonInfo.Base()).FinalizeReport();
-        new AddonMaster.AirShipExplorationResult(addonInfo.Base()).Redeploy();
+        if (!P.Active) return;
+        if (P.Config.AirShipExplorationResultFinalize)
+            new AddonMaster.AirShipExplorationResult(addonInfo.Base()).FinalizeReport();
+        if (P.Config.AirShipExplorationResultRedeploy)
+            new AddonMaster.AirShipExplorationResult(addonInfo.Base()).Redeploy();
     }
 }

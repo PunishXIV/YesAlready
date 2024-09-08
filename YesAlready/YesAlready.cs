@@ -76,7 +76,7 @@ public class YesAlready : IDalamudPlugin
         }
 
         LoadTerritories();
-        EnableFeatures(true);
+        ToggleFeatures(true);
 
         dtrEntry ??= Svc.DtrBar.Get("YesAlready");
         TaskManager = new();
@@ -87,7 +87,7 @@ public class YesAlready : IDalamudPlugin
         EzSignatureHelper.Initialize(this);
     }
 
-    public static void EnableFeatures(bool enable)
+    public static void ToggleFeatures(bool enable)
     {
         var featureAssembly = Assembly.GetExecutingAssembly();
 

@@ -1,7 +1,15 @@
-﻿using Dalamud.Interface.Utility.Raii;
+﻿using Dalamud.Interface;
+using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
+using System.Reflection;
+using System.Text;
+using YesAlready.BaseFeatures;
+using YesAlready.Features;
+using YesAlready.Utils;
 using static YesAlready.Configuration;
 
 namespace YesAlready.UI.Tabs;
@@ -13,7 +21,43 @@ public static class Custom
         if (!tab) return;
         using var idScope = ImRaii.PushId($"CustomBothers");
 
-        if (ImGui.Button("add"))
+        DrawButtons();
+
+        foreach (var bother in P.Config.CustomBothers.ToList())
+        {
+            var name = bother.Addon;
+            if (ImGui.InputText("Addon Name", ref name, 50, ImGuiInputTextFlags.EnterReturnsTrue))
+            {
+                bother.Addon = name;
+                P.Config.Save();
+                ToggleCustomBothers();
+            }
+
+            var args = string.Join(" ", bother.CallbackParams);
+            if (ImGui.InputText("Parameters", ref args, 150, ImGuiInputTextFlags.EnterReturnsTrue))
+            {
+                bother.CallbackParams = ParseArgs(args);
+                P.Config.Save();
+                ToggleCustomBothers();
+            }
+
+            ImGui.SameLine();
+            if (ImGuiEx.IconButton(FontAwesomeIcon.Trash, "Remove Entry", id: $"Delete##{P.Config.CustomBothers.IndexOf(bother)}"))
+            {
+                P.Config.CustomBothers.Remove(bother);
+                P.Config.Save();
+                ToggleCustomBothers();
+            }
+        }
+    }
+
+    public static void DrawButtons()
+    {
+        var style = ImGui.GetStyle();
+        var newStyle = new Vector2(style.ItemSpacing.X / 2, style.ItemSpacing.Y);
+        using var _ = ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, newStyle);
+
+        if (ImGuiEx.IconButton(FontAwesomeIcon.Plus, "Add new entry"))
         {
             P.Config.CustomBothers.Add(new CustomBother
             {
@@ -23,27 +67,36 @@ public static class Custom
             P.Config.Save();
         }
 
-        foreach (var bother in P.Config.CustomBothers.ToList())
+        var sb = new StringBuilder();
+        sb.AppendLine("This section allows you to build custom \"Bothers\".");
+        sb.AppendLine("Many bothers are very simple, consisting of a single callback parameter to a given addon when it appears. This is for those types of bothers.");
+        sb.AppendLine();
+        sb.AppendLine("Callback parameter parsing works the same as in Something Need Doing.");
+        sb.AppendLine("Custom bothers are registered via AddonLifeCycle on the PostSetup event.");
+        sb.AppendLine();
+        sb.AppendLine("Some bothers may require infeasible parameters, waits, or different AddonEvents. Those can still be requested for the normal bother system.");
+        sb.AppendLine();
+        sb.AppendLine("Example:");
+        sb.AppendLine("   AddonName: Character");
+        sb.AppendLine("   Parameters: -1");
+        sb.AppendLine("   Effect: When opening the Character addon, it will instantly be closed. Probably not useful.");
+
+        ImGui.SameLine();
+        ImGuiEx.IconButton(FontAwesomeIcon.QuestionCircle, sb.ToString());
+        if (ImGui.IsItemHovered()) ImGui.SetTooltip(sb.ToString());
+    }
+
+    private static void ToggleCustomBothers()
+    {
+        var featureAssembly = Assembly.GetExecutingAssembly();
+
+        foreach (var type in featureAssembly.GetTypes())
         {
-            var name = bother.Addon;
-            if (ImGui.InputText("Addon Name", ref name, 50))
+            if (typeof(BaseFeature).IsAssignableFrom(type) && !type.IsAbstract && type.Name == nameof(CustomAddonCallbacks))
             {
-                bother.Addon = name;
-                P.Config.Save();
-            }
-
-            var args = string.Empty;
-            if (ImGui.InputText("Command", ref args, 150))
-            {
-                bother.CallbackParams = ParseArgs(args);
-                P.Config.Save();
-            }
-
-            ImGui.SameLine();
-            if (ImGui.Button("remove"))
-            {
-                P.Config.CustomBothers.Remove(bother);
-                P.Config.Save();
+                var feature = (BaseFeature)Activator.CreateInstance(type);
+                feature.Disable();
+                feature.Enable();
             }
         }
     }

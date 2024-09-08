@@ -24,14 +24,14 @@ internal static class ImGuiEx
 
     public static bool IconButton(FontAwesomeIcon icon) => IconButton(icon);
 
-    public static bool IconButton(FontAwesomeIcon icon, string tooltip, int width = -1)
+    public static bool IconButton(FontAwesomeIcon icon, string tooltip, int width = -1, string id = "")
     {
         ImGui.PushFont(UiBuilder.IconFont);
 
         if (width > 0)
             ImGui.SetNextItemWidth(32);
 
-        var result = ImGui.Button($"{icon.ToIconString()}##{icon.ToIconString()}-{tooltip}");
+        var result = ImGui.Button($"{icon.ToIconString()}##{icon.ToIconString()}-{tooltip}{id}");
         ImGui.PopFont();
 
         if (tooltip != null)
