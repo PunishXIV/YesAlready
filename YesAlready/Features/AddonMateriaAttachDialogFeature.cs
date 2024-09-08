@@ -1,7 +1,6 @@
 using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
 using Dalamud.Game.ClientState.Conditions;
-using ECommons.UIHelpers.AddonMasterImplementations;
 using YesAlready.BaseFeatures;
 
 namespace YesAlready.Features;
@@ -23,15 +22,16 @@ internal class AddonMateriaAttachDialogFeature : BaseFeature
     protected static unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
     {
         if (!P.Active || !P.Config.MaterialAttachDialogEnabled) return;
-        var addon = new AddonMaster.MateriaAttachDialog(addonInfo.Base());
-
-        if (P.Config.OnlyMeldWhenGuaranteed && addon.SuccessRateFloat < 100)
+        if (GenericHelpers.TryGetAddonMaster<AddonMaster.MateriaAttachDialog>(out var am))
         {
-            Svc.Log.Debug($"Success rate {addon.SuccessRateFloat} less than 100%, aborting meld.");
-            return;
-        }
+            if (P.Config.OnlyMeldWhenGuaranteed && am.SuccessRateFloat < 100)
+            {
+                Svc.Log.Debug($"Success rate {am.SuccessRateFloat} less than 100%, aborting meld.");
+                return;
+            }
 
-        P.TaskManager.Enqueue(() => Svc.Condition[ConditionFlag.MeldingMateria]);
-        P.TaskManager.Enqueue(addon.Meld);
+            P.TaskManager.Enqueue(() => Svc.Condition[ConditionFlag.MeldingMateria]);
+            P.TaskManager.Enqueue(am.Meld);
+        }
     }
 }

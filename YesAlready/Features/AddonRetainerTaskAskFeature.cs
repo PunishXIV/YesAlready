@@ -1,6 +1,5 @@
 using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
-using ECommons.UIHelpers.AddonMasterImplementations;
 using YesAlready.BaseFeatures;
 
 namespace YesAlready.Features;
@@ -22,8 +21,10 @@ internal class AddonRetainerTaskAskFeature : BaseFeature
     protected static unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
     {
         if (!P.Active || !P.Config.RetainerTaskAskEnabled) return;
-        var addon = new AddonMaster.RetainerTaskAsk(addonInfo.Base());
-        P.TaskManager.Enqueue(() => addon.AssignButton->IsEnabled); // must be throttled, there's a little delay after setup before this is enabled
-        P.TaskManager.Enqueue(addon.Assign);
+        if (!GenericHelpers.TryGetAddonMaster<AddonMaster.RetainerTaskAsk>(out var am))
+        {
+            P.TaskManager.Enqueue(() => am.AssignButton->IsEnabled); // must be throttled, there's a little delay after setup before this is enabled
+            P.TaskManager.Enqueue(am.Assign);
+        }
     }
 }

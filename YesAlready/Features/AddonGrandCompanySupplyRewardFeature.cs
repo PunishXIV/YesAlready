@@ -1,6 +1,5 @@
 using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
-using ECommons.UIHelpers.AddonMasterImplementations;
 using YesAlready.BaseFeatures;
 
 namespace YesAlready.Features;
@@ -22,7 +21,6 @@ internal class AddonGrandCompanySupplyRewardFeature : BaseFeature
     protected static unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
     {
         if (!P.Active || !P.Config.GrandCompanySupplyReward) return;
-        var addon = new AddonMaster.GrandCompanySupplyReward(addonInfo.Base());
-        addon.Deliver();
+        new AddonMaster.GrandCompanySupplyReward(addonInfo.Base()).Deliver();
     }
 }

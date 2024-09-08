@@ -1,7 +1,6 @@
 using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
 using ECommons.Automation;
-using FFXIVClientStructs.FFXIV.Component.GUI;
 using System;
 using System.Linq;
 using YesAlready.BaseFeatures;
@@ -23,10 +22,9 @@ internal class AddonInputNumericFeature : BaseFeature
 
     protected static unsafe void AddonSetup(AddonEvent eventType, AddonArgs args)
     {
-        if (!P.Active)
-            return;
+        if (!P.Active) return;
 
-        var addon = (AtkUnitBase*)args.Addon;
+        var addon = args.Base();
         var min = addon->AtkValues[2].UInt;
         var max = addon->AtkValues[3].UInt;
         var text = P.LastSeenNumericsText = Utils.SEString.GetSeStringText(new nint(addon->AtkValues[6].String));

@@ -1,6 +1,5 @@
 using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
-using ECommons.UIHelpers.AddonMasterImplementations;
 using YesAlready.BaseFeatures;
 
 namespace YesAlready.Features;
@@ -22,7 +21,6 @@ internal class AddonJournalResultFeature : BaseFeature
     protected unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
     {
         if (!P.Active || !P.Config.JournalResultCompleteEnabled) return;
-        var addon = new AddonMaster.JournalResult(addonInfo.Base());
-        addon.Complete();
+        new AddonMaster.JournalResult(addonInfo.Base()).Complete();
     }
 }

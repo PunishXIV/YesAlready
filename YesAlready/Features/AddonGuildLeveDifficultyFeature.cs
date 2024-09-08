@@ -1,7 +1,6 @@
 using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
 using ECommons.Automation;
-using FFXIVClientStructs.FFXIV.Component.GUI;
 using YesAlready.BaseFeatures;
 
 namespace YesAlready.Features;
@@ -22,11 +21,7 @@ internal class AddonGuildLeveDifficultyFeature : BaseFeature
 
     protected static unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
     {
-        var addon = (AtkUnitBase*)addonInfo.Addon;
-
-        if (!P.Active || !P.Config.GuildLeveDifficultyConfirm)
-            return;
-
-        Callback.Fire(addon, true, 0, addon->AtkValues[1].Int);
+        if (!P.Active || !P.Config.GuildLeveDifficultyConfirm) return;
+        Callback.Fire(addonInfo.Base(), true, 0, addonInfo.Base()->AtkValues[1].Int);
     }
 }

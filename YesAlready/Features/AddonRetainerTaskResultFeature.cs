@@ -1,6 +1,5 @@
 using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
-using ECommons.UIHelpers.AddonMasterImplementations;
 using Lumina.Excel.GeneratedSheets;
 using YesAlready.BaseFeatures;
 
@@ -24,12 +23,14 @@ internal class AddonRetainerTaskResultFeature : BaseFeature
     {
         if (!P.Active || !P.Config.RetainerTaskResultEnabled) return;
 
-        var addon = new AddonMaster.RetainerTaskResult(addonInfo.Base());
-        var buttonText = addon.ReassignButton->ButtonTextNode->NodeText.ToString();
-        if (buttonText == Svc.Data.GetExcelSheet<Addon>(Svc.ClientState.ClientLanguage).GetRow(2365).Text)
-            return;
+        if (GenericHelpers.TryGetAddonMaster<AddonMaster.RetainerTaskResult>(out var am))
+        {
+            var buttonText = am.ReassignButton->ButtonTextNode->NodeText.ToString();
+            if (buttonText == Svc.Data.GetExcelSheet<Addon>(Svc.ClientState.ClientLanguage).GetRow(2365).Text)
+                return;
 
-        P.TaskManager.Enqueue(() => addon.ReassignButton->IsEnabled); // must be throttled, there's a little delay after setup before this is enabled
-        P.TaskManager.Enqueue(addon.Reassign);
+            P.TaskManager.Enqueue(() => am.ReassignButton->IsEnabled); // must be throttled, there's a little delay after setup before this is enabled
+            P.TaskManager.Enqueue(am.Reassign);
+        }
     }
 }

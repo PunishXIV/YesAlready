@@ -1,6 +1,5 @@
 using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
-using ECommons.UIHelpers.AddonMasterImplementations;
 using YesAlready.BaseFeatures;
 
 namespace YesAlready.Features;
@@ -22,7 +21,6 @@ internal class AddonMateriaRetrieveDialogFeature : BaseFeature
     protected static unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
     {
         if (!P.Active || !P.Config.MateriaRetrieveDialogEnabled) return;
-        var addon = new AddonMaster.MateriaRetrieveDialog(addonInfo.Base());
-        addon.Begin();
+        new AddonMaster.MateriaRetrieveDialog(addonInfo.Base()).Begin();
     }
 }

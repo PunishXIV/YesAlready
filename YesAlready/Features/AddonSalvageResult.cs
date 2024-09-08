@@ -1,7 +1,5 @@
 using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
-using ECommons;
-using ECommons.UIHelpers.AddonMasterImplementations;
 using YesAlready.BaseFeatures;
 
 namespace YesAlready.Features;
@@ -25,15 +23,16 @@ internal class AddonSalvageResult : BaseFeature
     protected static unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
     {
         if (!P.Active || !P.Config.DesynthesisResults || !GenericHelpers.IsAddonReady(addonInfo.Base())) return;
-        var addon = new AddonMaster.SalvageResult(addonInfo.Base());
-        addon.Close();
+        new AddonMaster.SalvageResult(addonInfo.Base()).Close();
     }
 
     protected static unsafe void AddonUpdate(AddonEvent eventType, AddonArgs addonInfo)
     {
         if (!P.Active || !P.Config.DesynthesisResults || !GenericHelpers.IsAddonReady(addonInfo.Base())) return;
-        var addon = new AddonMaster.SalvageAutoDialog(addonInfo.Base());
-        if (addon.DesynthesisInactive)
-            addon.EndDesynthesis();
+        if (GenericHelpers.TryGetAddonMaster<AddonMaster.SalvageAutoDialog>(out var am))
+        {
+            if (am.DesynthesisInactive)
+                am.EndDesynthesis();
+        }
     }
 }

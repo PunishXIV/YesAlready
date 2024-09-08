@@ -22,7 +22,6 @@ internal class AddonRaceChocoboResultFeature : BaseFeature
     protected static unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
     {
         if (!P.Active || !P.Config.ChocoboRacingQuit) return;
-        var addon = addonInfo.Base();
-        Callback.Fire(addon, true, 1);
+        Callback.Fire(addonInfo.Base(), true, 1);
     }
 }

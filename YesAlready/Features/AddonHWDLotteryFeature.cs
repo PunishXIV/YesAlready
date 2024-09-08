@@ -25,21 +25,15 @@ internal class AddonHWDLotteryFeature : BaseFeature
 
     protected static unsafe void AddonSetup(AddonEvent eventType, AddonArgs args)
     {
-        var addon = (AtkUnitBase*)args.Addon;
-
-        if (!P.Active || !P.Config.KupoOfFortune)
-            return;
-
-        Callback.Fire(addon, true, 0, 1);
+        if (!P.Active || !P.Config.KupoOfFortune) return;
+        Callback.Fire(args.Base(), true, 0, 1);
     }
 
     private unsafe void AddonUpdate(AddonEvent type, AddonArgs args)
     {
-        var addon = (AtkUnitBase*)args.Addon;
+        if (!P.Active || !P.Config.KupoOfFortune) return;
 
-        if (!P.Active || !P.Config.KupoOfFortune)
-            return;
-
+        var addon = args.Base();
         var closeButton = addon->UldManager.NodeList[7]->GetAsAtkComponentButton();
         if (Enumerable.Range(32, 5).Select(i => addon->AtkValues[i].UInt).ToList().All(x => x != 0) && closeButton != null && closeButton->IsEnabled)
         {

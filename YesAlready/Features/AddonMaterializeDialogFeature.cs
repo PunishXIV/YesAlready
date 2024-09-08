@@ -1,6 +1,5 @@
 using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
-using ECommons.UIHelpers.AddonMasterImplementations;
 using YesAlready.BaseFeatures;
 
 namespace YesAlready.Features;
@@ -22,7 +21,6 @@ internal class AddonMaterializeDialogFeature : BaseFeature
     protected static unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
     {
         if (!P.Active || !P.Config.MaterializeDialogEnabled) return;
-        var addon = new AddonMaster.MaterializeDialog(addonInfo.Base());
-        addon.Materialize();
+        new AddonMaster.MaterializeDialog(addonInfo.Base()).Materialize();
     }
 }

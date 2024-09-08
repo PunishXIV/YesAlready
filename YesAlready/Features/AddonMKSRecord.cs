@@ -7,8 +7,6 @@ namespace YesAlready.Features;
 
 internal class AddonMKSRecord : BaseFeature
 {
-    private delegate void AbandonDuty(bool a1);
-
     public override void Enable()
     {
         base.Enable();

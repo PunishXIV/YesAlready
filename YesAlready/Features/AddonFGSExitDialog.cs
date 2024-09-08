@@ -21,9 +21,7 @@ internal class AddonFGSExitDialog : BaseFeature
 
     protected static unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
     {
-        if (!P.Active || !P.Config.FallGuysExitConfirm)
-            return;
-
+        if (!P.Active || !P.Config.FallGuysExitConfirm) return;
         Callback.Fire(addonInfo.Base(), true, 0);
     }
 }

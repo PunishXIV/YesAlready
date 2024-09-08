@@ -1,11 +1,9 @@
 using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
 using Dalamud.Plugin.Services;
-using ECommons;
 using ECommons.Automation;
 using ECommons.Logging;
 using ECommons.Throttlers;
-using ECommons.UIHelpers.AddonMasterImplementations;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
@@ -42,7 +40,7 @@ internal class AddonSatisfactionSupplyFeature : BaseFeature
         if (!P.Active || !P.Config.CustomDeliveries || Disabled)
             return;
 
-        var addon = (AtkUnitBase*)args.Addon;
+        var addon = args.Base();
         if (!GenericHelpers.IsAddonReady(addon)) return;
 
         var atkValues = new[] { addon->AtkValues[22].Int, addon->AtkValues[31].Int, addon->AtkValues[40].Int };

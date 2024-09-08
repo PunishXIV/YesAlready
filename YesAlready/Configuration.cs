@@ -62,7 +62,17 @@ public partial class Configuration() : IPluginConfiguration
     public bool KupoOfFortune { get; set; } = false;
     public bool CustomDeliveries { get; set; } = false;
     public bool MKSRecordQuit { get; set; } = false;
+    public bool FrontlineRecordQuit { get; set; } = false;
     public bool DataCentreTravelConfirmEnabled { get; set; } = false;
+
+    public List<CustomBother> CustomBothers { get; set; } = [];
+
+    public class CustomBother
+    {
+        public string Addon { get; set; }
+        public bool UpdateState { get; set; } = true;
+        public object[] CallbackParams { get; set; }
+    }
 
     public enum TradeMultipleMode
     {

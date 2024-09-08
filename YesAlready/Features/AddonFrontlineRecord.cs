@@ -1,15 +1,16 @@
 using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
+using ECommons.Automation;
 using YesAlready.BaseFeatures;
 
 namespace YesAlready.Features;
 
-internal class AddonShopCardDialogFeature : BaseFeature
+internal class AddonFrontlineRecord : BaseFeature
 {
     public override void Enable()
     {
         base.Enable();
-        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "ShopCardDialog", AddonSetup);
+        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "FrontlineRecord", AddonSetup);
     }
 
     public override void Disable()
@@ -20,9 +21,7 @@ internal class AddonShopCardDialogFeature : BaseFeature
 
     protected unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
     {
-        if (!P.Active || !P.Config.ShopCardDialog) return;
-        var addon = new AddonMaster.ShopCardDialog(addonInfo.Base());
-        addon.Quantity = addon.MaxQuantity;
-        addon.Sell();
+        if (!P.Active || !P.Config.FrontlineRecordQuit) return;
+        Callback.Fire(addonInfo.Base(), true, -1);
     }
 }

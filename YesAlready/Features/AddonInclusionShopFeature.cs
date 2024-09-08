@@ -1,8 +1,6 @@
 using System;
 using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
-using Dalamud.Hooking;
-using Dalamud.Utility.Signatures;
 using ECommons.EzHookManager;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using YesAlready.BaseFeatures;
@@ -27,11 +25,9 @@ internal class AddonInclusionShopFeature : BaseFeature
 
     protected unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
     {
-        var addon = (AtkUnitBase*)addonInfo.Addon;
+        if (!P.Active || !P.Config.InclusionShopRememberEnabled) return;
 
-        if (!P.Active || !P.Config.InclusionShopRememberEnabled)
-            return;
-
+        var addon = addonInfo.Base();
         Svc.Log.Debug($"Firing 12,{P.Config.InclusionShopRememberCategory}");
         using var categoryValues = new AtkValueArray(12, P.Config.InclusionShopRememberCategory);
         addon->FireCallback(2, categoryValues);

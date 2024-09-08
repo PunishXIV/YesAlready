@@ -1,7 +1,5 @@
 using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
-using ECommons;
-using ECommons.UIHelpers.AddonMasterImplementations;
 using YesAlready.BaseFeatures;
 
 namespace YesAlready.Features;
@@ -25,20 +23,22 @@ internal class AddonSalvageDialogFeature : BaseFeature
     {
         if (!P.Active || !GenericHelpers.IsAddonReady(addonInfo.Base())) return;
 
-        var addon = new AddonMaster.SalvageDialog(addonInfo.Base());
-        switch (eventType)
+        if (GenericHelpers.TryGetAddonMaster<AddonMaster.SalvageDialog>(out var am))
         {
-            case AddonEvent.PreSetup:
-                if (P.Config.DesynthBulkDialogEnabled)
-                    addon.Addon->AtkValues[20].SetBool(true);
-                break;
-            case AddonEvent.PostSetup:
-                if (P.Config.DesynthDialogEnabled)
-                {
-                    addon.Checkbox();
-                    addon.Desynthesize();
-                }
-                break;
+            switch (eventType)
+            {
+                case AddonEvent.PreSetup:
+                    if (P.Config.DesynthBulkDialogEnabled)
+                        am.Addon->AtkValues[20].SetBool(true);
+                    break;
+                case AddonEvent.PostSetup:
+                    if (P.Config.DesynthDialogEnabled)
+                    {
+                        am.Checkbox();
+                        am.Desynthesize();
+                    }
+                    break;
+            }
         }
     }
 }

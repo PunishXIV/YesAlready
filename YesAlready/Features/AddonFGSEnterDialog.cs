@@ -21,9 +21,7 @@ internal class AddonFGSEnterDialog : BaseFeature
 
     protected static unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
     {
-        if (!P.Active || !P.Config.FallGuysRegisterConfirm)
-            return;
-
+        if (!P.Active || !P.Config.FallGuysRegisterConfirm) return;
         Callback.Fire(addonInfo.Base(), true, 0);
     }
 }

@@ -1,7 +1,6 @@
 using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
 using Dalamud.Memory;
-using ECommons;
 using ECommons.Automation;
 using Lumina.Excel.GeneratedSheets;
 using System.Linq;

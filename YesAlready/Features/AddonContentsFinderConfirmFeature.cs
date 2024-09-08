@@ -1,6 +1,5 @@
 using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
-using ECommons.UIHelpers.AddonMasterImplementations;
 using YesAlready.BaseFeatures;
 
 namespace YesAlready.Features;
@@ -23,8 +22,7 @@ internal class AddonContentsFinderConfirmFeature : BaseFeature
     {
         if (!P.Active || !P.Config.ContentsFinderConfirmEnabled) return;
 
-        var addon = new AddonMaster.ContentsFinderConfirm(addonInfo.Base());
-        addon.Commence();
+        new AddonMaster.ContentsFinderConfirm(addonInfo.Base()).Commence();
 
         if (P.Config.ContentsFinderOneTimeConfirmEnabled)
         {

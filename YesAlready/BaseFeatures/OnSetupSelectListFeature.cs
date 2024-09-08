@@ -1,5 +1,4 @@
 using Dalamud.Hooking;
-using ECommons;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using System;

@@ -1,7 +1,5 @@
 using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
-using ECommons;
-using ECommons.UIHelpers.AddonMasterImplementations;
 using System.Linq;
 using YesAlready.BaseFeatures;
 

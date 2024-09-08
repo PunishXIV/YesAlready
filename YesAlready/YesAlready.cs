@@ -5,7 +5,6 @@ using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
-using ECommons;
 using ECommons.Automation.LegacyTaskManager;
 using ECommons.EzHookManager;
 using ECommons.SimpleGui;
