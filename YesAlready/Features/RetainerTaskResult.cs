@@ -26,7 +26,7 @@ internal class RetainerTaskResult : BaseFeature
         if (GenericHelpers.TryGetAddonMaster<AddonMaster.RetainerTaskResult>(out var am))
         {
             var buttonText = am.ReassignButton->ButtonTextNode->NodeText.ToString();
-            if (buttonText == Svc.Data.GetExcelSheet<Addon>(Svc.ClientState.ClientLanguage).GetRow(2365).Text)
+            if (buttonText == Svc.Data.GetExcelSheet<Addon>(Svc.ClientState.ClientLanguage).GetRow(2365).Text) // Recall
                 return;
 
             P.TaskManager.Enqueue(() => am.ReassignButton->IsEnabled); // must be throttled, there's a little delay after setup before this is enabled
