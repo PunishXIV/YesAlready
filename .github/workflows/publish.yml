@@ -1,0 +1,49 @@
+name: Build & Publish to Dynamis
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  Build:
+    runs-on: ubuntu-latest
+    env:
+        DALAMUD_HOME: /tmp/dalamud
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Get Tag Name
+        run: echo "tag=$(echo ${{ github.ref }} | sed 's/refs\/tags\/v//')" >> $GITHUB_ENV
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.0.x
+
+      - name: Download Dalamud Latest
+        run: |
+          wget https://goatcorp.github.io/dalamud-distrib/latest.zip -O ${{ env.DALAMUD_HOME }}.zip
+          unzip ${{ env.DALAMUD_HOME }}.zip -d ${{ env.DALAMUD_HOME }}
+
+      - name: Restore Project
+        run: dotnet restore
+
+      - name: Build Project
+        run: dotnet build --configuration Release YesAlready/YesAlready.csproj -p:AssemblyVersion=${{ env.tag }}
+
+      - name: Publish Version
+        uses: PunishXIV/dynamis-action@v1
+        id: dynamis
+        with:
+          plugin_id: 26
+          internal_name: "YesAlready"
+          version_number: ${{ env.tag }}
+          path: "YesAlready/bin/Release/YesAlready/latest.zip"
+          type: "latest"
+          dalamud_version: "10"
+        env:
+          PUBLISHER_KEY: ${{ secrets.PUBLISHER_KEY }}
