@@ -66,6 +66,8 @@ public partial class Configuration() : IPluginConfiguration
     public bool DataCentreTravelConfirmEnabled { get; set; } = false;
     public bool AirShipExplorationResultFinalize { get; set; } = false;
     public bool AirShipExplorationResultRedeploy { get; set; } = false;
+    public bool MiragePrismRemoveDispel { get; set; } = false;
+    public bool MiragePrismExecuteCast { get; set; } = false;
 
     public List<CustomBother> CustomBothers { get; set; } = [];
 

@@ -415,6 +415,22 @@ public static class Bothers
                 P.Config.Save();
             }
             ImGuiEx.IndentedTextColored("Automatically accept the Data Center travel confirmation.");
+
+            var mpr = P.Config.MiragePrismRemoveDispel;
+            if (ImGui.Checkbox("MiragePrismRemoveDispel", ref mpr))
+            {
+                P.Config.MiragePrismRemoveDispel = mpr;
+                P.Config.Save();
+            }
+            ImGuiEx.IndentedTextColored("Automatically dispel glamours when using Glamour Dispellers.");
+
+            var mpe = P.Config.MiragePrismExecuteCast;
+            if (ImGui.Checkbox("MiragePrismExecuteCast", ref mpe))
+            {
+                P.Config.MiragePrismExecuteCast = mpe;
+                P.Config.Save();
+            }
+            ImGuiEx.IndentedTextColored("Automatically cast glamours when using Glamour Prisms.");
         }
 
         #endregion
