@@ -1,6 +1,5 @@
 using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
-using FFXIVClientStructs.FFXIV.Component.GUI;
 using System.Linq;
 using YesAlready.BaseFeatures;
 
@@ -20,14 +19,11 @@ internal class Talk : BaseFeature
         Svc.AddonLifecycle.UnregisterListener(AddonUpdate);
     }
 
-    private string lastTalkTarget = string.Empty;
-    private bool matched = false;
-
     protected unsafe void AddonUpdate(AddonEvent eventType, AddonArgs addonInfo)
     {
-        if (!P.Active || !((AtkUnitBase*)addonInfo.Addon)->IsVisible) return;
+        if (!P.Active) return;
 
-        var addon = new AddonMaster.Talk(addonInfo.Base());
+        if (!GenericHelpers.TryGetAddonMaster<AddonMaster.Talk>(out var addon) || !addon.IsAddonReady) return;
         var target = Svc.Targets.Target;
         var targetName = P.LastSeenTalkTarget = target != null
             ? Utils.SEString.GetSeStringText(target.Name)
@@ -35,39 +31,24 @@ internal class Talk : BaseFeature
 
         if (P.ForcedYesKeyPressed && !P.Config.SeparateForcedKeys || P.ForcedTalkKeyPressed)
         {
-            Svc.Log.Debug($"{nameof(Talk)}: Forced hotkey pressed");
+            PluginLog.Debug($"{nameof(Talk)}: Forced hotkey pressed");
             addon.Click();
             return;
         }
 
-        if (targetName != lastTalkTarget)
+        // if someone sees this and thinks "This is unoptimal, what if I have a lot of regex in my talk entries?", I will simply say "why would you have that?"
+        // knock yourself out optimising this without changing any current functionality
+        var nodes = P.Config.GetAllNodes().OfType<TalkEntryNode>();
+        foreach (var node in nodes)
         {
-            Svc.Log.Debug("Target Name: " + targetName + ", lastTalkTarget: " + lastTalkTarget);
-            lastTalkTarget = targetName;
-            matched = false;
-
-            var nodes = P.Config.GetAllNodes().OfType<TalkEntryNode>();
-
-            foreach (var node in nodes)
+            if (!node.Enabled || string.IsNullOrEmpty(node.TargetText)) continue;
+            var matched = EntryMatchesTargetName(node, targetName);
+            if (matched)
             {
-                if (!node.Enabled || string.IsNullOrEmpty(node.TargetText))
-                    continue;
-
-                matched = EntryMatchesTargetName(node, targetName);
-
-                if (matched)
-                {
-                    Svc.Log.Debug("Talk match seen: " + matched + " Node: " + node.Name);
-                    break;
-                }
+                PluginLog.Debug($"AddonTalk: Matched {targetName} to {node.Name}. Advancing");
+                addon.Click();
+                return;
             }
-        }
-
-        if (matched)
-        {
-            Svc.Log.Debug("AddonTalk: Advancing");
-            addon.Click();
-            return;
         }
     }
 
