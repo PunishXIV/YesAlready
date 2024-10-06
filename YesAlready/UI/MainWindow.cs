@@ -3,6 +3,7 @@ using Dalamud.Interface;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
+using ECommons.Logging;
 using ECommons.Reflection;
 using ImGuiNET;
 using System;
@@ -69,6 +70,9 @@ internal class MainWindow : Window
             Bothers.Draw();
             Custom.Draw();
             DisplayMiscOptions();
+            using (var tab = ImRaii.TabItem("Log"))
+                if (tab)
+                    InternalLog.PrintImgui();
         }
     }
 

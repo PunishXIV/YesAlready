@@ -7,13 +7,13 @@ public abstract class BaseFeature
 
     public virtual void Enable()
     {
-        Svc.Log.Debug($"Enabling {Key}");
+        PluginLog.Debug($"Enabling {Key}");
         Enabled = true;
     }
 
     public virtual void Disable()
     {
-        Svc.Log.Debug($"Disabling {Key}");
+        PluginLog.Debug($"Disabling {Key}");
         Enabled = false;
     }
 }

@@ -28,11 +28,11 @@ internal class InclusionShop : BaseFeature
         if (!P.Active || !P.Config.InclusionShopRememberEnabled) return;
 
         var addon = addonInfo.Base();
-        Svc.Log.Debug($"Firing 12,{P.Config.InclusionShopRememberCategory}");
+        PluginLog.Debug($"Firing 12,{P.Config.InclusionShopRememberCategory}");
         using var categoryValues = new AtkValueArray(12, P.Config.InclusionShopRememberCategory);
         addon->FireCallback(2, categoryValues);
 
-        Svc.Log.Debug($"Firing 13,{P.Config.InclusionShopRememberSubcategory}");
+        PluginLog.Debug($"Firing 13,{P.Config.InclusionShopRememberSubcategory}");
         using var subcategoryValues = new AtkValueArray(13, P.Config.InclusionShopRememberSubcategory);
         addon->FireCallback(2, subcategoryValues);
     }
@@ -63,7 +63,7 @@ internal class InclusionShop : BaseFeature
             var val1 = values[1].UInt;
             if (val1 != P.Config.InclusionShopRememberCategory)
             {
-                Svc.Log.Debug($"Remembring InclusionShop category: {val1}");
+                PluginLog.Debug($"Remembring InclusionShop category: {val1}");
                 P.Config.InclusionShopRememberCategory = val1;
                 P.Config.InclusionShopRememberSubcategory = 0;
                 P.Config.Save();
@@ -74,7 +74,7 @@ internal class InclusionShop : BaseFeature
             var val1 = values[1].UInt;
             if (val1 != P.Config.InclusionShopRememberSubcategory)
             {
-                Svc.Log.Debug($"Remembring InclusionShop subcategory: {val1}");
+                PluginLog.Debug($"Remembring InclusionShop subcategory: {val1}");
                 P.Config.InclusionShopRememberSubcategory = val1;
                 P.Config.Save();
             }

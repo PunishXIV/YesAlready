@@ -193,7 +193,7 @@ internal class SatisfactionSupply : BaseFeature
         else
         {
             Callback.Fire(contextMenu, false, 0, 0, 1021003, 0, 0);
-            Svc.Log.Debug($"Filled slot {i}");
+            PluginLog.Debug($"Filled slot {i}");
             SlotsFilled.Add(i);
             return true;
         }

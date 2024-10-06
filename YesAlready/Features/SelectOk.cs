@@ -25,7 +25,7 @@ internal class SelectOk : BaseFeature
 
         var addon = new AddonMaster.SelectOk(addonInfo.Base());
         var text = P.LastSeenOkText = addon.Text;
-        Svc.Log.Debug($"AddonSelectOk: text={text}");
+        PluginLog.Debug($"AddonSelectOk: text={text}");
 
         var nodes = P.Config.GetAllNodes().OfType<OkEntryNode>();
         foreach (var node in nodes)
@@ -36,7 +36,7 @@ internal class SelectOk : BaseFeature
             if (!EntryMatchesText(node, text))
                 continue;
 
-            Svc.Log.Debug("AddonSelectOk: Selecting ok");
+            PluginLog.Debug("AddonSelectOk: Selecting ok");
             addon.Ok();
             return;
         }

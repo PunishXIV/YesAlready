@@ -206,12 +206,12 @@ public class YesAlready : IDalamudPlugin
                     _ => $"Unknown Type: {atkValues[i].Type}"
                 })
                 .ToList();
-            Svc.Log.Debug($"Callback triggered on {atkUnitBase->NameString} with values: {string.Join(", ", atkValueList.Select(value => value.ToString()))}");
+            PluginLog.Debug($"Callback triggered on {atkUnitBase->NameString} with values: {string.Join(", ", atkValueList.Select(value => value.ToString()))}");
             LastSeenListIndex = atkValues[0].Int;
         }
         catch (Exception ex)
         {
-            Svc.Log.Error($"Exception in {nameof(FireCallbackDetour)}: {ex.Message}");
+            PluginLog.Error($"Exception in {nameof(FireCallbackDetour)}: {ex.Message}");
             return FireCallbackHook.Original(atkUnitBase, valueCount, atkValues, updateVisibility);
         }
         return FireCallbackHook.Original(atkUnitBase, valueCount, atkValues, updateVisibility);
@@ -270,7 +270,7 @@ public class YesAlready : IDalamudPlugin
                 ToggleOneTimeConfirm();
                 break;
             default:
-                Svc.Log.Error("I didn't quite understand that.");
+                PluginLog.Error("I didn't quite understand that.");
                 return;
         }
     }
@@ -300,7 +300,7 @@ public class YesAlready : IDalamudPlugin
 
         if (text.IsNullOrEmpty())
         {
-            Svc.Log.Error("No dialog has been seen.");
+            PluginLog.Error("No dialog has been seen.");
             return;
         }
 
@@ -316,7 +316,7 @@ public class YesAlready : IDalamudPlugin
 
         if (text.IsNullOrEmpty())
         {
-            Svc.Log.Error("No dialog has been seen.");
+            PluginLog.Error("No dialog has been seen.");
             return;
         }
 
@@ -333,7 +333,7 @@ public class YesAlready : IDalamudPlugin
 
         if (text.IsNullOrEmpty())
         {
-            Svc.Log.Error("No dialog has been selected.");
+            PluginLog.Error("No dialog has been selected.");
             return;
         }
 
@@ -358,7 +358,7 @@ public class YesAlready : IDalamudPlugin
 
         if (target.IsNullOrEmpty())
         {
-            Svc.Log.Error("No talk dialog has been seen.");
+            PluginLog.Error("No talk dialog has been seen.");
             return;
         }
 

@@ -26,7 +26,7 @@ internal class MateriaAttachDialog : BaseFeature
         {
             if (P.Config.OnlyMeldWhenGuaranteed && am.SuccessRateFloat < 100)
             {
-                Svc.Log.Debug($"Success rate {am.SuccessRateFloat} less than 100%, aborting meld.");
+                PluginLog.Debug($"Success rate {am.SuccessRateFloat} less than 100%, aborting meld.");
                 return;
             }
 

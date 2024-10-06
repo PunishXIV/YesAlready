@@ -29,7 +29,7 @@ internal class RetainerItemTransferProgress : BaseFeature
         {
             if (MemoryHelper.ReadSeStringNullTerminated(new nint(am.Base->AtkValues[0].String)).ToString() == Svc.Data.GetExcelSheet<Addon>().First(x => x.RowId == 13528).Text.RawString)
             {
-                Svc.Log.Debug("Closing Entrust Duplicates menu");
+                PluginLog.Debug("Closing Entrust Duplicates menu");
                 am.Close();
             }
         }

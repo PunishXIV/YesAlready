@@ -1,4 +1,5 @@
 using Dalamud.Hooking;
+using ECommons.Logging;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using System;
@@ -43,14 +44,14 @@ internal abstract class OnSetupSelectListFeature : BaseFeature, IDisposable
             {
                 if (!string.IsNullOrEmpty(targetName) && EntryMatchesTargetName(node, targetName))
                 {
-                    Svc.Log.Debug($"OnSetupSelectListFeature: Matched on {node.Text} ({node.TargetText})");
+                    PluginLog.Debug($"OnSetupSelectListFeature: Matched on {node.Text} ({node.TargetText})");
                     P.LastSelectedListNode = node;
                     return index;
                 }
             }
             else
             {
-                Svc.Log.Debug($"OnSetupSelectListFeature: Matched on {node.Text}");
+                PluginLog.Debug($"OnSetupSelectListFeature: Matched on {node.Text}");
                 P.LastSelectedListNode = node;
                 return index;
             }
@@ -69,7 +70,7 @@ internal abstract class OnSetupSelectListFeature : BaseFeature, IDisposable
 
     private unsafe nint OnItemSelectedDetour(AtkEventListener* self, AtkEventType eventType, uint eventParam, AtkEvent* eventData, ulong* inputData)
     {
-        Svc.Log.Debug($"PopupMenu RCV: listener={onItemSelectedHook.Address} {(nint)self:X}, type={eventType}, param={eventParam}, input={inputData[0]:X16} {inputData[1]:X16} {inputData[2]:X16} {(int)inputData[2]}");
+        PluginLog.Debug($"PopupMenu RCV: listener={onItemSelectedHook.Address} {(nint)self:X}, type={eventType}, param={eventParam}, input={inputData[0]:X16} {inputData[1]:X16} {inputData[2]:X16} {(int)inputData[2]}");
         try
         {
             var target = Svc.Targets.Target;
@@ -78,7 +79,7 @@ internal abstract class OnSetupSelectListFeature : BaseFeature, IDisposable
         }
         catch (Exception ex)
         {
-            Svc.Log.Error(ex, "Don't crash the game.");
+            PluginLog.Error($"Don't crash the game.\n{ex}");
         }
         return onItemSelectedHook.Original(self, eventType, eventParam, eventData, inputData);
     }
@@ -88,7 +89,7 @@ internal abstract class OnSetupSelectListFeature : BaseFeature, IDisposable
         var count = popupMenu->EntryCount;
         var entryTexts = new string?[count];
 
-        Svc.Log.Debug($"SelectString: Reading {count} strings");
+        PluginLog.Debug($"SelectString: Reading {count} strings");
         for (var i = 0; i < count; i++)
         {
             var textPtr = popupMenu->EntryNames[i];

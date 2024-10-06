@@ -29,7 +29,7 @@ internal class PurifyResult : BaseFeature
         var addon = addonInfo.Base();
         if (MemoryHelper.ReadSeString(&addon->GetTextNodeById(2)->NodeText).ExtractText() == Svc.Data.GetExcelSheet<Addon>().First(x => x.RowId == 2171).Text.RawString)
         {
-            Svc.Log.Debug("Closing Purify Results menu");
+            PluginLog.Debug("Closing Purify Results menu");
             Callback.Fire(addon, true, -1);
         }
     }
