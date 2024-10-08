@@ -27,7 +27,7 @@ public class CustomAddonCallbacks : BaseFeature
         if (!P.Active) return;
 
         var addon = addonInfo.Base();
-        var callbacks = P.Config.CustomCallbacks.First(x => x.Addon == addonInfo.AddonName).CallbackParams;
+        var callbacks = CallbackToArray(P.Config.CustomCallbacks.First(x => x.Addon == addonInfo.AddonName).CallbackParams);
         Callback.Fire(addon, true, callbacks);
     }
 
