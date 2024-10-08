@@ -25,6 +25,7 @@ public static class Custom
 
         foreach (var bother in P.Config.CustomBothers.ToList())
         {
+            using var id = ImRaii.PushId(P.Config.CustomBothers.IndexOf(bother));
             var name = bother.Addon;
             if (ImGui.InputText("Addon Name", ref name, 50, ImGuiInputTextFlags.EnterReturnsTrue))
             {
