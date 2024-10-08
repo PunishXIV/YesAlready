@@ -1,11 +1,10 @@
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-
 using Dalamud.Configuration;
 using Dalamud.Game.ClientState.Keys;
 using Dalamud.Game.Text;
 using Newtonsoft.Json;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 namespace YesAlready;
 
@@ -69,13 +68,13 @@ public partial class Configuration() : IPluginConfiguration
     public bool MiragePrismRemoveDispel { get; set; } = false;
     public bool MiragePrismExecuteCast { get; set; } = false;
 
-    public List<CustomBother> CustomBothers { get; set; } = [];
+    public List<CustomBother> CustomCallbacks { get; set; } = [];
 
     public class CustomBother
     {
         public string Addon { get; set; }
         public bool UpdateState { get; set; } = true;
-        public object[] CallbackParams { get; set; }
+        public string CallbackParams { get; set; }
     }
 
     public enum TradeMultipleMode

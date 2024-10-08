@@ -23,9 +23,9 @@ public static class Custom
 
         DrawButtons();
 
-        foreach (var bother in P.Config.CustomBothers.ToList())
+        foreach (var bother in P.Config.CustomCallbacks.ToList())
         {
-            using var id = ImRaii.PushId(P.Config.CustomBothers.IndexOf(bother));
+            using var id = ImRaii.PushId(P.Config.CustomCallbacks.IndexOf(bother));
             var name = bother.Addon;
             if (ImGui.InputText("Addon Name", ref name, 50, ImGuiInputTextFlags.EnterReturnsTrue))
             {
@@ -34,18 +34,18 @@ public static class Custom
                 ToggleCustomBothers();
             }
 
-            var args = string.Join(" ", bother.CallbackParams);
+            var args = bother.CallbackParams;
             if (ImGui.InputText("Parameters", ref args, 150, ImGuiInputTextFlags.EnterReturnsTrue))
             {
-                bother.CallbackParams = ParseArgs(args);
+                bother.CallbackParams = args;
                 P.Config.Save();
                 ToggleCustomBothers();
             }
 
             ImGui.SameLine();
-            if (ImGuiEx.IconButton(FontAwesomeIcon.Trash, "Remove Entry", id: $"Delete##{P.Config.CustomBothers.IndexOf(bother)}"))
+            if (ImGuiEx.IconButton(FontAwesomeIcon.Trash, "Remove Entry", id: $"Delete##{P.Config.CustomCallbacks.IndexOf(bother)}"))
             {
-                P.Config.CustomBothers.Remove(bother);
+                P.Config.CustomCallbacks.Remove(bother);
                 P.Config.Save();
                 ToggleCustomBothers();
             }
@@ -60,10 +60,10 @@ public static class Custom
 
         if (ImGuiEx.IconButton(FontAwesomeIcon.Plus, "Add new entry"))
         {
-            P.Config.CustomBothers.Add(new CustomBother
+            P.Config.CustomCallbacks.Add(new CustomBother
             {
                 Addon = "AddonName",
-                CallbackParams = [-1]
+                CallbackParams = "-1"
             });
             P.Config.Save();
         }
@@ -100,46 +100,5 @@ public static class Custom
                 feature.Enable();
             }
         }
-    }
-
-    private static object[] ParseArgs(string args)
-    {
-        var rawValues = args.Split(' ');
-        var valueArgs = new List<object>();
-
-        var current = "";
-        var inQuotes = false;
-
-        for (var i = 0; i < rawValues.Length; i++)
-        {
-            if (!inQuotes)
-            {
-                if (rawValues[i].StartsWith('\"'))
-                {
-                    inQuotes = true;
-                    current = rawValues[i].TrimStart('"');
-                }
-                else
-                {
-                    if (int.TryParse(rawValues[i], out var iValue)) valueArgs.Add(iValue);
-                    else if (uint.TryParse(rawValues[i].TrimEnd('U', 'u'), out var uValue)) valueArgs.Add(uValue);
-                    else if (bool.TryParse(rawValues[i], out var bValue)) valueArgs.Add(bValue);
-                    else valueArgs.Add(rawValues[i]);
-                }
-            }
-            else
-            {
-                if (rawValues[i].EndsWith('\"'))
-                {
-                    inQuotes = false;
-                    current += " " + rawValues[i].TrimEnd('"');
-                    valueArgs.Add(current);
-                    current = "";
-                }
-                else
-                    current += " " + rawValues[i];
-            }
-        }
-        return [.. valueArgs];
     }
 }
