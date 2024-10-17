@@ -384,6 +384,19 @@ public static class Bothers
             }
             ImGuiEx.IndentedTextColored("Eureka/Bozja lockboxes, forgotten fragments, and more. Warning: this does not check if you are maxed on items. Rate limiter (pause after N items).");
 
+            if (itemInspection)
+            {
+                ImGui.Indent();
+                var rateLimit = P.Config.ItemInspectionResultRateLimiter;
+                if (ImGui.InputInt(string.Empty, ref rateLimit))
+                {
+                    P.Config.ItemInspectionResultRateLimiter = rateLimit;
+                    P.Config.Save();
+                }
+                ImGui.Unindent();
+                ImGuiEx.IndentedTextColored("Rate limiter (pause after N items, 0 to disable).");
+            }
+
             var grandCompanySupplyReward = P.Config.GrandCompanySupplyReward;
             if (ImGui.Checkbox("GrandCompanySupplyReward", ref grandCompanySupplyReward))
             {
