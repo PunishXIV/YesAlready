@@ -1,6 +1,6 @@
 using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using YesAlready.BaseFeatures;
 
 namespace YesAlready.Features;

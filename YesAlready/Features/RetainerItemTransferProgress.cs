@@ -1,7 +1,7 @@
 using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
 using Dalamud.Memory;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using System.Linq;
 using YesAlready.BaseFeatures;
 
@@ -21,17 +21,15 @@ internal class RetainerItemTransferProgress : BaseFeature
         Svc.AddonLifecycle.UnregisterListener(AddonUpdate);
     }
 
-    protected static unsafe void AddonUpdate(AddonEvent eventType, AddonArgs addonInfo)
+    private static unsafe void AddonUpdate(AddonEvent eventType, AddonArgs addonInfo)
     {
         if (!P.Active || !P.Config.RetainerTransferProgressConfirm) return;
+        if (!GenericHelpers.TryGetAddonMaster<AddonMaster.RetainerItemTransferProgress>(out var am)) return;
 
-        if (GenericHelpers.TryGetAddonMaster<AddonMaster.RetainerItemTransferProgress>(out var am))
+        if (MemoryHelper.ReadSeStringNullTerminated(new nint(am.Base->AtkValues[0].String)).ToString() == Svc.Data.GetExcelSheet<Addon>().First(x => x.RowId == 13528).Text)
         {
-            if (MemoryHelper.ReadSeStringNullTerminated(new nint(am.Base->AtkValues[0].String)).ToString() == Svc.Data.GetExcelSheet<Addon>().First(x => x.RowId == 13528).Text.RawString)
-            {
-                PluginLog.Debug("Closing Entrust Duplicates menu");
-                am.Close();
-            }
+            PluginLog.Debug("Closing Entrust Duplicates menu");
+            am.Close();
         }
     }
 }

@@ -142,18 +142,17 @@ public class YesAlready : IDalamudPlugin
 
     private void LoadTerritories()
     {
-        var sheet = Svc.Data.GetExcelSheet<Lumina.Excel.GeneratedSheets.TerritoryType>()!;
+        var sheet = Svc.Data.GetExcelSheet<Lumina.Excel.Sheets.TerritoryType>()!;
         foreach (var row in sheet)
         {
-            var zone = row.PlaceName.Value;
-            if (zone == null)
+            var zone = row.PlaceName;
+            if (!zone.IsValid)
                 continue;
 
-            var text = Utils.SEString.GetSeStringText((SeString)zone.Name);
-            if (string.IsNullOrEmpty(text))
+            if (zone.Value.Name.IsEmpty)
                 continue;
 
-            TerritoryNames.Add(row.RowId, text);
+            TerritoryNames.Add(row.RowId, zone.Value.Name.ToString());
         }
     }
 

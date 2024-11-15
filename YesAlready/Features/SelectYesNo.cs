@@ -3,7 +3,7 @@ using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Memory;
 using FFXIVClientStructs.FFXIV.Component.GUI;
-using Lumina.Excel.GeneratedSheets2;
+using Lumina.Excel.Sheets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -42,7 +42,7 @@ internal class SelectYesNo : BaseFeature
             return;
         }
 
-        if (P.Config.GimmickYesNo && Svc.Data.GetExcelSheet<GimmickYesNo>().Where(x => !x.Unknown0.RawString.IsNullOrEmpty()).Select(x => x.Unknown0.RawString).ToList().Any(g => g.Equals(text)))
+        if (P.Config.GimmickYesNo && Svc.Data.GetExcelSheet<GimmickYesNo>().Where(x => !x.Unknown0.IsEmpty).Select(x => x.Unknown0).ToList().Any(g => g.Equals(text)))
         {
             PluginLog.Debug($"AddonSelectYesNo: Entry is a gimmick");
             addon.Yes();
@@ -59,30 +59,33 @@ internal class SelectYesNo : BaseFeature
         if (P.Config.AutoCollectable && collectablePatterns.Any(text.Contains))
         {
             PluginLog.Debug($"AddonSelectYesNo: Entry is collectable");
-            var fish = Svc.Data.GetExcelSheet<Item>().FirstOrDefault(x => !x.Singular.RawString.IsNullOrEmpty() && MemoryHelper.ReadSeStringNullTerminated(new nint(addon.Addon->AtkValues[15].String)).ExtractText().Contains(x.Singular.RawString, StringComparison.InvariantCultureIgnoreCase), null);
-            PluginLog.Debug($"Detected fish [{fish}] {fish.Name.RawString}");
-            if (fish.RowId != 0 && int.TryParse(Regex.Match(text, @"\d+").Value, out var value))
+            var fish = GenericHelpers.FindRow<Item>(x => !x.Singular.IsEmpty && MemoryHelper.ReadSeStringNullTerminated(new nint(addon.Addon->AtkValues[15].String)).ExtractText().Contains(x.Singular.ToString(), StringComparison.InvariantCultureIgnoreCase));
+            if (fish != null)
             {
-                var collectability = Svc.Data.GetExcelSheet<CollectablesShopItem>().FirstOrDefault(x => x.Item.Value.RowId == fish.RowId, null);
-                if (collectability != null)
+                PluginLog.Debug($"Detected fish [{fish}] {fish.Value.Name}");
+                if (fish.Value.RowId != 0 && int.TryParse(Regex.Match(text, @"\d+").Value, out var value))
                 {
-                    var min = collectability.CollectablesShopRefine.Value.LowCollectability;
-                    PluginLog.Debug($"Minimum collectability required is {min}, value detected is {value}");
-                    if (value >= min)
+                    var collectability = GenericHelpers.FindRow<CollectablesShopItem>(x => x.Item.Value.RowId == fish.Value.RowId);
+                    if (collectability != null)
                     {
-                        PluginLog.Debug($"AddonSelectYesNo: Entry is [{fish}] {fish.Name.RawString} with a sufficient collectability of {value}");
-                        addon.Yes();
-                        return;
+                        var min = collectability.Value.CollectablesShopRefine.Value.LowCollectability;
+                        PluginLog.Debug($"Minimum collectability required is {min}, value detected is {value}");
+                        if (value >= min)
+                        {
+                            PluginLog.Debug($"AddonSelectYesNo: Entry is [{fish}] {fish.Value.Name} with a sufficient collectability of {value}");
+                            addon.Yes();
+                            return;
+                        }
+                        else
+                        {
+                            PluginLog.Debug($"AddonSelectYesNo: Entry is [{fish}] {fish.Value.Name} with an insufficient collectability of {value}");
+                            addon.No();
+                            return;
+                        }
                     }
                     else
-                    {
-                        PluginLog.Debug($"AddonSelectYesNo: Entry is [{fish}] {fish.Name.RawString} with an insufficient collectability of {value}");
-                        addon.No();
-                        return;
-                    }
+                        PluginLog.Debug($"Failed to find matching CollectablesShopItem for [{fish.Value.RowId}] {fish.Value.Name}.");
                 }
-                else
-                    PluginLog.Debug($"Failed to find matching CollectablesShopItem for [{fish.RowId}] {fish.Name.RawString}.");
             }
         }
 
