@@ -25,7 +25,7 @@ internal class RetainerTaskResult : BaseFeature
 
         if (GenericHelpers.TryGetAddonMaster<AddonMaster.RetainerTaskResult>(out var am))
         {
-            var buttonText = am.ReassignButton->ButtonTextNode->NodeText.ToString();
+            var buttonText = am.ReassignButton->ButtonTextNode->NodeText.ExtractText();
             if (buttonText == Svc.Data.GetExcelSheet<Addon>(Svc.ClientState.ClientLanguage).GetRow(2365).Text) // Recall
                 return;
 

@@ -59,7 +59,7 @@ internal class SelectYesNo : BaseFeature
         if (P.Config.AutoCollectable && collectablePatterns.Any(text.Contains))
         {
             PluginLog.Debug($"AddonSelectYesNo: Entry is collectable");
-            var fish = GenericHelpers.FindRow<Item>(x => !x.Singular.IsEmpty && MemoryHelper.ReadSeStringNullTerminated(new nint(addon.Addon->AtkValues[15].String)).ExtractText().Contains(x.Singular.ToString(), StringComparison.InvariantCultureIgnoreCase));
+            var fish = GenericHelpers.FindRow<Item>(x => !x.Singular.IsEmpty && MemoryHelper.ReadSeStringNullTerminated(new nint(addon.Addon->AtkValues[15].String)).ExtractText().Contains(x.Singular.ExtractText(), StringComparison.InvariantCultureIgnoreCase));
             if (fish != null)
             {
                 PluginLog.Debug($"Detected fish [{fish}] {fish.Value.Name}");

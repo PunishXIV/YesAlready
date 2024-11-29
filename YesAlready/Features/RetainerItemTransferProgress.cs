@@ -26,7 +26,7 @@ internal class RetainerItemTransferProgress : BaseFeature
         if (!P.Active || !P.Config.RetainerTransferProgressConfirm) return;
         if (!GenericHelpers.TryGetAddonMaster<AddonMaster.RetainerItemTransferProgress>(out var am)) return;
 
-        if (MemoryHelper.ReadSeStringNullTerminated(new nint(am.Base->AtkValues[0].String)).ToString() == Svc.Data.GetExcelSheet<Addon>().First(x => x.RowId == 13528).Text)
+        if (MemoryHelper.ReadSeStringNullTerminated(new nint(am.Base->AtkValues[0].String)).ExtractText() == Svc.Data.GetExcelSheet<Addon>().First(x => x.RowId == 13528).Text)
         {
             PluginLog.Debug("Closing Entrust Duplicates menu");
             am.Close();
