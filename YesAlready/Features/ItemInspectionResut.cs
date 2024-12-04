@@ -47,7 +47,10 @@ internal class ItemInspectionResut : BaseFeature
                 return;
             }
 
-            am.Next();
+            if (am.NextButton->IsEnabled)
+                am.Next();
+            else
+                am.Close();
         }
     }
 }

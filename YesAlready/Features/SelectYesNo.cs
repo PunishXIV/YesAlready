@@ -87,6 +87,8 @@ internal class SelectYesNo : BaseFeature
                         PluginLog.Debug($"Failed to find matching CollectablesShopItem for [{fish.Value.RowId}] {fish.Value.Name}.");
                 }
             }
+            else
+                PluginLog.Debug($"Failed to match any fish to {MemoryHelper.ReadSeStringNullTerminated(new nint(addon.Addon->AtkValues[15].String)).ExtractText()}");
         }
 
         var zoneWarnOnce = true;
