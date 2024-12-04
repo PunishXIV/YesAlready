@@ -444,6 +444,14 @@ public static class Bothers
                 P.Config.Save();
             }
             ImGuiEx.IndentedTextColored("Automatically cast glamours when using Glamour Prisms.");
+
+            var bpu = P.Config.BannerPreviewUpdate;
+            if (ImGui.Checkbox("BannerPreviewUpdate", ref bpu))
+            {
+                P.Config.BannerPreviewUpdate = bpu;
+                P.Config.Save();
+            }
+            ImGuiEx.IndentedTextColored("Automatically update portraits.");
         }
 
         #endregion

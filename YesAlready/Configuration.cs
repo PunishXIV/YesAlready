@@ -67,6 +67,7 @@ public partial class Configuration() : IPluginConfiguration
     public bool AirShipExplorationResultRedeploy { get; set; } = false;
     public bool MiragePrismRemoveDispel { get; set; } = false;
     public bool MiragePrismExecuteCast { get; set; } = false;
+    public bool BannerPreviewUpdate { get; set; } = false;
 
     public List<CustomBother> CustomCallbacks { get; set; } = [];
 
