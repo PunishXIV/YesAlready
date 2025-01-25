@@ -105,13 +105,13 @@ public static class Bothers
             ImGuiEx.IndentedTextColored("Remove the Desynthesis menu confirmation.");
 
             // 4. SalvageDialog (Bulk)
-            var desynthBulkDialog = P.Config.DesynthBulkDialogEnabled;
-            if (ImGui.Checkbox("SalvageDialog (Bulk)", ref desynthBulkDialog))
-            {
-                P.Config.DesynthBulkDialogEnabled = desynthBulkDialog;
-                P.Config.Save();
-            }
-            ImGuiEx.IndentedTextColored("Check the bulk desynthesis button when using the SalvageDialog feature.");
+            //var desynthBulkDialog = P.Config.DesynthBulkDialogEnabled;
+            //if (ImGui.Checkbox("SalvageDialog (Bulk)", ref desynthBulkDialog))
+            //{
+            //    P.Config.DesynthBulkDialogEnabled = desynthBulkDialog;
+            //    P.Config.Save();
+            //}
+            //ImGuiEx.IndentedTextColored("Check the bulk desynthesis button when using the SalvageDialog feature.");
 
             // 5. SalvageResults
             var desynthResultsDialog = P.Config.DesynthesisResults;

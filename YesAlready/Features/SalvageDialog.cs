@@ -1,5 +1,6 @@
 using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
+using FFXIVClientStructs.Interop;
 using YesAlready.BaseFeatures;
 
 namespace YesAlready.Features;
@@ -10,7 +11,7 @@ internal class SalvageDialog : BaseFeature
     {
         base.Enable();
         Svc.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "SalvageDialog", AddonSetup);
-        Svc.AddonLifecycle.RegisterListener(AddonEvent.PreSetup, "SalvageDialog", AddonSetup);
+        //Svc.AddonLifecycle.RegisterListener(AddonEvent.PreSetup, "SalvageDialog", AddonSetup);
     }
 
     public override void Disable()
@@ -27,10 +28,10 @@ internal class SalvageDialog : BaseFeature
         {
             switch (eventType)
             {
-                case AddonEvent.PreSetup:
-                    if (P.Config.DesynthBulkDialogEnabled)
-                        am.Addon->AtkValues[20].SetBool(true);
-                    break;
+                //case AddonEvent.PreSetup:
+                //    if (P.Config.DesynthBulkDialogEnabled && addonInfo is AddonSetupArgs { AtkValueCount: > 20 } args)
+                //        args.AtkValueSpan.GetPointer(20)->SetBool(true);
+                //    break;
                 case AddonEvent.PostSetup:
                     if (P.Config.DesynthDialogEnabled)
                     {
