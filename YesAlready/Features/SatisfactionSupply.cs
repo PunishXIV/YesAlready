@@ -67,7 +67,7 @@ internal class SatisfactionSupply : BaseFeature
         if (agent == null) return true;
         var item = agent->Items[row];
         var invItem = FindItemInInventory(item.Id);
-        var invItemColectability = InventoryManager.Instance()->GetInventoryContainer(invItem.Value.inv)->GetInventorySlot(invItem.Value.slot)->Spiritbond;
+        var invItemColectability = InventoryManager.Instance()->GetInventoryContainer(invItem.Value.inv)->GetInventorySlot(invItem.Value.slot)->SpiritbondOrCollectability;
         var wc = InventoryManager.Instance()->GetInventoryItemCount(AgentSatisfactionSupply.Instance()->CrafterScripId1);
         var pc = InventoryManager.Instance()->GetInventoryItemCount(AgentSatisfactionSupply.Instance()->CrafterScripId2);
         var wg = InventoryManager.Instance()->GetInventoryItemCount(AgentSatisfactionSupply.Instance()->GathererScripId1);

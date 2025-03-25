@@ -92,7 +92,7 @@ internal abstract class OnSetupSelectListFeature : BaseFeature, IDisposable
         PluginLog.Debug($"SelectString: Reading {count} strings");
         for (var i = 0; i < count; i++)
         {
-            var textPtr = popupMenu->EntryNames[i];
+            var textPtr = popupMenu->EntryNames[i].Value;
             entryTexts[i] = textPtr != null ? new string((char*)*textPtr) : string.Empty;
         }
 

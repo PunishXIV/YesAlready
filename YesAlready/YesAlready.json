@@ -7,7 +7,7 @@
   "RepoUrl": "https://github.com/PunishXIV/YesAlready/",
   "IconUrl": "https://github.com/daemitus/YesAlready/raw/master/res/icon.png",
   "ApplicableVersion": "any",
-  "DalamudApiLevel": 11,
+  "DalamudApiLevel": 12,
   "Tags": [
     "punish",
     "plugin"
