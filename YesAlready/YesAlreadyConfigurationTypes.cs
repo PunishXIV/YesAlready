@@ -69,7 +69,6 @@ public class TextEntryNode : ITextNode
         }
     }
 
-
     public bool RequiresPlayerConditions { get; set; } = false;
     public string PlayerConditions { get; set; } = string.Empty;
     public bool IsConditional { get; set; } = false;
@@ -96,7 +95,6 @@ public class TextEntryNode : ITextNode
             }
         }
     }
-
 
     public bool ZoneRestricted { get; set; } = false;
 

@@ -25,7 +25,7 @@ internal abstract class OnSetupSelectListFeature : BaseFeature, IDisposable
         var millisSinceLastEscape = (DateTime.Now - P.EscapeLastPressed).TotalMilliseconds;
 
         var target = Svc.Targets.Target;
-        var targetName = target != null ? target.Name.ExtractText() : string.Empty;
+        var targetName = target != null ? target.Name.GetText() : string.Empty;
 
         var nodes = P.Config.GetAllNodes().OfType<ListEntryNode>();
         foreach (var node in nodes)
@@ -70,11 +70,11 @@ internal abstract class OnSetupSelectListFeature : BaseFeature, IDisposable
 
     private unsafe nint OnItemSelectedDetour(AtkEventListener* self, AtkEventType eventType, uint eventParam, AtkEvent* eventData, ulong* inputData)
     {
-        PluginLog.Debug($"PopupMenu RCV: listener={onItemSelectedHook.Address} {(nint)self:X}, type={eventType}, param={eventParam}, input={inputData[0]:X16} {inputData[1]:X16} {inputData[2]:X16} {(int)inputData[2]}");
+        PluginLog.Debug($"PopupMenu RCV: listener={onItemSelectedHook!.Address} {(nint)self:X}, type={eventType}, param={eventParam}, input={inputData[0]:X16} {inputData[1]:X16} {inputData[2]:X16} {(int)inputData[2]}");
         try
         {
             var target = Svc.Targets.Target;
-            var targetName = P.LastSeenListTarget = target != null ? target.Name.ExtractText() : string.Empty;
+            var targetName = P.LastSeenListTarget = target != null ? target.Name.GetText() : string.Empty;
             P.LastSeenListSelection = P.LastSeenListEntries[(int)inputData[2]].Text;
         }
         catch (Exception ex)

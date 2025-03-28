@@ -33,12 +33,12 @@ internal class ConditionsListWindow : Window
 
         ImGui.Separator();
 
-        foreach (var flag in Enum.GetValues(typeof(ConditionFlag)))
+        foreach (var flag in Enum.GetValues<ConditionFlag>())
         {
             ImGui.TextUnformatted($"{flag}");
             ImGui.NextColumn();
 
-            ImGui.TextUnformatted($"{(int)Enum.Parse(typeof(ConditionFlag), flag.ToString())}");
+            ImGui.TextUnformatted($"{(int)Enum.Parse<ConditionFlag>(flag.ToString())}");
             ImGui.NextColumn();
         }
 

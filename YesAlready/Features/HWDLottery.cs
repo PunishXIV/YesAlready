@@ -15,7 +15,6 @@ internal class HWDLottery : BaseFeature
         Svc.AddonLifecycle.RegisterListener(AddonEvent.PostUpdate, "HWDLottery", AddonUpdate);
     }
 
-
     public override void Disable()
     {
         base.Disable();

@@ -27,7 +27,7 @@ internal class PurifyResult : BaseFeature
         if (!P.Active || !P.Config.AetherialReductionResults || !GenericHelpers.IsAddonReady(addonInfo.Base())) return;
 
         var addon = addonInfo.Base();
-        if (MemoryHelper.ReadSeString(&addon->GetTextNodeById(2)->NodeText).ExtractText() == Svc.Data.GetExcelSheet<Addon>().First(x => x.RowId == 2171).Text)
+        if (MemoryHelper.ReadSeString(&addon->GetTextNodeById(2)->NodeText).GetText() == Svc.Data.GetExcelSheet<Addon>().First(x => x.RowId == 2171).Text)
         {
             PluginLog.Debug("Closing Purify Results menu");
             Callback.Fire(addon, true, -1);

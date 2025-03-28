@@ -18,8 +18,8 @@ internal class SelectString : OnSetupSelectListFeature
     {
         try
         {
-            P.LastSeenListSelection = P.LastSeenListIndex < P.LastSeenListEntries.Length ? P.LastSeenListEntries?[P.LastSeenListIndex].Text : string.Empty;
-            P.LastSeenListTarget = P.LastSeenListTarget = Svc.Targets.Target != null ? Svc.Targets.Target.Name.ExtractText() : string.Empty;
+            P.LastSeenListSelection = P.LastSeenListIndex < P.LastSeenListEntries.Length ? P.LastSeenListEntries?[P.LastSeenListIndex].Text ?? string.Empty : string.Empty;
+            P.LastSeenListTarget = P.LastSeenListTarget = Svc.Targets.Target != null ? Svc.Targets.Target.Name.GetText() ?? string.Empty : string.Empty;
         }
         catch { }
     }

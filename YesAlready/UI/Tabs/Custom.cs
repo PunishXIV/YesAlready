@@ -95,9 +95,11 @@ public static class Custom
         {
             if (typeof(BaseFeature).IsAssignableFrom(type) && !type.IsAbstract && type.Name == nameof(CustomAddonCallbacks))
             {
-                var feature = (BaseFeature)Activator.CreateInstance(type);
-                feature.Disable();
-                feature.Enable();
+                if (Activator.CreateInstance(type) is BaseFeature feature)
+                {
+                    feature.Disable();
+                    feature.Enable();
+                }
             }
         }
     }

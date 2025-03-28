@@ -26,17 +26,14 @@ namespace YesAlready;
 public class YesAlready : IDalamudPlugin
 {
     public static string Name => "YesAlready";
-    private const string Command = "/yesalready";
-    private static string[] Aliases => ["/pyes"];
-    private readonly List<string> registeredCommands = [];
-    internal Configuration Configuration { get; init; }
+    public static YesAlready P { get; private set; } = null!;
+
     internal Configuration Config;
-
-    internal static YesAlready P;
-
     private readonly IDtrBarEntry dtrEntry;
     internal BlockListHandler BlockListHandler;
     internal TaskManager TaskManager;
+    private const string Command = "/yesalready";
+    private readonly string[] Aliases = ["/pyes"];
 
     private unsafe delegate void* FireCallbackDelegate(AtkUnitBase* atkUnitBase, int valueCount, AtkValue* atkValues, byte updateVisibility);
     [EzHook("E8 ?? ?? ?? ?? 0F B6 E8 8B 44 24 20", detourName: nameof(FireCallbackDetour), true)]
@@ -55,25 +52,10 @@ public class YesAlready : IDalamudPlugin
         BlockListHandler = new();
 
         Config = Svc.PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
-        Svc.Commands.AddHandler(Command, new CommandInfo(OnCommand)
-        {
-            HelpMessage = "Opens the plugin window.",
-            ShowInHelp = true
-        });
-        registeredCommands.Add(Command);
+        EzCmd.Add(Command, OnCommand, "Opens the plugin window.", int.MaxValue);
 
         foreach (var a in Aliases)
-        {
-            if (!Svc.Commands.Commands.ContainsKey(a))
-            {
-                Svc.Commands.AddHandler(a, new CommandInfo(OnCommand)
-                {
-                    HelpMessage = $"{Command} Alias",
-                    ShowInHelp = true
-                });
-                registeredCommands.Add(a);
-            }
-        }
+            EzCmd.Add(a, OnCommand, $"{Command} alias");
 
         LoadTerritories();
         ToggleFeatures(true);
@@ -95,36 +77,30 @@ public class YesAlready : IDalamudPlugin
         {
             if (typeof(BaseFeature).IsAssignableFrom(type) && !type.IsAbstract)
             {
-                var feature = (BaseFeature)Activator.CreateInstance(type);
-                if (enable)
-                    feature.Enable();
-                else
-                    feature.Disable();
+                if (Activator.CreateInstance(type) is BaseFeature feature)
+                {
+                    if (enable)
+                        feature.Enable();
+                    else
+                        feature.Disable();
+                }
             }
         }
     }
 
     public void Dispose()
     {
-        foreach (var c in registeredCommands)
-            Svc.Commands.RemoveHandler(c);
-
-        registeredCommands.Clear();
         dtrEntry.Remove();
-
         Svc.Framework.Update -= FrameworkUpdate;
-
         Svc.PluginInterface.UiBuilder.OpenMainUi -= DrawConfigUI;
-
         ECommonsMain.Dispose();
-        P = null;
     }
 
     public void DrawConfigUI() => EzConfigGui.Window.IsOpen ^= true;
     internal void OpenZoneListUi() => EzConfigGui.WindowSystem.Windows.First(w => w.WindowName == ZoneListWindow.Title).IsOpen ^= true;
     internal void OpenConditionsListUi() => EzConfigGui.WindowSystem.Windows.First(w => w.WindowName == ConditionsListWindow.Title).IsOpen ^= true;
 
-    internal Dictionary<uint, string> TerritoryNames { get; } = [];
+    internal Dictionary<uint, string> TerritoryNames { get; private set; } = [];
     internal string LastSeenDialogText { get; set; } = string.Empty;
     internal string LastSeenOkText { get; set; } = string.Empty;
     internal string LastSeenListSelection { get; set; } = string.Empty;
@@ -141,20 +117,8 @@ public class YesAlready : IDalamudPlugin
     internal ListEntryNode LastSelectedListNode { get; set; } = new();
 
     private void LoadTerritories()
-    {
-        var sheet = Svc.Data.GetExcelSheet<Lumina.Excel.Sheets.TerritoryType>()!;
-        foreach (var row in sheet)
-        {
-            var zone = row.PlaceName;
-            if (!zone.IsValid)
-                continue;
-
-            if (zone.Value.Name.IsEmpty)
-                continue;
-
-            TerritoryNames.Add(row.RowId, zone.Value.Name.ToString());
-        }
-    }
+        => TerritoryNames = GenericHelpers.FindRows<Lumina.Excel.Sheets.TerritoryType>(r => r.PlaceName.IsValid && !r.PlaceName.Value.Name.IsEmpty)
+            .Select((r, n) => (r.RowId, PlaceName: r.PlaceName.Value.Name.ToString())).ToDictionary(t => t.RowId, t => t.PlaceName);
 
     private bool wasDisableKeyPressed;
     private void FrameworkUpdate(IFramework framework)
@@ -184,7 +148,7 @@ public class YesAlready : IDalamudPlugin
             EscapeLastPressed = DateTime.Now;
 
             var target = Svc.Targets.Target;
-            EscapeTargetName = target != null ? target.Name.ExtractText() : string.Empty;
+            EscapeTargetName = target != null ? target.Name.GetText() : string.Empty;
         }
     }
 
@@ -199,7 +163,7 @@ public class YesAlready : IDalamudPlugin
                 .Select<int, object>(i => atkValues[i].Type switch
                 {
                     ValueType.Int => atkValues[i].Int,
-                    ValueType.String => Marshal.PtrToStringUTF8(new IntPtr(atkValues[i].String)),
+                    ValueType.String => Marshal.PtrToStringUTF8(new IntPtr(atkValues[i].String)) ?? string.Empty,
                     ValueType.UInt => atkValues[i].UInt,
                     ValueType.Bool => atkValues[i].Byte != 0,
                     _ => $"Unknown Type: {atkValues[i].Type}"

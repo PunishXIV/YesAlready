@@ -2,6 +2,7 @@ using Dalamud.Configuration;
 using Dalamud.Game.ClientState.Keys;
 using Dalamud.Game.Text;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -73,9 +74,11 @@ public partial class Configuration() : IPluginConfiguration
 
     public class CustomBother
     {
-        public string Addon { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Addon { get; set; } = string.Empty;
         public bool UpdateState { get; set; } = true;
-        public string CallbackParams { get; set; }
+        public string CallbackParams { get; set; } = string.Empty;
+        public bool Enabled { get; set; } = true;
     }
 
     public enum TradeMultipleMode
@@ -190,7 +193,7 @@ public partial class Configuration() : IPluginConfiguration
         {
             if (chosenFolder == default)
             {
-                chosenFolder = new TextFolderNode { Name = chosenFolder.Name };
+                chosenFolder = new TextFolderNode { Name = chosenFolder?.Name ?? string.Empty };
                 folder.Children.Add(chosenFolder);
             }
         }
@@ -207,7 +210,7 @@ public partial class Configuration() : IPluginConfiguration
         {
             if (chosenFolder == default)
             {
-                chosenFolder = new TextFolderNode { Name = chosenFolder.Name };
+                chosenFolder = new TextFolderNode { Name = chosenFolder?.Name ?? string.Empty };
                 folder.Children.Add(chosenFolder);
             }
         }

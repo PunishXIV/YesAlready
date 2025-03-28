@@ -59,7 +59,7 @@ internal class SelectYesNo : BaseFeature
         if (P.Config.AutoCollectable && collectablePatterns.Any(text.Contains))
         {
             PluginLog.Debug($"AddonSelectYesNo: Entry is collectable");
-            var fish = GenericHelpers.FindRow<Item>(x => !x.Singular.IsEmpty && MemoryHelper.ReadSeStringNullTerminated(new nint(addon.Addon->AtkValues[15].String)).ExtractText().Contains(x.Singular.ExtractText(), StringComparison.InvariantCultureIgnoreCase));
+            var fish = GenericHelpers.FindRow<Item>(x => !x.Singular.IsEmpty && MemoryHelper.ReadSeStringNullTerminated(new nint(addon.Addon->AtkValues[15].String)).GetText().Contains(x.Singular.GetText(), StringComparison.InvariantCultureIgnoreCase));
             if (fish != null)
             {
                 PluginLog.Debug($"Detected fish [{fish}] {fish.Value.Name}");
@@ -88,7 +88,7 @@ internal class SelectYesNo : BaseFeature
                 }
             }
             else
-                PluginLog.Debug($"Failed to match any fish to {MemoryHelper.ReadSeStringNullTerminated(new nint(addon.Addon->AtkValues[15].String)).ExtractText()}");
+                PluginLog.Debug($"Failed to match any fish to {MemoryHelper.ReadSeStringNullTerminated(new nint(addon.Addon->AtkValues[15].String)).GetText()}");
         }
 
         var zoneWarnOnce = true;
@@ -162,8 +162,7 @@ internal class SelectYesNo : BaseFeature
             if (node.ConditionalNumberRegex?.IsMatch(text) ?? false)
             {
                 PluginLog.Debug("AddonSelectYesNo: Is conditional matches");
-                var result = node.ConditionalNumberRegex?.Match(text);
-                if (result.Success && int.TryParse(result.Value, out int value))
+                if (node.ConditionalNumberRegex?.Match(text) is { Success: true, Value: var result } && int.TryParse(result, out var value))
                 {
                     PluginLog.Debug($"AddonSelectYesNo: Is conditional - {value}");
                     return node.ComparisonType switch

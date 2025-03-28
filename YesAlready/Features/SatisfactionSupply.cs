@@ -24,7 +24,6 @@ internal class SatisfactionSupply : BaseFeature
         Svc.Framework.Update += RequestComplete;
     }
 
-
     public override void Disable()
     {
         base.Disable();
@@ -67,6 +66,7 @@ internal class SatisfactionSupply : BaseFeature
         if (agent == null) return true;
         var item = agent->Items[row];
         var invItem = FindItemInInventory(item.Id);
+        if (invItem is null) return true;
         var invItemColectability = InventoryManager.Instance()->GetInventoryContainer(invItem.Value.inv)->GetInventorySlot(invItem.Value.slot)->SpiritbondOrCollectability;
         var wc = InventoryManager.Instance()->GetInventoryItemCount(AgentSatisfactionSupply.Instance()->CrafterScripId1);
         var pc = InventoryManager.Instance()->GetInventoryItemCount(AgentSatisfactionSupply.Instance()->CrafterScripId2);
