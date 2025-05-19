@@ -1,9 +1,5 @@
-using Dalamud.Game.Addon.Lifecycle;
-using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
-using ECommons.Automation;
 using System;
 using System.Linq;
-using YesAlready.BaseFeatures;
 
 namespace YesAlready.Features;
 internal class InputNumeric : BaseFeature

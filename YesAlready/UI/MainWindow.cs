@@ -3,7 +3,6 @@ using Dalamud.Interface;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
-using ECommons.Logging;
 using ECommons.Reflection;
 using ImGuiNET;
 using System;
@@ -373,18 +372,15 @@ internal class MainWindow : Window
         }
     }
 
-    public static string ComparisonTypeToText(ComparisonType comparisonType)
+    public static string ComparisonTypeToText(ComparisonType comparisonType) => comparisonType switch
     {
-        return comparisonType switch
-        {
-            ComparisonType.LessThan => "Less than",
-            ComparisonType.LessThanOrEqual => "Less than or equal",
-            ComparisonType.GreaterThan => "Greater than",
-            ComparisonType.GreaterThanOrEqual => "Greater than or equal",
-            ComparisonType.Equal => "Equal",
-            _ => throw new Exception("Invalid enum value"),
-        };
-    }
+        ComparisonType.LessThan => "Less than",
+        ComparisonType.LessThanOrEqual => "Less than or equal",
+        ComparisonType.GreaterThan => "Greater than",
+        ComparisonType.GreaterThanOrEqual => "Greater than or equal",
+        ComparisonType.Equal => "Equal",
+        _ => throw new Exception("Invalid enum value"),
+    };
 
     public static void TextNodeDragDrop(ITextNode node)
     {

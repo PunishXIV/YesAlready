@@ -1,9 +1,9 @@
-namespace YesAlready.Features;
+﻿namespace YesAlready.Features;
 
 [AddonFeature(AddonEvent.PostSetup)]
-internal class MKSRecord : AddonFeature
+internal class WKSReward : AddonFeature
 {
-    protected override bool IsEnabled() => P.Config.MKSRecordQuit;
+    protected override bool IsEnabled() => P.Config.WKSRewardClose;
 
     protected override unsafe void HandleAddonEvent(AddonEvent eventType, AddonArgs addonInfo, AtkUnitBase* atk) => Callback.Fire(atk, true, -1);
 }

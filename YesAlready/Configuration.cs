@@ -2,7 +2,6 @@ using Dalamud.Configuration;
 using Dalamud.Game.ClientState.Keys;
 using Dalamud.Game.Text;
 using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -69,6 +68,8 @@ public partial class Configuration() : IPluginConfiguration
     public bool MiragePrismRemoveDispel { get; set; } = false;
     public bool MiragePrismExecuteCast { get; set; } = false;
     public bool BannerPreviewUpdate { get; set; } = false;
+    public bool WKSRewardClose { get; set; } = false;
+    public bool WKSAnnounceHide { get; set; } = false;
 
     public List<CustomBother> CustomCallbacks { get; set; } = [];
 
@@ -101,9 +102,7 @@ public partial class Configuration() : IPluginConfiguration
 
     public void Save() => Svc.PluginInterface.SavePluginConfig(this);
 
-    public IEnumerable<ITextNode> GetAllNodes()
-    {
-        return new ITextNode[]
+    public IEnumerable<ITextNode> GetAllNodes() => new ITextNode[]
         {
             RootFolder,
             OkRootFolder,
@@ -116,7 +115,6 @@ public partial class Configuration() : IPluginConfiguration
         .Concat(GetAllNodes(ListRootFolder.Children))
         .Concat(GetAllNodes(TalkRootFolder.Children))
         .Concat(GetAllNodes(NumericsRootFolder.Children));
-    }
 
     public IEnumerable<ITextNode> GetAllNodes(IEnumerable<ITextNode> nodes)
     {

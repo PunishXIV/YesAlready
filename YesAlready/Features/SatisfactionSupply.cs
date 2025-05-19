@@ -1,16 +1,10 @@
-using Dalamud.Game.Addon.Lifecycle;
-using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
 using Dalamud.Plugin.Services;
-using ECommons.Automation;
-using ECommons.Logging;
 using ECommons.Throttlers;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
-using FFXIVClientStructs.FFXIV.Component.GUI;
 using System.Collections.Generic;
 using System.Linq;
-using YesAlready.BaseFeatures;
 
 namespace YesAlready.Features;
 internal class SatisfactionSupply : BaseFeature

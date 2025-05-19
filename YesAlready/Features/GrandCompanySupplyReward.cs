@@ -1,26 +1,9 @@
-using Dalamud.Game.Addon.Lifecycle;
-using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
-using YesAlready.BaseFeatures;
-
 namespace YesAlready.Features;
 
-internal class GrandCompanySupplyReward : BaseFeature
+[AddonFeature(AddonEvent.PostSetup)]
+internal class GrandCompanySupplyReward : AddonFeature
 {
-    public override void Enable()
-    {
-        base.Enable();
-        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "GrandCompanySupplyReward", AddonSetup);
-    }
+    protected override bool IsEnabled() => P.Config.GrandCompanySupplyReward;
 
-    public override void Disable()
-    {
-        base.Disable();
-        Svc.AddonLifecycle.UnregisterListener(AddonSetup);
-    }
-
-    protected static unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
-    {
-        if (!P.Active || !P.Config.GrandCompanySupplyReward) return;
-        new AddonMaster.GrandCompanySupplyReward(addonInfo.Base()).Deliver();
-    }
+    protected override unsafe void HandleAddonEvent(AddonEvent eventType, AddonArgs addonInfo, AtkUnitBase* atk) => new AddonMaster.GrandCompanySupplyReward(atk).Deliver();
 }

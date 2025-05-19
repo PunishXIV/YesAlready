@@ -1,28 +1,13 @@
-using Dalamud.Game.Addon.Lifecycle;
-using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
-using YesAlready.BaseFeatures;
-
 namespace YesAlready.Features;
 
-internal class ContentsFinderConfirm : BaseFeature
+[AddonFeature(AddonEvent.PostSetup)]
+internal class ContentsFinderConfirm : AddonFeature
 {
-    public override void Enable()
-    {
-        base.Enable();
-        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "ContentsFinderConfirm", AddonSetup);
-    }
+    protected override bool IsEnabled() => P.Config.ContentsFinderConfirmEnabled;
 
-    public override void Disable()
+    protected override unsafe void HandleAddonEvent(AddonEvent eventType, AddonArgs addonInfo, AtkUnitBase* atk)
     {
-        base.Disable();
-        Svc.AddonLifecycle.UnregisterListener(AddonSetup);
-    }
-
-    protected static unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
-    {
-        if (!P.Active || !P.Config.ContentsFinderConfirmEnabled) return;
-
-        new AddonMaster.ContentsFinderConfirm(addonInfo.Base()).Commence();
+        new AddonMaster.ContentsFinderConfirm(atk).Commence();
 
         if (P.Config.ContentsFinderOneTimeConfirmEnabled)
         {

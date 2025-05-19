@@ -1,37 +1,20 @@
-//using Dalamud.Game.Addon.Lifecycle;
-//using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
 //using Dalamud.Memory;
-//using ECommons;
-//using ECommons.Automation;
-//using FFXIVClientStructs.FFXIV.Component.GUI;
-//using YesAlready.BaseFeatures;
 
 //namespace YesAlready.Features;
-//internal class AddonTradeMultipleFeature : BaseFeature
+
+//[AddonFeature(AddonEvent.PostUpdate)]
+//internal class TradeMultiple : AddonFeature
 //{
-//    public override void Enable()
-//    {
-//        base.Enable();
-//        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostUpdate, "TradeMultiple", AddonUpdate);
-//    }
+//    protected override bool IsEnabled() => P.Config.TradeMultiple;
 
-//    public override void Disable()
+//    protected override unsafe void HandleAddonEvent(AddonEvent eventType, AddonArgs addonInfo, AtkUnitBase* atk)
 //    {
-//        base.Disable();
-//        Svc.AddonLifecycle.UnregisterListener(AddonUpdate);
-//    }
-
-//    protected static unsafe void AddonUpdate(AddonEvent eventType, AddonArgs addonInfo)
-//    {
-//        if (!P.Active || !P.Config.TradeMultiple) return;
-
-//        var addon = addonInfo.Base();
-//        if (MemoryHelper.ReadSeStringNullTerminated(new nint(addon->AtkValues[0].String)).ToString() != "5/5")
+//        if (MemoryHelper.ReadSeStringNullTerminated(new nint(atk->AtkValues[0].String)).ToString() != "5/5")
 //            return;
 
 //        if (GenericHelpers.TryGetAddonByName<AtkUnitBase>("SelectYesno", out var _))
 //            return;
 
-//        Callback.Fire(addon, true, 0);
+//        Callback.Fire(atk, true, 0);
 //    }
 //}

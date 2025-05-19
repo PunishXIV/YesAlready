@@ -1,27 +1,9 @@
-using Dalamud.Game.Addon.Lifecycle;
-using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
-using ECommons.Automation;
-using YesAlready.BaseFeatures;
-
 namespace YesAlready.Features;
 
-internal class GuildLeveDifficulty : BaseFeature
+[AddonFeature(AddonEvent.PostSetup)]
+internal class GuildLeveDifficulty : AddonFeature
 {
-    public override void Enable()
-    {
-        base.Enable();
-        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "GuildLeveDifficulty", AddonSetup);
-    }
+    protected override bool IsEnabled() => P.Config.GuildLeveDifficultyConfirm;
 
-    public override void Disable()
-    {
-        base.Disable();
-        Svc.AddonLifecycle.UnregisterListener(AddonSetup);
-    }
-
-    protected static unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
-    {
-        if (!P.Active || !P.Config.GuildLeveDifficultyConfirm) return;
-        Callback.Fire(addonInfo.Base(), true, 0, addonInfo.Base()->AtkValues[1].Int);
-    }
+    protected override unsafe void HandleAddonEvent(AddonEvent eventType, AddonArgs addonInfo, AtkUnitBase* atk) => Callback.Fire(atk, true, 0, atk->AtkValues[1].Int);
 }

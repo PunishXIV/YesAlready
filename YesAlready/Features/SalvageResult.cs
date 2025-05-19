@@ -1,38 +1,27 @@
-using Dalamud.Game.Addon.Lifecycle;
-using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
-using YesAlready.BaseFeatures;
-
 namespace YesAlready.Features;
 
-internal class SalvageResult : BaseFeature
+[AddonFeature(AddonEvent.PostSetup)]
+[AddonFeature(AddonEvent.PostUpdate, "SalvageAutoDialog")]
+internal class SalvageResult : AddonFeature
 {
-    public override void Enable()
-    {
-        base.Enable();
-        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "SalvageResult", AddonSetup);
-        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostUpdate, "SalvageAutoDialog", AddonUpdate);
-    }
+    protected override bool IsEnabled() => P.Config.DesynthesisResults;
 
-    public override void Disable()
+    protected override unsafe void HandleAddonEvent(AddonEvent eventType, AddonArgs addonInfo, AtkUnitBase* atk)
     {
-        base.Disable();
-        Svc.AddonLifecycle.UnregisterListener(AddonSetup);
-        Svc.AddonLifecycle.UnregisterListener(AddonUpdate);
-    }
+        if (!GenericHelpers.IsAddonReady(atk)) return;
 
-    protected static unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
-    {
-        if (!P.Active || !P.Config.DesynthesisResults || !GenericHelpers.IsAddonReady(addonInfo.Base())) return;
-        new AddonMaster.SalvageResult(addonInfo.Base()).Close();
-    }
-
-    protected static unsafe void AddonUpdate(AddonEvent eventType, AddonArgs addonInfo)
-    {
-        if (!P.Active || !P.Config.DesynthesisResults || !GenericHelpers.IsAddonReady(addonInfo.Base())) return;
-        if (GenericHelpers.TryGetAddonMaster<AddonMaster.SalvageAutoDialog>(out var am))
+        switch (addonInfo.AddonName)
         {
-            if (am.DesynthesisInactive)
-                am.EndDesynthesis();
+            case "SalvageResult":
+                new AddonMaster.SalvageResult(atk).Close();
+                break;
+
+            case "SalvageAutoDialog":
+                if (GenericHelpers.TryGetAddonMaster<AddonMaster.SalvageAutoDialog>(out var am) && am.DesynthesisInactive)
+                {
+                    am.EndDesynthesis();
+                }
+                break;
         }
     }
 }

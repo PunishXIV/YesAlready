@@ -1,29 +1,16 @@
-using Dalamud.Game.Addon.Lifecycle;
-using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
 using Dalamud.Memory;
 using Lumina.Excel.Sheets;
 using System.Linq;
-using YesAlready.BaseFeatures;
 
 namespace YesAlready.Features;
 
-internal class RetainerItemTransferProgress : BaseFeature
+[AddonFeature(AddonEvent.PostUpdate)]
+internal class RetainerItemTransferProgress : AddonFeature
 {
-    public override void Enable()
-    {
-        base.Enable();
-        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostUpdate, "RetainerItemTransferProgress", AddonUpdate);
-    }
+    protected override bool IsEnabled() => P.Config.RetainerTransferProgressConfirm;
 
-    public override void Disable()
+    protected override unsafe void HandleAddonEvent(AddonEvent eventType, AddonArgs addonInfo, AtkUnitBase* atk)
     {
-        base.Disable();
-        Svc.AddonLifecycle.UnregisterListener(AddonUpdate);
-    }
-
-    private static unsafe void AddonUpdate(AddonEvent eventType, AddonArgs addonInfo)
-    {
-        if (!P.Active || !P.Config.RetainerTransferProgressConfirm) return;
         if (!GenericHelpers.TryGetAddonMaster<AddonMaster.RetainerItemTransferProgress>(out var am)) return;
 
         if (MemoryHelper.ReadSeStringNullTerminated(new nint(am.Base->AtkValues[0].String)).GetText() == Svc.Data.GetExcelSheet<Addon>().First(x => x.RowId == 13528).Text)

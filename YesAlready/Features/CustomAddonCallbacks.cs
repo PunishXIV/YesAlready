@@ -1,10 +1,6 @@
-﻿using Dalamud.Game.Addon.Lifecycle;
-using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
-using ECommons.Automation;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using YesAlready.BaseFeatures;
 
 namespace YesAlready.Features;
 public class CustomAddonCallbacks : BaseFeature

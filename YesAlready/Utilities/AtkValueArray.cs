@@ -2,8 +2,6 @@ using System;
 using System.Runtime.InteropServices;
 using System.Text;
 
-using FFXIVClientStructs.FFXIV.Component.GUI;
-
 using ValueType = FFXIVClientStructs.FFXIV.Component.GUI.ValueType;
 
 namespace YesAlready.Utils;

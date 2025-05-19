@@ -1,27 +1,9 @@
-using Dalamud.Game.Addon.Lifecycle;
-using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
-using ECommons.Automation;
-using YesAlready.BaseFeatures;
-
 namespace YesAlready.Features;
 
-internal class FGSEnterDialog : BaseFeature
+[AddonFeature(AddonEvent.PostSetup)]
+internal class FGSEnterDialog : AddonFeature
 {
-    public override void Enable()
-    {
-        base.Enable();
-        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "FGSEnterDialog", AddonSetup);
-    }
+    protected override bool IsEnabled() => P.Config.FallGuysRegisterConfirm;
 
-    public override void Disable()
-    {
-        base.Disable();
-        Svc.AddonLifecycle.UnregisterListener(AddonSetup);
-    }
-
-    protected static unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
-    {
-        if (!P.Active || !P.Config.FallGuysRegisterConfirm) return;
-        Callback.Fire(addonInfo.Base(), true, 0);
-    }
+    protected override unsafe void HandleAddonEvent(AddonEvent eventType, AddonArgs addonInfo, AtkUnitBase* atk) => Callback.Fire(atk, true, 0);
 }

@@ -1,28 +1,13 @@
-using Dalamud.Game.Addon.Lifecycle;
-using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
-using FFXIVClientStructs.Interop;
-using YesAlready.BaseFeatures;
-
 namespace YesAlready.Features;
 
-internal class SalvageDialog : BaseFeature
+[AddonFeature(AddonEvent.PostSetup)]
+internal class SalvageDialog : AddonFeature
 {
-    public override void Enable()
-    {
-        base.Enable();
-        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "SalvageDialog", AddonSetup);
-        //Svc.AddonLifecycle.RegisterListener(AddonEvent.PreSetup, "SalvageDialog", AddonSetup);
-    }
+    protected override bool IsEnabled() => P.Config.DesynthDialogEnabled;
 
-    public override void Disable()
+    protected override unsafe void HandleAddonEvent(AddonEvent eventType, AddonArgs addonInfo, AtkUnitBase* atk)
     {
-        base.Disable();
-        Svc.AddonLifecycle.UnregisterListener(AddonSetup);
-    }
-
-    protected unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
-    {
-        if (!P.Active || !GenericHelpers.IsAddonReady(addonInfo.Base())) return;
+        if (!GenericHelpers.IsAddonReady(atk)) return;
 
         if (GenericHelpers.TryGetAddonMaster<AddonMaster.SalvageDialog>(out var am))
         {

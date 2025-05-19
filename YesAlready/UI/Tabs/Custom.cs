@@ -2,12 +2,10 @@
 using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Reflection;
 using System.Text;
-using YesAlready.BaseFeatures;
 using YesAlready.Features;
 using YesAlready.Utils;
 using static YesAlready.Configuration;

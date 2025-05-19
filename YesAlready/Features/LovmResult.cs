@@ -1,27 +1,9 @@
-using Dalamud.Game.Addon.Lifecycle;
-using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
-using ECommons.Automation;
-using YesAlready.BaseFeatures;
-
 namespace YesAlready.Features;
 
-internal class LovmResult : BaseFeature
+[AddonFeature(AddonEvent.PostSetup)]
+internal class LovmResult : AddonFeature
 {
-    public override void Enable()
-    {
-        base.Enable();
-        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "LovmResult", AddonSetup);
-    }
+    protected override bool IsEnabled() => P.Config.LordOfVerminionQuit;
 
-    public override void Disable()
-    {
-        base.Disable();
-        Svc.AddonLifecycle.UnregisterListener(AddonSetup);
-    }
-
-    protected static unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
-    {
-        if (!P.Active || !P.Config.LordOfVerminionQuit) return;
-        Callback.Fire(addonInfo.Base(), true, -1);
-    }
+    protected override unsafe void HandleAddonEvent(AddonEvent eventType, AddonArgs addonInfo, AtkUnitBase* atk) => Callback.Fire(atk, true, -1);
 }

@@ -1,9 +1,5 @@
 using System;
-using Dalamud.Game.Addon.Lifecycle;
-using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
 using ECommons.EzHookManager;
-using FFXIVClientStructs.FFXIV.Component.GUI;
-using YesAlready.BaseFeatures;
 using YesAlready.Utils;
 using ValueType = FFXIVClientStructs.FFXIV.Component.GUI.ValueType;
 

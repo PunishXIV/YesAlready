@@ -1,7 +1,5 @@
 using Dalamud.Hooking;
-using ECommons.Logging;
 using FFXIVClientStructs.FFXIV.Client.UI;
-using FFXIVClientStructs.FFXIV.Component.GUI;
 using System;
 using System.Linq;
 

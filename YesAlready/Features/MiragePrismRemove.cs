@@ -1,25 +1,9 @@
-﻿using Dalamud.Game.Addon.Lifecycle;
-using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
-using YesAlready.BaseFeatures;
+﻿namespace YesAlready.Features;
 
-namespace YesAlready.Features;
-public class MiragePrismRemove : BaseFeature
+[AddonFeature(AddonEvent.PostSetup)]
+internal class MiragePrismRemove : AddonFeature
 {
-    public override void Enable()
-    {
-        base.Enable();
-        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "MiragePrismRemove", AddonSetup);
-    }
+    protected override bool IsEnabled() => P.Config.MiragePrismRemoveDispel;
 
-    public override void Disable()
-    {
-        base.Disable();
-        Svc.AddonLifecycle.UnregisterListener(AddonSetup);
-    }
-
-    protected static unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
-    {
-        if (!P.Active || !P.Config.MiragePrismRemoveDispel) return;
-        new AddonMaster.MiragePrismRemove(addonInfo.Base()).Dispel();
-    }
+    protected override unsafe void HandleAddonEvent(AddonEvent eventType, AddonArgs addonInfo, AtkUnitBase* atk) => new AddonMaster.MiragePrismRemove(atk).Dispel();
 }

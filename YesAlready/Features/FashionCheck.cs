@@ -1,30 +1,9 @@
-using Dalamud.Game.Addon.Lifecycle;
-using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
-using ECommons.Automation;
-using FFXIVClientStructs.FFXIV.Component.GUI;
-using YesAlready.BaseFeatures;
-
 namespace YesAlready.Features;
 
-internal class FashionCheck : BaseFeature
+[AddonFeature(AddonEvent.PostSetup)]
+internal class FashionCheck : AddonFeature
 {
-    public override void Enable()
-    {
-        base.Enable();
-        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "FashionCheck", AddonSetup);
-    }
+    protected override unsafe bool IsEnabled() => P.Config.FashionCheckQuit && !GenericHelpers.TryGetAddonByName<AtkUnitBase>("ContentsInfo", out var _); // do not fire when the timers window is also open
 
-    public override void Disable()
-    {
-        base.Disable();
-        Svc.AddonLifecycle.UnregisterListener(AddonSetup);
-    }
-
-    protected static unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
-    {
-        if (!P.Active || !P.Config.FashionCheckQuit) return;
-
-        if (!GenericHelpers.TryGetAddonByName<AtkUnitBase>("ContentsInfo", out var _)) // do not fire when the timers window is also open
-            Callback.Fire(addonInfo.Base(), true, -1);
-    }
+    protected override unsafe void HandleAddonEvent(AddonEvent eventType, AddonArgs addonInfo, AtkUnitBase* atk) => Callback.Fire(atk, true, -1);
 }

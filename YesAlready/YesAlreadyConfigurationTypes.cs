@@ -350,8 +350,5 @@ public class ConcreteNodeConverter : JsonConverter
         return obj;
     }
 
-    private static string SimpleName(Type type)
-    {
-        return $"{type.FullName}, {type.Assembly.GetName().Name}";
-    }
+    private static string SimpleName(Type type) => $"{type.FullName}, {type.Assembly.GetName().Name}";
 }

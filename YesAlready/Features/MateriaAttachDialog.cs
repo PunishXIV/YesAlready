@@ -1,27 +1,14 @@
-using Dalamud.Game.Addon.Lifecycle;
-using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
 using Dalamud.Game.ClientState.Conditions;
-using YesAlready.BaseFeatures;
 
 namespace YesAlready.Features;
 
-internal class MateriaAttachDialog : BaseFeature
+[AddonFeature(AddonEvent.PostSetup)]
+internal class MateriaAttachDialog : AddonFeature
 {
-    public override void Enable()
-    {
-        base.Enable();
-        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "MateriaAttachDialog", AddonSetup);
-    }
+    protected override bool IsEnabled() => P.Config.MaterialAttachDialogEnabled;
 
-    public override void Disable()
+    protected override unsafe void HandleAddonEvent(AddonEvent eventType, AddonArgs addonInfo, AtkUnitBase* atk)
     {
-        base.Disable();
-        Svc.AddonLifecycle.UnregisterListener(AddonSetup);
-    }
-
-    protected static unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
-    {
-        if (!P.Active || !P.Config.MaterialAttachDialogEnabled) return;
         if (GenericHelpers.TryGetAddonMaster<AddonMaster.MateriaAttachDialog>(out var am))
         {
             if (P.Config.OnlyMeldWhenGuaranteed && am.SuccessRateFloat < 100)

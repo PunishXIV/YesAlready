@@ -1,28 +1,9 @@
-﻿using Dalamud.Game.Addon.Lifecycle;
-using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
-using ECommons.Automation;
-using YesAlready.BaseFeatures;
+﻿namespace YesAlready.Features;
 
-namespace YesAlready.Features;
-internal class BannerPreview : BaseFeature
+[AddonFeature(AddonEvent.PostSetup)]
+internal class BannerPreview : AddonFeature
 {
-    public override void Enable()
-    {
-        base.Enable();
-        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "BannerPreview", AddonSetup);
-    }
+    protected override bool IsEnabled() => P.Config.BannerPreviewUpdate;
 
-    public override void Disable()
-    {
-        base.Disable();
-        Svc.AddonLifecycle.UnregisterListener(AddonSetup);
-    }
-
-    protected static unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
-    {
-        if (!P.Active || !P.Config.BannerPreviewUpdate) return;
-        Callback.Fire(addonInfo.Base(), true, 0);
-        // FIX: this causes a "Character not in frame error" when done PostSetup ... somehow
-        //new AddonMaster.BannerPreview(addonInfo.Base()).Update();
-    }
+    protected override unsafe void HandleAddonEvent(AddonEvent eventType, AddonArgs addonInfo, AtkUnitBase* atk) => Callback.Fire(atk, true, 0);// FIX: this causes a "Character not in frame error" when done PostSetup ... somehow//new AddonMaster.BannerPreview(atk).Update();
 }

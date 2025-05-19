@@ -1,30 +1,16 @@
-using Dalamud.Game.Addon.Lifecycle;
-using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
-using YesAlready.BaseFeatures;
 
 namespace YesAlready.Features;
 
-internal class ItemInspectionResut : BaseFeature
+[AddonFeature(AddonEvent.PostSetup)]
+internal class ItemInspectionResut : AddonFeature
 {
-    public override void Enable()
-    {
-        base.Enable();
-        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "ItemInspectionResult", AddonSetup);
-    }
-
-    public override void Disable()
-    {
-        base.Disable();
-        Svc.AddonLifecycle.UnregisterListener(AddonSetup);
-    }
-
     private int itemInspectionCount = 0;
 
-    protected unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
-    {
-        if (!P.Active || !P.Config.ItemInspectionResultEnabled) return;
+    protected override bool IsEnabled() => P.Config.ItemInspectionResultEnabled;
 
+    protected override unsafe void HandleAddonEvent(AddonEvent eventType, AddonArgs addonInfo, AtkUnitBase* atk)
+    {
         if (GenericHelpers.TryGetAddonMaster<AddonMaster.ItemInspectionResult>(out var am))
         {
             if (am.Base->UldManager.NodeListCount < 64) return;

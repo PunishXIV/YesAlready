@@ -1,36 +1,22 @@
-using Dalamud.Game.Addon.Lifecycle;
-using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
 using Dalamud.Memory;
-using ECommons.Automation;
 using Lumina.Excel.Sheets;
 using System.Linq;
-using YesAlready.BaseFeatures;
 
 namespace YesAlready.Features;
 
-internal class PurifyResult : BaseFeature
+[AddonFeature(AddonEvent.PostUpdate)]
+internal class PurifyResult : AddonFeature
 {
-    public override void Enable()
-    {
-        base.Enable();
-        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostUpdate, "PurifyResult", AddonUpdate);
-    }
+    protected override bool IsEnabled() => P.Config.AetherialReductionResults;
 
-    public override void Disable()
+    protected override unsafe void HandleAddonEvent(AddonEvent eventType, AddonArgs addonInfo, AtkUnitBase* atk)
     {
-        base.Disable();
-        Svc.AddonLifecycle.UnregisterListener(AddonUpdate);
-    }
+        if (!GenericHelpers.IsAddonReady(atk)) return;
 
-    private static unsafe void AddonUpdate(AddonEvent eventType, AddonArgs addonInfo)
-    {
-        if (!P.Active || !P.Config.AetherialReductionResults || !GenericHelpers.IsAddonReady(addonInfo.Base())) return;
-
-        var addon = addonInfo.Base();
-        if (MemoryHelper.ReadSeString(&addon->GetTextNodeById(2)->NodeText).GetText() == Svc.Data.GetExcelSheet<Addon>().First(x => x.RowId == 2171).Text)
+        if (MemoryHelper.ReadSeString(&atk->GetTextNodeById(2)->NodeText).GetText() == Svc.Data.GetExcelSheet<Addon>().First(x => x.RowId == 2171).Text)
         {
             PluginLog.Debug("Closing Purify Results menu");
-            Callback.Fire(addon, true, -1);
+            Callback.Fire(atk, true, -1);
         }
     }
 }

@@ -1,26 +1,9 @@
-using Dalamud.Game.Addon.Lifecycle;
-using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
-using YesAlready.BaseFeatures;
-
 namespace YesAlready.Features;
 
-internal class MaterializeDialog : BaseFeature
+[AddonFeature(AddonEvent.PostSetup)]
+internal class MaterializeDialog : AddonFeature
 {
-    public override void Enable()
-    {
-        base.Enable();
-        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "MaterializeDialog", AddonSetup);
-    }
+    protected override bool IsEnabled() => P.Config.MaterializeDialogEnabled;
 
-    public override void Disable()
-    {
-        base.Disable();
-        Svc.AddonLifecycle.UnregisterListener(AddonSetup);
-    }
-
-    protected static unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
-    {
-        if (!P.Active || !P.Config.MaterializeDialogEnabled) return;
-        new AddonMaster.MaterializeDialog(addonInfo.Base()).Materialize();
-    }
+    protected override unsafe void HandleAddonEvent(AddonEvent eventType, AddonArgs addonInfo, AtkUnitBase* atk) => new AddonMaster.MaterializeDialog(atk).Materialize();
 }

@@ -1,28 +1,14 @@
-using Dalamud.Game.Addon.Lifecycle;
-using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
 using Lumina.Excel.Sheets;
-using YesAlready.BaseFeatures;
 
 namespace YesAlready.Features;
 
-internal class RetainerTaskResult : BaseFeature
+[AddonFeature(AddonEvent.PostSetup)]
+internal class RetainerTaskResult : AddonFeature
 {
-    public override void Enable()
-    {
-        base.Enable();
-        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "RetainerTaskResult", AddonSetup);
-    }
+    protected override bool IsEnabled() => P.Config.RetainerTaskResultEnabled;
 
-    public override void Disable()
+    protected override unsafe void HandleAddonEvent(AddonEvent eventType, AddonArgs addonInfo, AtkUnitBase* atk)
     {
-        base.Disable();
-        Svc.AddonLifecycle.UnregisterListener(AddonSetup);
-    }
-
-    protected unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
-    {
-        if (!P.Active || !P.Config.RetainerTaskResultEnabled) return;
-
         if (GenericHelpers.TryGetAddonMaster<AddonMaster.RetainerTaskResult>(out var am))
         {
             var buttonText = am.ReassignButton->ButtonTextNode->NodeText.GetText();
