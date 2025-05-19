@@ -22,9 +22,8 @@ public class CustomAddonCallbacks : BaseFeature
     {
         if (!P.Active) return;
 
-        var addon = addonInfo.Base();
         var callbacks = CallbackToArray(P.Config.CustomCallbacks.First(x => x.Addon == addonInfo.AddonName).CallbackParams);
-        Callback.Fire(addon, true, callbacks);
+        Callback.Fire((AtkUnitBase*)addonInfo.Addon, true, callbacks);
     }
 
     public static string CallbackToString(object[] args)

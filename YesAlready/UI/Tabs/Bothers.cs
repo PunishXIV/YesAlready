@@ -376,27 +376,6 @@ public static class Bothers
             }
             ImGuiEx.IndentedTextColored("Automatically turn in any available collectibles for Custom Deliveries.");
 
-            var itemInspection = P.Config.ItemInspectionResultEnabled;
-            if (ImGui.Checkbox("ItemInspectionResult", ref itemInspection))
-            {
-                P.Config.ItemInspectionResultEnabled = itemInspection;
-                P.Config.Save();
-            }
-            ImGuiEx.IndentedTextColored("Eureka/Bozja lockboxes, forgotten fragments, and more. Warning: this does not check if you are maxed on items. Rate limiter (pause after N items).");
-
-            if (itemInspection)
-            {
-                ImGui.Indent();
-                var rateLimit = P.Config.ItemInspectionResultRateLimiter;
-                if (ImGui.InputInt(string.Empty, ref rateLimit))
-                {
-                    P.Config.ItemInspectionResultRateLimiter = rateLimit;
-                    P.Config.Save();
-                }
-                ImGui.Unindent();
-                ImGuiEx.IndentedTextColored("Rate limiter (pause after N items, 0 to disable).");
-            }
-
             var grandCompanySupplyReward = P.Config.GrandCompanySupplyReward;
             if (ImGui.Checkbox("GrandCompanySupplyReward", ref grandCompanySupplyReward))
             {
@@ -454,6 +433,48 @@ public static class Bothers
             ImGuiEx.IndentedTextColored("Automatically update portraits.");
         }
 
+        #endregion
+
+        #region Forays
+        if (ImGui.CollapsingHeader("Forays"))
+        {
+            var itemInspection = P.Config.ItemInspectionResultEnabled;
+            if (ImGui.Checkbox("ItemInspectionResult", ref itemInspection))
+            {
+                P.Config.ItemInspectionResultEnabled = itemInspection;
+                P.Config.Save();
+            }
+            ImGuiEx.IndentedTextColored("Eureka/Bozja lockboxes, forgotten fragments, and more. Warning: this does not check if you are maxed on items. Rate limiter (pause after N items).");
+
+            if (itemInspection)
+            {
+                ImGui.Indent();
+                var rateLimit = P.Config.ItemInspectionResultRateLimiter;
+                if (ImGui.InputInt(string.Empty, ref rateLimit))
+                {
+                    P.Config.ItemInspectionResultRateLimiter = rateLimit;
+                    P.Config.Save();
+                }
+                ImGui.Unindent();
+                ImGuiEx.IndentedTextColored("Rate limiter (pause after N items, 0 to disable).");
+            }
+
+            var wksAnnounceHide = P.Config.WKSAnnounceHide;
+            if (ImGui.Checkbox("WKSAnnounceHide", ref wksAnnounceHide))
+            {
+                P.Config.WKSAnnounceHide = wksAnnounceHide;
+                P.Config.Save();
+            }
+            ImGuiEx.IndentedTextColored("Hide Cosmic Exploration announcements.");
+
+            var wksRewardClose = P.Config.WKSRewardClose;
+            if (ImGui.Checkbox("WKSRewardHide", ref wksRewardClose))
+            {
+                P.Config.WKSRewardClose = wksRewardClose;
+                P.Config.Save();
+            }
+            ImGuiEx.IndentedTextColored("Automatically close the Cosmic Exploration rewards window.");
+        }
         #endregion
     }
 }

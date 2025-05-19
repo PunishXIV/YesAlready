@@ -2,44 +2,41 @@ using System;
 using System.Linq;
 
 namespace YesAlready.Features;
-internal class InputNumeric : BaseFeature
+
+[AddonFeature(AddonEvent.PostSetup)]
+internal class InputNumeric : TextMatchingFeature
 {
-    public override void Enable()
+    protected override unsafe string GetSetLastSeenText(AtkUnitBase* atk)
     {
-        base.Enable();
-        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "InputNumeric", AddonSetup);
+        var text = Utils.SEString.GetSeStringText(new nint(atk->AtkValues[6].String));
+        P.LastSeenNumericsText = text;
+        return text;
     }
 
-    public override void Disable()
+    protected override unsafe object? ShouldProceed(string text, AtkUnitBase* atk)
     {
-        base.Disable();
-        Svc.AddonLifecycle.UnregisterListener(AddonSetup);
-    }
-
-    protected static unsafe void AddonSetup(AddonEvent eventType, AddonArgs args)
-    {
-        if (!P.Active) return;
-
-        var addon = args.Base();
-        var min = addon->AtkValues[2].UInt;
-        var max = addon->AtkValues[3].UInt;
-        var text = P.LastSeenNumericsText = Utils.SEString.GetSeStringText(new nint(addon->AtkValues[6].String));
-        PluginLog.Debug($"AddonInputNumeric: text={text}");
-
         var nodes = P.Config.GetAllNodes().OfType<NumericsEntryNode>();
         foreach (var node in nodes)
         {
             if (!node.Enabled || string.IsNullOrEmpty(node.Text))
                 continue;
-            if (!EntryMatchesText(node, text))
-                continue;
 
-            PluginLog.Debug("AddonInputNumeric: Selecting ok");
-            var value = Math.Clamp(node.IsPercent ? (uint)Math.Ceiling(max * (node.Percentage / 100f)) : (uint)node.Quantity, min, max);
-            Callback.Fire(addon, true, (int)value);
-            return;
+            if (EntryMatchesText(node.Text, text, node.IsTextRegex))
+                return node;
         }
+
+        return null;
     }
-    private static bool EntryMatchesText(NumericsEntryNode node, string text)
-        => node.IsTextRegex && (node.TextRegex?.IsMatch(text) ?? false) || !node.IsTextRegex && text.Contains(node.Text);
+
+    protected override unsafe void Proceed(AtkUnitBase* atk, object? matchingNode)
+    {
+        if (matchingNode is not NumericsEntryNode node) return;
+
+        var min = atk->AtkValues[2].UInt;
+        var max = atk->AtkValues[3].UInt;
+
+        PluginLog.Debug("AddonInputNumeric: Selecting ok");
+        var value = Math.Clamp(node.IsPercent ? (uint)Math.Ceiling(max * (node.Percentage / 100f)) : (uint)node.Quantity, min, max);
+        Callback.Fire(atk, true, (int)value);
+    }
 }

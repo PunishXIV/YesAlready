@@ -5,32 +5,22 @@ using ValueType = FFXIVClientStructs.FFXIV.Component.GUI.ValueType;
 
 namespace YesAlready.Features;
 
-internal class InclusionShop : BaseFeature
+[AddonFeature(AddonEvent.PostSetup)]
+internal class InclusionShop : AddonFeature
 {
-    public override void Enable()
-    {
-        base.Enable();
-        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "InclusionShop", AddonSetup);
-    }
+    protected override bool IsEnabled() => P.Config.InclusionShopRememberEnabled;
 
-    public override void Disable()
+    protected override unsafe void HandleAddonEvent(AddonEvent eventType, AddonArgs addonInfo, AtkUnitBase* atk)
     {
-        base.Disable();
-        Svc.AddonLifecycle.UnregisterListener(AddonSetup);
-    }
+        if (!GenericHelpers.IsAddonReady(atk)) return;
 
-    protected unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
-    {
-        if (!P.Active || !P.Config.InclusionShopRememberEnabled) return;
-
-        var addon = addonInfo.Base();
         PluginLog.Debug($"Firing 12,{P.Config.InclusionShopRememberCategory}");
         using var categoryValues = new AtkValueArray(12, P.Config.InclusionShopRememberCategory);
-        addon->FireCallback(2, categoryValues);
+        atk->FireCallback(2, categoryValues);
 
         PluginLog.Debug($"Firing 13,{P.Config.InclusionShopRememberSubcategory}");
         using var subcategoryValues = new AtkValueArray(13, P.Config.InclusionShopRememberSubcategory);
-        addon->FireCallback(2, subcategoryValues);
+        atk->FireCallback(2, subcategoryValues);
     }
 
     [EzHook("40 53 48 83 EC ?? 48 8B DA 4D 8B D0", detourName: nameof(AgentReceiveEventDetour), true)]

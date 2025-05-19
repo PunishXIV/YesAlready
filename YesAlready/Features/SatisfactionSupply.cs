@@ -7,52 +7,35 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace YesAlready.Features;
-internal class SatisfactionSupply : BaseFeature
-{
-    public override void Enable()
-    {
-        base.Enable();
-        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostUpdate, "SatisfactionSupply", AddonUpdate);
-        Svc.AddonLifecycle.RegisterListener(AddonEvent.PreSetup, "SatisfactionSupply", Reset);
-        Svc.Framework.Update += RequestFill;
-        Svc.Framework.Update += RequestComplete;
-    }
 
-    public override void Disable()
-    {
-        base.Disable();
-        Svc.AddonLifecycle.UnregisterListener(AddonUpdate);
-        Svc.AddonLifecycle.UnregisterListener(Reset);
-        Svc.Framework.Update -= RequestFill;
-        Svc.Framework.Update -= RequestComplete;
-    }
+[AddonFeature(AddonEvent.PostUpdate)]
+internal class SatisfactionSupply : AddonFeature
+{
+    protected override bool IsEnabled() => P.Config.CustomDeliveries;
 
     private static bool Disabled;
-    protected static unsafe void AddonUpdate(AddonEvent eventType, AddonArgs args)
+    private static List<int> SlotsFilled { get; set; } = [];
+    private static ulong RequestAllow;
+
+    protected override unsafe void HandleAddonEvent(AddonEvent eventType, AddonArgs addonInfo, AtkUnitBase* atk)
     {
-        if (!P.Active || !P.Config.CustomDeliveries || Disabled)
-            return;
+        if (Disabled || !GenericHelpers.IsAddonReady(atk)) return;
 
-        var addon = args.Base();
-        if (!GenericHelpers.IsAddonReady(addon)) return;
-
-        var atkValues = new[] { addon->AtkValues[22].Int, addon->AtkValues[31].Int, addon->AtkValues[40].Int };
+        var atkValues = new[] { atk->AtkValues[22].Int, atk->AtkValues[31].Int, atk->AtkValues[40].Int };
         foreach (var (index, value) in atkValues.Select((value, index) => (index, value)))
         {
             if (value != 0 && !GenericHelpers.TryGetAddonByName<AtkUnitBase>("Request", out var _))
             {
-                if (WillOvercap(addon, index))
+                if (WillOvercap(atk, index))
                 {
                     Utils.SEString.PrintPluginMessage("Further turn in will overcap scrips.");
                     Disabled = true;
                     return;
                 }
-                Callback.Fire(addon, false, 1, index);
+                Callback.Fire(atk, false, 1, index);
             }
         }
     }
-
-    private void Reset(AddonEvent type, AddonArgs args) => Disabled = false;
 
     private static unsafe bool WillOvercap(AtkUnitBase* addon, int row)
     {
@@ -142,7 +125,24 @@ internal class SatisfactionSupply : BaseFeature
         return null;
     }
 
-    private static List<int> SlotsFilled { get; set; } = [];
+    public override void Enable()
+    {
+        base.Enable();
+        Svc.Framework.Update += RequestFill;
+        Svc.Framework.Update += RequestComplete;
+        Svc.AddonLifecycle.RegisterListener(AddonEvent.PreSetup, "SatisfactionSupply", Reset);
+    }
+
+    public override void Disable()
+    {
+        base.Disable();
+        Svc.Framework.Update -= RequestFill;
+        Svc.Framework.Update -= RequestComplete;
+        Svc.AddonLifecycle.UnregisterListener(Reset);
+    }
+
+    private void Reset(AddonEvent type, AddonArgs args) => Disabled = false;
+
     private static unsafe void RequestFill(IFramework framework)
     {
         if (!P.Active || !P.Config.CustomDeliveries || !GenericHelpers.TryGetAddonByName<AddonRequest>("SatisfactionSupply", out var _))
@@ -193,7 +193,6 @@ internal class SatisfactionSupply : BaseFeature
         }
     }
 
-    private static ulong RequestAllow;
     private static unsafe void RequestComplete(IFramework framework)
     {
         if (!P.Active || !P.Config.CustomDeliveries || !GenericHelpers.TryGetAddonByName<AddonRequest>("SatisfactionSupply", out var _))

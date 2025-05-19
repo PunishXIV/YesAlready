@@ -2,41 +2,28 @@ using System.Linq;
 
 namespace YesAlready.Features;
 
-internal class SelectIconString : OnSetupSelectListFeature
+[AddonFeature(AddonEvent.PostSetup)]
+[AddonFeature(AddonEvent.PreFinalize)]
+internal class SelectIconString : TextMatchingFeature
 {
-    public override void Enable()
+    protected override unsafe string GetSetLastSeenText(AtkUnitBase* atk)
     {
-        base.Enable();
-        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "SelectIconString", AddonSetup);
-        Svc.AddonLifecycle.RegisterListener(AddonEvent.PreFinalize, "SelectIconString", SetEntry);
+        var addon = new AddonMaster.SelectIconString(atk);
+        P.LastSeenListEntries = [.. addon.Entries.Select(x => (x.Index, x.Text))];
+        return string.Join(", ", addon.Entries.Select(x => x.Text));
     }
 
-    private void SetEntry(AddonEvent type, AddonArgs args)
+    protected override unsafe object? ShouldProceed(string text, AtkUnitBase* atk)
     {
-        try
-        {
-            P.LastSeenListSelection = P.LastSeenListIndex < P.LastSeenListEntries.Length ? P.LastSeenListEntries?[P.LastSeenListIndex].Text ?? string.Empty : string.Empty;
-            P.LastSeenListTarget = P.LastSeenListTarget = Svc.Targets.Target != null ? Svc.Targets.Target.Name.GetText() ?? string.Empty : string.Empty;
-        }
-        catch { }
+        if (!GenericHelpers.TryGetAddonMaster<AddonMaster.SelectIconString>(out var addon)) return null;
+        string[] entries = [.. addon.Entries.Select(x => x.Text)];
+        return GetMatchingIndex(entries);
     }
 
-    public override void Disable()
+    protected override unsafe void Proceed(AtkUnitBase* atk, object? matchingNode)
     {
-        base.Disable();
-        Svc.AddonLifecycle.UnregisterListener(AddonSetup);
-        Svc.AddonLifecycle.UnregisterListener(SetEntry);
-    }
-
-    protected unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
-    {
-        if (!P.Active) return;
-
-        var addon = new AddonMaster.SelectIconString(addonInfo.Base());
-        P.LastSeenListEntries = addon.Entries.Select(x => (x.Index, x.Text)).ToArray();
-
-        var index = GetMatchingIndex(addon.Entries.Select(x => x.Text).ToArray());
-        if (index != null)
-            addon.Entries[(int)index].Select();
+        if (matchingNode is not int index) return;
+        var addon = new AddonMaster.SelectIconString(atk);
+        addon.Entries[index].Select();
     }
 }

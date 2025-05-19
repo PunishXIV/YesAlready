@@ -2,43 +2,29 @@ using System.Linq;
 
 namespace YesAlready.Features;
 
-internal class SelectOk : BaseFeature
+[AddonFeature(AddonEvent.PostSetup)]
+internal class SelectOk : TextMatchingFeature
 {
-    public override void Enable()
+    protected override unsafe string GetSetLastSeenText(AtkUnitBase* atk)
     {
-        base.Enable();
-        Svc.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "SelectOk", AddonSetup);
+        var text = new AddonMaster.SelectOk(atk).Text;
+        P.LastSeenOkText = text;
+        return text;
     }
 
-    public override void Disable()
+    protected override unsafe object? ShouldProceed(string text, AtkUnitBase* atk)
     {
-        base.Disable();
-        Svc.AddonLifecycle.UnregisterListener(AddonSetup);
-    }
-
-    protected unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
-    {
-        if (!P.Active) return;
-
-        var addon = new AddonMaster.SelectOk(addonInfo.Base());
-        var text = P.LastSeenOkText = addon.Text;
-        PluginLog.Debug($"AddonSelectOk: text={text}");
-
         var nodes = P.Config.GetAllNodes().OfType<OkEntryNode>();
         foreach (var node in nodes)
         {
             if (!node.Enabled || string.IsNullOrEmpty(node.Text))
                 continue;
 
-            if (!EntryMatchesText(node, text))
-                continue;
-
-            PluginLog.Debug("AddonSelectOk: Selecting ok");
-            addon.Ok();
-            return;
+            if (EntryMatchesText(node.Text, text, node.IsTextRegex))
+                return node;
         }
+        return null;
     }
 
-    private static bool EntryMatchesText(OkEntryNode node, string text)
-        => node.IsTextRegex && (node.TextRegex?.IsMatch(text) ?? false) || !node.IsTextRegex && text.Contains(node.Text);
+    protected override unsafe void Proceed(AtkUnitBase* atk, object? matchingNode) => new AddonMaster.SelectOk(atk).Ok();
 }
