@@ -4,16 +4,13 @@ using System.Linq;
 namespace YesAlready.BaseFeatures;
 
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-public class AddonFeatureAttribute : Attribute
+public class AddonFeatureAttribute(AddonEvent eventType, string? addonName = null) : Attribute
 {
-    public string AddonName { get; }
-    public AddonEvent EventType { get; }
-
-    public AddonFeatureAttribute(AddonEvent eventType, string? addonName = null)
-    {
-        EventType = eventType;
-        AddonName = addonName ?? GetType().DeclaringType?.Name ?? throw new InvalidOperationException("Could not determine addon name");
-    }
+    /// <summary>
+    /// Name of the addon to register the listener for. Will use the class name if one is not provided.
+    /// </summary>
+    public string? AddonName { get; } = addonName;
+    public AddonEvent EventType { get; } = eventType;
 }
 
 public abstract class AddonFeature : BaseFeature
@@ -27,7 +24,7 @@ public abstract class AddonFeature : BaseFeature
 
         if (_attributes != null)
             foreach (var attr in _attributes)
-                Svc.AddonLifecycle.RegisterListener(attr.EventType, attr.AddonName, OnAddonEvent);
+                Svc.AddonLifecycle.RegisterListener(attr.EventType, attr.AddonName ?? GetType().Name, OnAddonEvent);
     }
 
     public override void Disable()

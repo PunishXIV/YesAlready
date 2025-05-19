@@ -1,10 +1,10 @@
 using Dalamud.Game.ClientState.Keys;
-using Dalamud.Game.Gui.Dtr;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using ECommons.Automation.LegacyTaskManager;
+using ECommons.EzDTR;
 using ECommons.EzHookManager;
 using ECommons.SimpleGui;
 using System;
@@ -26,7 +26,6 @@ public class YesAlready : IDalamudPlugin
     public static YesAlready P { get; private set; } = null!;
 
     internal Configuration Config;
-    private readonly IDtrBarEntry dtrEntry;
     internal BlockListHandler BlockListHandler;
     internal TaskManager TaskManager;
     private const string Command = "/yesalready";
@@ -50,14 +49,12 @@ public class YesAlready : IDalamudPlugin
 
         Config = Svc.PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
         EzCmd.Add(Command, OnCommand, "Opens the plugin window.", int.MaxValue);
-
-        foreach (var a in Aliases)
-            EzCmd.Add(a, OnCommand, $"{Command} alias");
+        Aliases.Each(a => EzCmd.Add(a, OnCommand, $"{Command} alias"));
+        _ = new EzDtr(() => new SeString(new TextPayload($"{Name}: {(Config.Enabled ? (BlockListHandler.Locked ? "Paused" : "On") : "Off")}")), () => Config.Enabled ^= true);
 
         LoadTerritories();
         ToggleFeatures(true);
 
-        dtrEntry ??= Svc.DtrBar.Get("YesAlready");
         TaskManager = new();
 
         Svc.Framework.Update += FrameworkUpdate;
@@ -87,7 +84,7 @@ public class YesAlready : IDalamudPlugin
 
     public void Dispose()
     {
-        dtrEntry.Remove();
+        //dtrEntry.Remove();
         Svc.Framework.Update -= FrameworkUpdate;
         Svc.PluginInterface.UiBuilder.OpenMainUi -= DrawConfigUI;
         ECommonsMain.Dispose();
@@ -120,12 +117,6 @@ public class YesAlready : IDalamudPlugin
     private bool wasDisableKeyPressed;
     private void FrameworkUpdate(IFramework framework)
     {
-        if (dtrEntry.Shown)
-        {
-            dtrEntry.Text = new SeString(new TextPayload($"{Name}: {(P.Config.Enabled ? (P.BlockListHandler.Locked ? "Paused" : "On") : "Off")}"));
-            dtrEntry.OnClick = () => P.Config.Enabled ^= true;
-        }
-
         if (!P.Active && !wasDisableKeyPressed) return;
         DisableKeyPressed = Config.DisableKey != VirtualKey.NO_KEY && Svc.KeyState[Config.DisableKey];
 
