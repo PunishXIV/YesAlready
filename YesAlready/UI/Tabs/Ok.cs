@@ -6,7 +6,7 @@ using System.Text;
 namespace YesAlready.UI.Tabs;
 public static class Ok
 {
-    private static TextFolderNode OkRootFolder => P.Config.OkRootFolder;
+    private static TextFolderNode OkRootFolder => C.OkRootFolder;
 
     public static void DrawButtons()
     {
@@ -18,7 +18,7 @@ public static class Ok
         {
             var newNode = new OkEntryNode { Enabled = false, Text = "Your text goes here" };
             OkRootFolder.Children.Add(newNode);
-            P.Config.Save();
+            C.Save();
         }
 
         ImGui.SameLine();
@@ -28,7 +28,7 @@ public static class Ok
             var createFolder = io.KeyShift;
 
             Configuration.CreateOkNode(OkRootFolder, createFolder);
-            P.Config.Save();
+            C.Save();
         }
 
         ImGui.SameLine();
@@ -36,7 +36,7 @@ public static class Ok
         {
             var newNode = new TextFolderNode { Name = "Untitled folder" };
             OkRootFolder.Children.Add(newNode);
-            P.Config.Save();
+            C.Save();
         }
 
         var sb = new StringBuilder();
@@ -90,7 +90,7 @@ public static class Ok
             if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
             {
                 node.Enabled = !node.Enabled;
-                P.Config.Save();
+                C.Save();
                 return;
             }
             else if (ImGui.IsMouseClicked(ImGuiMouseButton.Right))
@@ -98,10 +98,10 @@ public static class Ok
                 var io = ImGui.GetIO();
                 if (io.KeyCtrl && io.KeyShift)
                 {
-                    if (P.Config.TryFindParent(node, out var parent))
+                    if (C.TryFindParent(node, out var parent))
                     {
                         parent!.Children.Remove(node);
-                        P.Config.Save();
+                        C.Save();
                     }
 
                     return;
@@ -125,7 +125,7 @@ public static class Ok
         if (ImGui.Checkbox("Enabled", ref enabled))
         {
             node.Enabled = enabled;
-            P.Config.Save();
+            C.Save();
         }
 
         var trashAltWidth = Utils.ImGuiEx.GetIconButtonWidth(FontAwesomeIcon.TrashAlt);
@@ -133,10 +133,10 @@ public static class Ok
         ImGui.SameLine(ImGui.GetContentRegionMax().X - trashAltWidth);
         if (Utils.ImGuiEx.IconButton(FontAwesomeIcon.TrashAlt, "Delete"))
         {
-            if (P.Config.TryFindParent(node, out var parentNode))
+            if (C.TryFindParent(node, out var parentNode))
             {
                 parentNode!.Children.Remove(node);
-                P.Config.Save();
+                C.Save();
             }
         }
 
@@ -144,7 +144,7 @@ public static class Ok
         if (ImGui.InputText($"##{node.Name}-matchText", ref matchText, 10_000, ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EnterReturnsTrue))
         {
             node.Text = matchText;
-            P.Config.Save();
+            C.Save();
         }
 
         ImGui.PopStyleVar(); // ItemSpacing

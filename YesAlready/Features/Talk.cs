@@ -14,13 +14,13 @@ internal class Talk : TextMatchingFeature
 
     protected override unsafe object? ShouldProceed(string text, AtkUnitBase* atk)
     {
-        if (P.ForcedYesKeyPressed && !P.Config.SeparateForcedKeys || P.ForcedTalkKeyPressed)
+        if (P.ForcedYesKeyPressed && !C.SeparateForcedKeys || P.ForcedTalkKeyPressed)
         {
             PluginLog.Debug($"{nameof(Talk)}: Forced hotkey pressed");
             return true;
         }
 
-        var nodes = P.Config.GetAllNodes().OfType<TalkEntryNode>();
+        var nodes = C.GetAllNodes().OfType<TalkEntryNode>();
         foreach (var node in nodes)
         {
             if (!node.Enabled || string.IsNullOrEmpty(node.TargetText))

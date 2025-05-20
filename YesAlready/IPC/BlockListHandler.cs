@@ -2,13 +2,13 @@ using System.Collections.Generic;
 
 namespace YesAlready.IPC;
 
-internal class BlockListHandler
+public class BlockListHandler
 {
     internal const string BlockListNamespace = "YesAlready.StopRequests";
     internal HashSet<string> BlockList;
     internal bool Locked => BlockList.Count != 0;
 
-    internal BlockListHandler()
+    public BlockListHandler()
     {
         BlockList = Svc.PluginInterface.GetOrCreateData<HashSet<string>>(BlockListNamespace, () => []);
         BlockList.Clear();

@@ -1,55 +1,15 @@
 ﻿using Dalamud.Interface;
+using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
-using System;
-using System.Linq;
 using System.Numerics;
-using System.Reflection;
 using System.Text;
 using YesAlready.Features;
 using YesAlready.Utils;
-using static YesAlready.Configuration;
 
 namespace YesAlready.UI.Tabs;
 public static class Custom
 {
-    public static void Draw()
-    {
-        using var tab = ImRaii.TabItem("Custom");
-        if (!tab) return;
-        using var idScope = ImRaii.PushId($"CustomBothers");
-
-        DrawButtons();
-
-        foreach (var bother in P.Config.CustomCallbacks.ToList())
-        {
-            using var id = ImRaii.PushId(P.Config.CustomCallbacks.IndexOf(bother));
-            var name = bother.Addon;
-            if (ImGui.InputText("Addon Name", ref name, 50, ImGuiInputTextFlags.EnterReturnsTrue))
-            {
-                bother.Addon = name;
-                P.Config.Save();
-                ToggleCustomBothers();
-            }
-
-            var args = bother.CallbackParams;
-            if (ImGui.InputText("Parameters", ref args, 150, ImGuiInputTextFlags.EnterReturnsTrue))
-            {
-                bother.CallbackParams = args;
-                P.Config.Save();
-                ToggleCustomBothers();
-            }
-
-            ImGui.SameLine();
-            if (ImGuiEx.IconButton(FontAwesomeIcon.Trash, "Remove Entry", id: $"Delete##{P.Config.CustomCallbacks.IndexOf(bother)}"))
-            {
-                P.Config.CustomCallbacks.Remove(bother);
-                P.Config.Save();
-                ToggleCustomBothers();
-            }
-        }
-    }
-
     public static void DrawButtons()
     {
         var style = ImGui.GetStyle();
@@ -58,12 +18,15 @@ public static class Custom
 
         if (ImGuiEx.IconButton(FontAwesomeIcon.Plus, "Add new entry"))
         {
-            P.Config.CustomCallbacks.Add(new CustomBother
+            var newNode = new CustomEntryNode
             {
+                Enabled = true,
                 Addon = "AddonName",
                 CallbackParams = "-1"
-            });
-            P.Config.Save();
+            };
+            C.CustomRootFolder.Children.Add(newNode);
+            C.Save();
+            CustomAddonCallbacks.Toggle();
         }
 
         var sb = new StringBuilder();
@@ -85,20 +48,55 @@ public static class Custom
         if (ImGui.IsItemHovered()) ImGui.SetTooltip(sb.ToString());
     }
 
-    private static void ToggleCustomBothers()
+    public static void DrawPopup(CustomEntryNode node, Vector2 spacing)
     {
-        var featureAssembly = Assembly.GetExecutingAssembly();
-
-        foreach (var type in featureAssembly.GetTypes())
+        using var _ = ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, spacing);
+        var enabled = node.Enabled;
+        if (ImGui.Checkbox("Enabled", ref enabled))
         {
-            if (typeof(BaseFeature).IsAssignableFrom(type) && !type.IsAbstract && type.Name == nameof(CustomAddonCallbacks))
+            node.Enabled = enabled;
+            C.Save();
+            CustomAddonCallbacks.Toggle();
+        }
+
+        var trashAltWidth = ImGuiEx.GetIconButtonWidth(FontAwesomeIcon.TrashAlt);
+
+        ImGui.SameLine(ImGui.GetContentRegionMax().X - trashAltWidth);
+        if (ImGuiEx.IconButton(FontAwesomeIcon.TrashAlt, "Delete"))
+        {
+            if (C.TryFindParent(node, out var parentNode))
             {
-                if (Activator.CreateInstance(type) is BaseFeature feature)
-                {
-                    feature.Disable();
-                    feature.Enable();
-                }
+                parentNode!.Children.Remove(node);
+                C.Save();
+                CustomAddonCallbacks.Toggle();
             }
+        }
+
+        ImGui.TextUnformatted("Note:");
+        var noteText = node.Text;
+        if (ImGui.InputText($"##{node.Name}-{nameof(noteText)}", ref noteText, 10_000, ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EnterReturnsTrue))
+        {
+            node.Text = noteText;
+            C.Save();
+        }
+        ImGui.SameLine();
+        ImGuiComponents.HelpMarker("This is not used for anything, it's just a note to help remember what this bother does.");
+
+        ImGui.TextUnformatted("Addon Name:");
+        var addonName = node.Addon;
+        if (ImGui.InputText($"##{node.Name}-{nameof(addonName)}", ref addonName, 100, ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EnterReturnsTrue))
+        {
+            node.Addon = addonName;
+            C.Save();
+            CustomAddonCallbacks.Toggle();
+        }
+
+        ImGui.TextUnformatted("Parameters:");
+        var callbackParams = node.CallbackParams;
+        if (ImGui.InputText($"##{node.Name}-{nameof(callbackParams)}", ref callbackParams, 150, ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EnterReturnsTrue))
+        {
+            node.CallbackParams = callbackParams;
+            C.Save();
         }
     }
 }

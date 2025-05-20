@@ -5,7 +5,7 @@
 //[AddonFeature(AddonEvent.PostUpdate)]
 //internal class TradeMultiple : AddonFeature
 //{
-//    protected override bool IsEnabled() => P.Config.TradeMultiple;
+//    protected override bool IsEnabled() => C.TradeMultiple;
 
 //    protected override unsafe void HandleAddonEvent(AddonEvent eventType, AddonArgs addonInfo, AtkUnitBase* atk)
 //    {

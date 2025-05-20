@@ -32,7 +32,7 @@ internal class SEString
     {
         var message = new XivChatEntry
         {
-            Type = P.Config.MessageChannel,
+            Type = C.MessageChannel,
             Message = new SeStringBuilder()
             .AddUiForeground($"[{Name}] ", 45)
             .AddText(msg)
@@ -46,7 +46,7 @@ internal class SEString
     {
         var message = new XivChatEntry
         {
-            Type = P.Config.MessageChannel,
+            Type = C.MessageChannel,
             Message = new SeStringBuilder()
             .AddUiForeground($"[{Name}] ", 45)
             .Append(msg)

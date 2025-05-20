@@ -7,7 +7,7 @@ namespace YesAlready.Features;
 [AddonFeature(AddonEvent.PostUpdate)]
 internal class PurifyResult : AddonFeature
 {
-    protected override bool IsEnabled() => P.Config.AetherialReductionResults;
+    protected override bool IsEnabled() => C.AetherialReductionResults;
 
     protected override unsafe void HandleAddonEvent(AddonEvent eventType, AddonArgs addonInfo, AtkUnitBase* atk)
     {

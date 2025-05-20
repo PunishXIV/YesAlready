@@ -11,7 +11,7 @@ namespace YesAlready.Features;
 [AddonFeature(AddonEvent.PostUpdate)]
 internal class SatisfactionSupply : AddonFeature
 {
-    protected override bool IsEnabled() => P.Config.CustomDeliveries;
+    protected override bool IsEnabled() => C.CustomDeliveries;
 
     private static bool Disabled;
     private static List<int> SlotsFilled { get; set; } = [];
@@ -145,7 +145,7 @@ internal class SatisfactionSupply : AddonFeature
 
     private static unsafe void RequestFill(IFramework framework)
     {
-        if (!P.Active || !P.Config.CustomDeliveries || !GenericHelpers.TryGetAddonByName<AddonRequest>("SatisfactionSupply", out var _))
+        if (!P.Active || !C.CustomDeliveries || !GenericHelpers.TryGetAddonByName<AddonRequest>("SatisfactionSupply", out var _))
             return;
 
         if (GenericHelpers.TryGetAddonByName<AddonRequest>("Request", out var addon) && GenericHelpers.IsAddonReady((AtkUnitBase*)addon))
@@ -154,18 +154,18 @@ internal class SatisfactionSupply : AddonFeature
             {
                 if (SlotsFilled.Contains(addon->EntryCount))
                 {
-                    P.TaskManager.Abort();
+                    Service.TaskManager.Abort();
                     return;
                 }
                 if (SlotsFilled.Contains(i)) return;
                 var val = i;
-                P.TaskManager.Enqueue(() => TryClickItem(addon, val));
+                Service.TaskManager.Enqueue(() => TryClickItem(addon, val));
             }
         }
         else
         {
             SlotsFilled.Clear();
-            P.TaskManager.Abort();
+            Service.TaskManager.Abort();
         }
     }
 
@@ -195,7 +195,7 @@ internal class SatisfactionSupply : AddonFeature
 
     private static unsafe void RequestComplete(IFramework framework)
     {
-        if (!P.Active || !P.Config.CustomDeliveries || !GenericHelpers.TryGetAddonByName<AddonRequest>("SatisfactionSupply", out var _))
+        if (!P.Active || !C.CustomDeliveries || !GenericHelpers.TryGetAddonByName<AddonRequest>("SatisfactionSupply", out var _))
             return;
 
         if (GenericHelpers.TryGetAddonByName<AtkUnitBase>("Request", out var addon) && GenericHelpers.IsAddonReady(addon))

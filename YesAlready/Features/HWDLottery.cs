@@ -6,7 +6,7 @@ namespace YesAlready.Features;
 [AddonFeature(AddonEvent.PostUpdate)]
 internal class HWDLottery : AddonFeature
 {
-    protected override bool IsEnabled() => P.Config.KupoOfFortune;
+    protected override bool IsEnabled() => C.KupoOfFortune;
 
     protected override unsafe void HandleAddonEvent(AddonEvent eventType, AddonArgs addonInfo, AtkUnitBase* atk)
     {

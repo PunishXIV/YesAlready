@@ -25,7 +25,7 @@ internal abstract class OnSetupSelectListFeature : BaseFeature, IDisposable
         var target = Svc.Targets.Target;
         var targetName = target != null ? target.Name.GetText() : string.Empty;
 
-        var nodes = P.Config.GetAllNodes().OfType<ListEntryNode>();
+        var nodes = C.GetAllNodes().OfType<ListEntryNode>();
         foreach (var node in nodes)
         {
             if (!node.Enabled || string.IsNullOrEmpty(node.Text))

@@ -6,7 +6,7 @@ using System.Text;
 namespace YesAlready.UI.Tabs;
 public static class Numerics
 {
-    private static TextFolderNode NumericsRootFolder => P.Config.NumericsRootFolder;
+    private static TextFolderNode NumericsRootFolder => C.NumericsRootFolder;
 
     public static void DrawButtons()
     {
@@ -18,7 +18,7 @@ public static class Numerics
         {
             var newNode = new NumericsEntryNode { Enabled = false, Text = "Your text goes here" };
             NumericsRootFolder.Children.Add(newNode);
-            P.Config.Save();
+            C.Save();
         }
 
         ImGui.SameLine();
@@ -28,7 +28,7 @@ public static class Numerics
             var createFolder = io.KeyShift;
 
             Configuration.CreateNumericsNode(NumericsRootFolder, createFolder);
-            P.Config.Save();
+            C.Save();
         }
 
         ImGui.SameLine();
@@ -36,7 +36,7 @@ public static class Numerics
         {
             var newNode = new TextFolderNode { Name = "Untitled folder" };
             NumericsRootFolder.Children.Add(newNode);
-            P.Config.Save();
+            C.Save();
         }
 
         var sb = new StringBuilder();
@@ -73,7 +73,7 @@ public static class Numerics
         if (ImGui.Checkbox("Enabled", ref enabled))
         {
             node.Enabled = enabled;
-            P.Config.Save();
+            C.Save();
         }
 
         var trashAltWidth = Utils.ImGuiEx.GetIconButtonWidth(FontAwesomeIcon.TrashAlt);
@@ -81,10 +81,10 @@ public static class Numerics
         ImGui.SameLine(ImGui.GetContentRegionMax().X - trashAltWidth);
         if (Utils.ImGuiEx.IconButton(FontAwesomeIcon.TrashAlt, "Delete"))
         {
-            if (P.Config.TryFindParent(node, out var parentNode))
+            if (C.TryFindParent(node, out var parentNode))
             {
                 parentNode!.Children.Remove(node);
-                P.Config.Save();
+                C.Save();
             }
         }
 
@@ -92,7 +92,7 @@ public static class Numerics
         if (ImGui.InputText($"##{node.Name}-matchText", ref matchText, 10_000, ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EnterReturnsTrue))
         {
             node.Text = matchText;
-            P.Config.Save();
+            C.Save();
         }
 
         ImGui.PopStyleVar(); // ItemSpacing
@@ -101,7 +101,7 @@ public static class Numerics
         if (ImGui.Checkbox("Percentage", ref percent))
         {
             node.IsPercent = percent;
-            P.Config.Save();
+            C.Save();
         }
         if (node.IsPercent)
         {
@@ -112,7 +112,7 @@ public static class Numerics
                 else node.Percentage = percentage;
                 if (percentage > 100) node.Percentage = 100;
                 else node.Percentage = percentage;
-                P.Config.Save();
+                C.Save();
             }
         }
         else
@@ -122,7 +122,7 @@ public static class Numerics
             {
                 if (quantity < 1) node.Quantity = 1;
                 else node.Quantity = quantity;
-                P.Config.Save();
+                C.Save();
             }
         }
 
@@ -130,7 +130,7 @@ public static class Numerics
         //if (ImGui.Checkbox("Target Restricted", ref targetRestricted))
         //{
         //    node.TargetRestricted = targetRestricted;
-        //    P.Config.Save();
+        //    C.Save();
         //}
 
         //var searchPlusWidth = Utils.ImGuiEx.GetIconButtonWidth(FontAwesomeIcon.SearchPlus);
@@ -144,12 +144,12 @@ public static class Numerics
         //    if (!string.IsNullOrEmpty(name))
         //    {
         //        node.TargetText = name;
-        //        P.Config.Save();
+        //        C.Save();
         //    }
         //    else
         //    {
         //        node.TargetText = "Could not find target";
-        //        P.Config.Save();
+        //        C.Save();
         //    }
         //}
 
@@ -157,7 +157,7 @@ public static class Numerics
         //if (ImGui.InputText($"##{node.Name}-targetText", ref targetText, 10_000, ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EnterReturnsTrue))
         //{
         //    node.TargetText = targetText;
-        //    P.Config.Save();
+        //    C.Save();
         //}
     }
 }

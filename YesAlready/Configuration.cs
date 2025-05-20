@@ -23,6 +23,7 @@ public partial class Configuration() : IPluginConfiguration
     public TextFolderNode ListRootFolder { get; private set; } = new TextFolderNode { Name = "/" };
     public TextFolderNode TalkRootFolder { get; private set; } = new TextFolderNode { Name = "/" };
     public TextFolderNode NumericsRootFolder { get; private set; } = new TextFolderNode { Name = "/" };
+    public TextFolderNode CustomRootFolder { get; private set; } = new TextFolderNode { Name = "/" };
     public bool DesynthDialogEnabled { get; set; } = false;
     public bool DesynthBulkDialogEnabled { get; set; } = false;
     public bool MaterializeDialogEnabled { get; set; } = false;
@@ -109,12 +110,14 @@ public partial class Configuration() : IPluginConfiguration
             ListRootFolder,
             TalkRootFolder,
             NumericsRootFolder,
+            CustomRootFolder,
         }
         .Concat(GetAllNodes(RootFolder.Children))
         .Concat(GetAllNodes(OkRootFolder.Children))
         .Concat(GetAllNodes(ListRootFolder.Children))
         .Concat(GetAllNodes(TalkRootFolder.Children))
-        .Concat(GetAllNodes(NumericsRootFolder.Children));
+        .Concat(GetAllNodes(NumericsRootFolder.Children))
+        .Concat(GetAllNodes(CustomRootFolder.Children));
 
     public IEnumerable<ITextNode> GetAllNodes(IEnumerable<ITextNode> nodes)
     {
@@ -147,72 +150,116 @@ public partial class Configuration() : IPluginConfiguration
         return false;
     }
 
-    public static void CreateTextNode(TextFolderNode folder, bool zoneRestricted, bool createFolder, bool selectNo)
+    public static void CreateNode<T>(TextFolderNode folder, bool createFolder, string? zoneName = null, bool? isYes = null) where T : ITextNode, new()
     {
-        var newNode = new TextEntryNode() { Enabled = true, Text = P.LastSeenDialogText };
+        var newNode = new T { Enabled = true };
         var chosenFolder = folder;
 
-        if (zoneRestricted || createFolder)
+        switch (newNode)
         {
-            var currentID = Svc.ClientState.TerritoryType;
-            if (!P.TerritoryNames.TryGetValue(currentID, out var zoneName))
-                return;
+            case TextEntryNode textNode:
+                textNode.Text = P.LastSeenDialogText;
+                if (isYes.HasValue)
+                    textNode.IsYes = isYes.Value;
+                break;
+            case OkEntryNode okNode:
+                okNode.Text = P.LastSeenOkText;
+                break;
+            case ListEntryNode listNode:
+                listNode.Text = P.LastSeenListSelection;
+                break;
+            case TalkEntryNode talkNode:
+                talkNode.Text = P.LastSeenTalkTarget;
+                break;
+            case NumericsEntryNode numericsNode:
+                numericsNode.Text = P.LastSeenNumericsText;
+                break;
+        }
 
-            newNode.ZoneRestricted = true;
-            newNode.ZoneText = zoneName;
+        if (zoneName != null && newNode is IZoneRestrictedNode zoneNode)
+        {
+            zoneNode.ZoneRestricted = true;
+            zoneNode.ZoneText = zoneName;
         }
 
         if (createFolder)
         {
-            var zoneName = newNode.ZoneText;
-
-            chosenFolder = folder.Children.OfType<TextFolderNode>().FirstOrDefault(node => node.Name == zoneName);
-            if (chosenFolder == default)
+            var folderName = zoneName ?? chosenFolder?.Name ?? string.Empty;
+            chosenFolder = folder.Children.OfType<TextFolderNode>().FirstOrDefault(node => node.Name == folderName);
+            if (chosenFolder == null)
             {
-                chosenFolder = new TextFolderNode { Name = zoneName };
+                chosenFolder = new TextFolderNode { Name = folderName };
                 folder.Children.Add(chosenFolder);
             }
         }
 
-        if (selectNo)
+        chosenFolder.Children.Add(newNode);
+    }
+
+    // Keep these as convenience methods that call the generic version
+    public static void CreateTextNode(TextFolderNode folder, bool zoneRestricted, bool createFolder, bool selectNo)
+    {
+        string? zoneName = null;
+        if (zoneRestricted)
         {
-            newNode.IsYes = false;
+            var currentID = Svc.ClientState.TerritoryType;
+            if (!P.TerritoryNames.TryGetValue(currentID, out zoneName))
+                return;
         }
 
-        chosenFolder.Children.Add(newNode);
+        CreateNode<TextEntryNode>(folder, createFolder, zoneName, !selectNo);
     }
 
     public static void CreateOkNode(TextFolderNode folder, bool createFolder)
     {
-        var newNode = new OkEntryNode() { Enabled = true, Text = P.LastSeenOkText };
-        var chosenFolder = folder;
-
-        if (createFolder)
-        {
-            if (chosenFolder == default)
-            {
-                chosenFolder = new TextFolderNode { Name = chosenFolder?.Name ?? string.Empty };
-                folder.Children.Add(chosenFolder);
-            }
-        }
-
-        chosenFolder.Children.Add(newNode);
+        CreateNode<OkEntryNode>(folder, createFolder);
     }
 
     public static void CreateNumericsNode(TextFolderNode folder, bool createFolder)
     {
-        var newNode = new NumericsEntryNode() { Enabled = true, Text = P.LastSeenNumericsText };
-        var chosenFolder = folder;
+        CreateNode<NumericsEntryNode>(folder, createFolder);
+    }
 
-        if (createFolder)
+    public void Migrate()
+    {
+        IMigration[] migrations = [new V2()];
+        foreach (var migration in migrations)
         {
-            if (chosenFolder == default)
+            if (C.Version < migration.Version)
             {
-                chosenFolder = new TextFolderNode { Name = chosenFolder?.Name ?? string.Empty };
-                folder.Children.Add(chosenFolder);
+                PluginLog.Information($"Migrating from {C.Version} to {migration.Version}");
+                var c = C;
+                migration.Migrate(ref c);
+                c.Version = migration.Version;
+                C = c;
             }
         }
+    }
 
-        chosenFolder.Children.Add(newNode);
+    public interface IMigration
+    {
+        int Version { get; }
+        void Migrate(ref Configuration config);
+    }
+
+    public class V2 : IMigration
+    {
+        public int Version => 2;
+        public void Migrate(ref Configuration config)
+        {
+            foreach (var bother in config.CustomCallbacks)
+            {
+                var node = new CustomEntryNode
+                {
+                    Enabled = bother.Enabled,
+                    Addon = bother.Addon,
+                    Text = bother.Name,
+                    UpdateState = bother.UpdateState,
+                    CallbackParams = bother.CallbackParams
+                };
+                config.CustomRootFolder.Children.Add(node);
+            }
+            config.CustomCallbacks.Clear();
+        }
     }
 }

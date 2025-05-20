@@ -17,7 +17,22 @@ internal class SelectIconString : TextMatchingFeature
     {
         if (!GenericHelpers.TryGetAddonMaster<AddonMaster.SelectIconString>(out var addon)) return null;
         string[] entries = [.. addon.Entries.Select(x => x.Text)];
-        return GetMatchingIndex(entries);
+
+        var nodes = C.GetAllNodes().OfType<ListEntryNode>();
+        foreach (var node in nodes)
+        {
+            if (!node.Enabled || string.IsNullOrEmpty(node.Text))
+                continue;
+
+            if (!CheckRestrictions(node))
+                continue;
+
+            var index = GetMatchingIndex(entries, node.Text, node.IsTextRegex);
+            if (index.HasValue)
+                return index.Value;
+        }
+
+        return null;
     }
 
     protected override unsafe void Proceed(AtkUnitBase* atk, object? matchingNode)

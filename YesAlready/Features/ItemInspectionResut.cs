@@ -7,7 +7,7 @@ internal class ItemInspectionResut : AddonFeature
 {
     private int itemInspectionCount = 0;
 
-    protected override bool IsEnabled() => P.Config.ItemInspectionResultEnabled;
+    protected override bool IsEnabled() => C.ItemInspectionResultEnabled;
 
     protected override unsafe void HandleAddonEvent(AddonEvent eventType, AddonArgs addonInfo, AtkUnitBase* atk)
     {
@@ -25,7 +25,7 @@ internal class ItemInspectionResut : AddonFeature
             }
 
             itemInspectionCount++;
-            var rateLimiter = P.Config.ItemInspectionResultRateLimiter;
+            var rateLimiter = C.ItemInspectionResultRateLimiter;
             if (rateLimiter != 0 && itemInspectionCount % rateLimiter == 0)
             {
                 itemInspectionCount = 0;

@@ -25,19 +25,19 @@ internal class SelectYesno : TextMatchingFeature
             return new TextEntryNode { IsYes = true };
         }
 
-        if (P.Config.GimmickYesNo && Svc.Data.GetExcelSheet<GimmickYesNo>().Where(x => !x.Unknown0.IsEmpty).Select(x => x.Unknown0).ToList().Any(g => g.Equals(text)))
+        if (C.GimmickYesNo && Svc.Data.GetExcelSheet<GimmickYesNo>().Where(x => !x.Unknown0.IsEmpty).Select(x => x.Unknown0).ToList().Any(g => g.Equals(text)))
         {
             Log($"Entry is a gimmick");
             return new TextEntryNode { IsYes = true };
         }
 
-        if (P.Config.PartyFinderJoinConfirm && GenericHelpers.TryGetAddonByName<AtkUnitBase>("LookingForGroupDetail", out var _) && lfgPatterns.Any(r => r.IsMatch(text)))
+        if (C.PartyFinderJoinConfirm && GenericHelpers.TryGetAddonByName<AtkUnitBase>("LookingForGroupDetail", out var _) && lfgPatterns.Any(r => r.IsMatch(text)))
         {
             Log($"Entry is party finder join confirmation");
             return new TextEntryNode { IsYes = true };
         }
 
-        if (P.Config.AutoCollectable && collectablePatterns.Any(text.Contains))
+        if (C.AutoCollectable && collectablePatterns.Any(text.Contains))
         {
             Log($"Entry is collectable");
             var fish = GenericHelpers.FindRow<Item>(x => x.ItemSearchCategory.RowId == 46 && !x.Singular.IsEmpty && MemoryHelper.ReadSeStringNullTerminated(new nint(atk->AtkValues[15].String)).GetText().Contains(x.Singular.GetText(), StringComparison.InvariantCultureIgnoreCase));
@@ -69,10 +69,13 @@ internal class SelectYesno : TextMatchingFeature
                 Log($"Failed to match any fish to {MemoryHelper.ReadSeStringNullTerminated(new nint(atk->AtkValues[15].String)).GetText()}");
         }
 
-        var nodes = P.Config.GetAllNodes().OfType<TextEntryNode>();
+        var nodes = C.GetAllNodes().OfType<TextEntryNode>();
         foreach (var node in nodes)
         {
             if (!node.Enabled || string.IsNullOrEmpty(node.Text))
+                continue;
+
+            if (!CheckRestrictions(node))
                 continue;
 
             if (EntryMatchesText(node.Text, text, node.IsTextRegex))

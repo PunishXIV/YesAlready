@@ -8,22 +8,38 @@ public class CustomAddonCallbacks : BaseFeature
     public override void Enable()
     {
         base.Enable();
-        foreach (var addon in P.Config.CustomCallbacks)
-            Svc.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, addon.Addon, AddonSetup);
+        foreach (var node in C.CustomRootFolder.Children.OfType<CustomEntryNode>())
+        {
+            if (node.Enabled)
+            {
+                PluginLog.Debug($"Registering callback for {node.Addon}");
+                Svc.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, node.Addon, AddonSetup);
+            }
+        }
     }
 
     public override void Disable()
     {
         base.Disable();
+        PluginLog.Debug("Unregistering all custom bothers");
         Svc.AddonLifecycle.UnregisterListener(AddonSetup);
+    }
+
+    public static void Toggle()
+    {
+        P.GetFeature<CustomAddonCallbacks>()?.Disable();
+        P.GetFeature<CustomAddonCallbacks>()?.Enable();
     }
 
     protected static unsafe void AddonSetup(AddonEvent eventType, AddonArgs addonInfo)
     {
         if (!P.Active) return;
 
-        var callbacks = CallbackToArray(P.Config.CustomCallbacks.First(x => x.Addon == addonInfo.AddonName).CallbackParams);
-        Callback.Fire((AtkUnitBase*)addonInfo.Addon, true, callbacks);
+        if (C.CustomRootFolder.Children.OfType<CustomEntryNode>().FirstOrDefault(x => x.Addon == addonInfo.AddonName && x.Enabled) is { } node)
+        {
+            var callbacks = CallbackToArray(node.CallbackParams);
+            Callback.Fire((AtkUnitBase*)addonInfo.Addon, node.UpdateState, callbacks);
+        }
     }
 
     public static string CallbackToString(object[] args)

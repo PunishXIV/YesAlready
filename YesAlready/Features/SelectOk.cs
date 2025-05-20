@@ -14,7 +14,7 @@ internal class SelectOk : TextMatchingFeature
 
     protected override unsafe object? ShouldProceed(string text, AtkUnitBase* atk)
     {
-        var nodes = P.Config.GetAllNodes().OfType<OkEntryNode>();
+        var nodes = C.GetAllNodes().OfType<OkEntryNode>();
         foreach (var node in nodes)
         {
             if (!node.Enabled || string.IsNullOrEmpty(node.Text))

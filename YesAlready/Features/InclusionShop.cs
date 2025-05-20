@@ -8,18 +8,18 @@ namespace YesAlready.Features;
 [AddonFeature(AddonEvent.PostSetup)]
 internal class InclusionShop : AddonFeature
 {
-    protected override bool IsEnabled() => P.Config.InclusionShopRememberEnabled;
+    protected override bool IsEnabled() => C.InclusionShopRememberEnabled;
 
     protected override unsafe void HandleAddonEvent(AddonEvent eventType, AddonArgs addonInfo, AtkUnitBase* atk)
     {
         if (!GenericHelpers.IsAddonReady(atk)) return;
 
-        PluginLog.Debug($"Firing 12,{P.Config.InclusionShopRememberCategory}");
-        using var categoryValues = new AtkValueArray(12, P.Config.InclusionShopRememberCategory);
+        PluginLog.Debug($"Firing 12,{C.InclusionShopRememberCategory}");
+        using var categoryValues = new AtkValueArray(12, C.InclusionShopRememberCategory);
         atk->FireCallback(2, categoryValues);
 
-        PluginLog.Debug($"Firing 13,{P.Config.InclusionShopRememberSubcategory}");
-        using var subcategoryValues = new AtkValueArray(13, P.Config.InclusionShopRememberSubcategory);
+        PluginLog.Debug($"Firing 13,{C.InclusionShopRememberSubcategory}");
+        using var subcategoryValues = new AtkValueArray(13, C.InclusionShopRememberSubcategory);
         atk->FireCallback(2, subcategoryValues);
     }
 
@@ -47,22 +47,22 @@ internal class InclusionShop : AddonFeature
         if (val0 == 12)
         {
             var val1 = values[1].UInt;
-            if (val1 != P.Config.InclusionShopRememberCategory)
+            if (val1 != C.InclusionShopRememberCategory)
             {
                 PluginLog.Debug($"Remembring InclusionShop category: {val1}");
-                P.Config.InclusionShopRememberCategory = val1;
-                P.Config.InclusionShopRememberSubcategory = 0;
-                P.Config.Save();
+                C.InclusionShopRememberCategory = val1;
+                C.InclusionShopRememberSubcategory = 0;
+                C.Save();
             }
         }
         else if (val0 == 13)
         {
             var val1 = values[1].UInt;
-            if (val1 != P.Config.InclusionShopRememberSubcategory)
+            if (val1 != C.InclusionShopRememberSubcategory)
             {
                 PluginLog.Debug($"Remembring InclusionShop subcategory: {val1}");
-                P.Config.InclusionShopRememberSubcategory = val1;
-                P.Config.Save();
+                C.InclusionShopRememberSubcategory = val1;
+                C.Save();
             }
         }
 

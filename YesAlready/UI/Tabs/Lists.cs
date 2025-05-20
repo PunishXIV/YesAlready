@@ -6,7 +6,7 @@ using System.Text;
 namespace YesAlready.UI.Tabs;
 public static class Lists
 {
-    private static TextFolderNode ListRootFolder => P.Config.ListRootFolder;
+    private static TextFolderNode ListRootFolder => C.ListRootFolder;
 
     public static void DrawButtons()
     {
@@ -18,7 +18,7 @@ public static class Lists
         {
             var newNode = new ListEntryNode { Enabled = false, Text = "Your text goes here" };
             ListRootFolder.Children.Add(newNode);
-            P.Config.Save();
+            C.Save();
         }
 
         ImGui.SameLine();
@@ -26,7 +26,7 @@ public static class Lists
         {
             var newNode = new ListEntryNode { Enabled = true, Text = P.LastSeenListSelection, TargetRestricted = true, TargetText = P.LastSeenListTarget };
             ListRootFolder.Children.Add(newNode);
-            P.Config.Save();
+            C.Save();
         }
 
         ImGui.SameLine();
@@ -34,7 +34,7 @@ public static class Lists
         {
             var newNode = new TextFolderNode { Name = "Untitled folder" };
             ListRootFolder.Children.Add(newNode);
-            P.Config.Save();
+            C.Save();
         }
 
         var sb = new StringBuilder();
@@ -90,7 +90,7 @@ public static class Lists
             if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
             {
                 node.Enabled = !node.Enabled;
-                P.Config.Save();
+                C.Save();
                 return;
             }
             else if (ImGui.IsMouseClicked(ImGuiMouseButton.Right))
@@ -98,10 +98,10 @@ public static class Lists
                 var io = ImGui.GetIO();
                 if (io.KeyCtrl && io.KeyShift)
                 {
-                    if (P.Config.TryFindParent(node, out var parent))
+                    if (C.TryFindParent(node, out var parent))
                     {
                         parent!.Children.Remove(node);
-                        P.Config.Save();
+                        C.Save();
                     }
 
                     return;
@@ -125,7 +125,7 @@ public static class Lists
         if (ImGui.Checkbox("Enabled", ref enabled))
         {
             node.Enabled = enabled;
-            P.Config.Save();
+            C.Save();
         }
 
         var trashAltWidth = Utils.ImGuiEx.GetIconButtonWidth(FontAwesomeIcon.TrashAlt);
@@ -133,10 +133,10 @@ public static class Lists
         ImGui.SameLine(ImGui.GetContentRegionMax().X - trashAltWidth);
         if (Utils.ImGuiEx.IconButton(FontAwesomeIcon.TrashAlt, "Delete"))
         {
-            if (P.Config.TryFindParent(node, out var parentNode))
+            if (C.TryFindParent(node, out var parentNode))
             {
                 parentNode!.Children.Remove(node);
-                P.Config.Save();
+                C.Save();
             }
         }
 
@@ -144,14 +144,14 @@ public static class Lists
         if (ImGui.InputText($"##{node.Name}-matchText", ref matchText, 10_000, ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EnterReturnsTrue))
         {
             node.Text = matchText;
-            P.Config.Save();
+            C.Save();
         }
 
         var targetRestricted = node.TargetRestricted;
         if (ImGui.Checkbox("Target Restricted", ref targetRestricted))
         {
             node.TargetRestricted = targetRestricted;
-            P.Config.Save();
+            C.Save();
         }
 
         var searchPlusWidth = Utils.ImGuiEx.GetIconButtonWidth(FontAwesomeIcon.SearchPlus);
@@ -165,12 +165,12 @@ public static class Lists
             if (!string.IsNullOrEmpty(name))
             {
                 node.TargetText = name;
-                P.Config.Save();
+                C.Save();
             }
             else
             {
                 node.TargetText = "Could not find target";
-                P.Config.Save();
+                C.Save();
             }
         }
 
@@ -180,7 +180,7 @@ public static class Lists
         if (ImGui.InputText($"##{node.Name}-targetText", ref targetText, 10_000, ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EnterReturnsTrue))
         {
             node.TargetText = targetText;
-            P.Config.Save();
+            C.Save();
         }
     }
 }

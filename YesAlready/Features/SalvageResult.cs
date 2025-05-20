@@ -4,7 +4,7 @@ namespace YesAlready.Features;
 [AddonFeature(AddonEvent.PostUpdate, "SalvageAutoDialog")]
 internal class SalvageResult : AddonFeature
 {
-    protected override bool IsEnabled() => P.Config.DesynthesisResults;
+    protected override bool IsEnabled() => C.DesynthesisResults;
 
     protected override unsafe void HandleAddonEvent(AddonEvent eventType, AddonArgs addonInfo, AtkUnitBase* atk)
     {

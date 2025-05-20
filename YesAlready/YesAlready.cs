@@ -3,10 +3,10 @@ using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
-using ECommons.Automation.LegacyTaskManager;
 using ECommons.EzDTR;
 using ECommons.EzHookManager;
 using ECommons.SimpleGui;
+using ECommons.Singletons;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +14,6 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using YesAlready.Interface;
-using YesAlready.IPC;
 using YesAlready.UI;
 using ValueType = FFXIVClientStructs.FFXIV.Component.GUI.ValueType;
 
@@ -24,10 +23,8 @@ public class YesAlready : IDalamudPlugin
 {
     public static string Name => "YesAlready";
     public static YesAlready P { get; private set; } = null!;
+    public static Configuration C { get; set; } = null!;
 
-    internal Configuration Config;
-    internal BlockListHandler BlockListHandler;
-    internal TaskManager TaskManager;
     private const string Command = "/yesalready";
     private readonly string[] Aliases = ["/pyes"];
 
@@ -35,27 +32,28 @@ public class YesAlready : IDalamudPlugin
     [EzHook("E8 ?? ?? ?? ?? 0F B6 E8 8B 44 24 20", detourName: nameof(FireCallbackDetour), true)]
     private readonly EzHook<FireCallbackDelegate> FireCallbackHook = null!;
 
-    internal bool Active => Config.Enabled && !BlockListHandler.Locked;
+    internal bool Active => C.Enabled && !Service.BlockListHandler.Locked;
 
     public YesAlready(IDalamudPluginInterface pluginInterface)
     {
         P = this;
         ECommonsMain.Init(pluginInterface, P);
+        SingletonServiceManager.Initialize(typeof(Service));
+
+        C = Svc.PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
+        C.Migrate();
 
         EzConfigGui.Init(new MainWindow().Draw);
         EzConfigGui.WindowSystem.AddWindow(new ZoneListWindow());
         EzConfigGui.WindowSystem.AddWindow(new ConditionsListWindow());
-        BlockListHandler = new();
 
-        Config = Svc.PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
-        EzCmd.Add(Command, OnCommand, "Opens the plugin window.", int.MaxValue);
+        EzCmd.Add(Command, OnCommand, "Opens the plugin window.", int.MinValue);
         Aliases.Each(a => EzCmd.Add(a, OnCommand, $"{Command} alias"));
-        _ = new EzDtr(() => new SeString(new TextPayload($"{Name}: {(Config.Enabled ? (BlockListHandler.Locked ? "Paused" : "On") : "Off")}")), () => Config.Enabled ^= true);
+
+        _ = new EzDtr(() => new SeString(new TextPayload($"{Name}: {(C.Enabled ? (Service.BlockListHandler.Locked ? "Paused" : "On") : "Off")}")), () => C.Enabled ^= true);
 
         LoadTerritories();
         ToggleFeatures(true);
-
-        TaskManager = new();
 
         Svc.Framework.Update += FrameworkUpdate;
         Svc.PluginInterface.UiBuilder.OpenMainUi += DrawConfigUI;
@@ -82,9 +80,22 @@ public class YesAlready : IDalamudPlugin
         }
     }
 
+    public T? GetFeature<T>() where T : BaseFeature
+    {
+        var featureAssembly = Assembly.GetExecutingAssembly();
+        var type = typeof(T);
+
+        if (!typeof(BaseFeature).IsAssignableFrom(type) || type.IsAbstract)
+            return null;
+
+        if (Activator.CreateInstance(type) is T feature)
+            return feature;
+
+        return null;
+    }
+
     public void Dispose()
     {
-        //dtrEntry.Remove();
         Svc.Framework.Update -= FrameworkUpdate;
         Svc.PluginInterface.UiBuilder.OpenMainUi -= DrawConfigUI;
         ECommonsMain.Dispose();
@@ -118,18 +129,18 @@ public class YesAlready : IDalamudPlugin
     private void FrameworkUpdate(IFramework framework)
     {
         if (!P.Active && !wasDisableKeyPressed) return;
-        DisableKeyPressed = Config.DisableKey != VirtualKey.NO_KEY && Svc.KeyState[Config.DisableKey];
+        DisableKeyPressed = C.DisableKey != VirtualKey.NO_KEY && Svc.KeyState[C.DisableKey];
 
         if (P.Active && DisableKeyPressed && !wasDisableKeyPressed)
-            P.Config.Enabled = false;
+            C.Enabled = false;
         else if (!P.Active && !DisableKeyPressed && wasDisableKeyPressed)
-            P.Config.Enabled = true;
+            C.Enabled = true;
 
         wasDisableKeyPressed = DisableKeyPressed;
 
-        ForcedYesKeyPressed = Config.ForcedYesKey != VirtualKey.NO_KEY && Svc.KeyState[Config.ForcedYesKey];
+        ForcedYesKeyPressed = C.ForcedYesKey != VirtualKey.NO_KEY && Svc.KeyState[C.ForcedYesKey];
 
-        ForcedTalkKeyPressed = Config.ForcedTalkKey != VirtualKey.NO_KEY && Config.SeparateForcedKeys && Svc.KeyState[Config.ForcedTalkKey];
+        ForcedTalkKeyPressed = C.ForcedTalkKey != VirtualKey.NO_KEY && C.SeparateForcedKeys && Svc.KeyState[C.ForcedTalkKey];
 
         if (Svc.KeyState[VirtualKey.ESCAPE])
         {
@@ -184,8 +195,8 @@ public class YesAlready : IDalamudPlugin
                 CommandHelpMenu();
                 break;
             case "toggle":
-                Config.Enabled ^= true;
-                Config.Save();
+                C.Enabled ^= true;
+                C.Save();
                 break;
             case "last":
                 CommandAddNode(false, false, false);
@@ -255,8 +266,8 @@ public class YesAlready : IDalamudPlugin
             return;
         }
 
-        Configuration.CreateTextNode(Config.RootFolder, zoneRestricted, createFolder, selectNo);
-        Config.Save();
+        Configuration.CreateTextNode(C.RootFolder, zoneRestricted, createFolder, selectNo);
+        C.Save();
 
         Utils.SEString.PrintPluginMessage("Added a new text entry.");
     }
@@ -271,8 +282,8 @@ public class YesAlready : IDalamudPlugin
             return;
         }
 
-        Configuration.CreateOkNode(Config.RootFolder, createFolder);
-        Config.Save();
+        Configuration.CreateOkNode(C.RootFolder, createFolder);
+        C.Save();
 
         Utils.SEString.PrintPluginMessage("Added a new text entry.");
     }
@@ -296,9 +307,9 @@ public class YesAlready : IDalamudPlugin
             newNode.TargetText = target;
         }
 
-        var parent = Config.ListRootFolder;
+        var parent = C.ListRootFolder;
         parent.Children.Add(newNode);
-        Config.Save();
+        C.Save();
 
         Utils.SEString.PrintPluginMessage("Added a new list entry.");
     }
@@ -315,30 +326,30 @@ public class YesAlready : IDalamudPlugin
 
         var newNode = new TalkEntryNode { Enabled = true, TargetText = target };
 
-        var parent = Config.TalkRootFolder;
+        var parent = C.TalkRootFolder;
         parent.Children.Add(newNode);
-        Config.Save();
+        C.Save();
 
         Utils.SEString.PrintPluginMessage("Added a new talk entry.");
     }
 
     private void ToggleDutyConfirm()
     {
-        Config.ContentsFinderConfirmEnabled ^= true;
-        Config.ContentsFinderOneTimeConfirmEnabled = false;
-        Config.Save();
+        C.ContentsFinderConfirmEnabled ^= true;
+        C.ContentsFinderOneTimeConfirmEnabled = false;
+        C.Save();
 
-        var state = Config.ContentsFinderConfirmEnabled ? "enabled" : "disabled";
+        var state = C.ContentsFinderConfirmEnabled ? "enabled" : "disabled";
         Utils.SEString.PrintPluginMessage($"Duty Confirm {state}.");
     }
 
     private void ToggleOneTimeConfirm()
     {
-        Config.ContentsFinderOneTimeConfirmEnabled ^= true;
-        Config.ContentsFinderConfirmEnabled = Config.ContentsFinderOneTimeConfirmEnabled;
-        Config.Save();
+        C.ContentsFinderOneTimeConfirmEnabled ^= true;
+        C.ContentsFinderConfirmEnabled = C.ContentsFinderOneTimeConfirmEnabled;
+        C.Save();
 
-        var state = Config.ContentsFinderOneTimeConfirmEnabled ? "enabled" : "disabled";
+        var state = C.ContentsFinderOneTimeConfirmEnabled ? "enabled" : "disabled";
         Utils.SEString.PrintPluginMessage($"Duty Confirm and One Time Confirm {state}.");
     }
 

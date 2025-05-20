@@ -15,7 +15,7 @@ internal class InputNumeric : TextMatchingFeature
 
     protected override unsafe object? ShouldProceed(string text, AtkUnitBase* atk)
     {
-        var nodes = P.Config.GetAllNodes().OfType<NumericsEntryNode>();
+        var nodes = C.GetAllNodes().OfType<NumericsEntryNode>();
         foreach (var node in nodes)
         {
             if (!node.Enabled || string.IsNullOrEmpty(node.Text))

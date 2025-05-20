@@ -3,7 +3,7 @@ namespace YesAlready.Features;
 [AddonFeature(AddonEvent.PostSetup)]
 internal class SalvageDialog : AddonFeature
 {
-    protected override bool IsEnabled() => P.Config.DesynthDialogEnabled;
+    protected override bool IsEnabled() => C.DesynthDialogEnabled;
 
     protected override unsafe void HandleAddonEvent(AddonEvent eventType, AddonArgs addonInfo, AtkUnitBase* atk)
     {
@@ -14,11 +14,11 @@ internal class SalvageDialog : AddonFeature
             switch (eventType)
             {
                 //case AddonEvent.PreSetup:
-                //    if (P.Config.DesynthBulkDialogEnabled && addonInfo is AddonSetupArgs { AtkValueCount: > 20 } args)
+                //    if (C.DesynthBulkDialogEnabled && addonInfo is AddonSetupArgs { AtkValueCount: > 20 } args)
                 //        args.AtkValueSpan.GetPointer(20)->SetBool(true);
                 //    break;
                 case AddonEvent.PostSetup:
-                    if (P.Config.DesynthDialogEnabled)
+                    if (C.DesynthDialogEnabled)
                     {
                         am.Checkbox();
                         am.Desynthesize();

@@ -35,55 +35,55 @@ public static class Bothers
         if (ImGui.CollapsingHeader("Hotkey Settings"))
         {
             // 1. Disable Hotkey
-            if (!hotkeyValues.Contains(P.Config.DisableKey))
+            if (!hotkeyValues.Contains(C.DisableKey))
             {
-                P.Config.DisableKey = VirtualKey.NO_KEY;
-                P.Config.Save();
+                C.DisableKey = VirtualKey.NO_KEY;
+                C.Save();
             }
 
-            var disableHotkeyIndex = Array.IndexOf(hotkeyValues, P.Config.DisableKey);
+            var disableHotkeyIndex = Array.IndexOf(hotkeyValues, C.DisableKey);
 
             ImGui.SetNextItemWidth(85);
             if (ImGui.Combo("Disable Hotkey", ref disableHotkeyIndex, hotkeyChoices, hotkeyChoices.Length))
             {
-                P.Config.DisableKey = hotkeyValues[disableHotkeyIndex];
-                P.Config.Save();
+                C.DisableKey = hotkeyValues[disableHotkeyIndex];
+                C.Save();
             }
 
             ImGuiEx.IndentedTextColored("While this key is held, the plugin is disabled.");
 
             // 2. Forced Yes Hotkey
-            if (!hotkeyValues.Contains(P.Config.ForcedYesKey))
+            if (!hotkeyValues.Contains(C.ForcedYesKey))
             {
-                P.Config.ForcedYesKey = VirtualKey.NO_KEY;
-                P.Config.Save();
+                C.ForcedYesKey = VirtualKey.NO_KEY;
+                C.Save();
             }
 
-            var forcedYesHotkeyIndex = Array.IndexOf(hotkeyValues, P.Config.ForcedYesKey);
+            var forcedYesHotkeyIndex = Array.IndexOf(hotkeyValues, C.ForcedYesKey);
 
             ImGui.SetNextItemWidth(85);
             if (ImGui.Combo("Forced Yes Hotkey", ref forcedYesHotkeyIndex, hotkeyChoices, hotkeyChoices.Length))
             {
-                P.Config.ForcedYesKey = hotkeyValues[forcedYesHotkeyIndex];
-                P.Config.Save();
+                C.ForcedYesKey = hotkeyValues[forcedYesHotkeyIndex];
+                C.Save();
             }
 
             ImGui.SameLine();
-            var separateForcedKeys = P.Config.SeparateForcedKeys;
+            var separateForcedKeys = C.SeparateForcedKeys;
             if (ImGui.Checkbox("Separate Yes/Talk", ref separateForcedKeys))
             {
-                P.Config.SeparateForcedKeys = separateForcedKeys;
-                P.Config.Save();
+                C.SeparateForcedKeys = separateForcedKeys;
+                C.Save();
             }
 
-            if (P.Config.SeparateForcedKeys)
+            if (C.SeparateForcedKeys)
             {
-                var forcedTalkHotkeyIndex = Array.IndexOf(hotkeyValues, P.Config.ForcedTalkKey);
+                var forcedTalkHotkeyIndex = Array.IndexOf(hotkeyValues, C.ForcedTalkKey);
                 ImGui.SetNextItemWidth(85);
                 if (ImGui.Combo("Forced Talk Hotkey", ref forcedTalkHotkeyIndex, hotkeyChoices, hotkeyChoices.Length))
                 {
-                    P.Config.ForcedTalkKey = hotkeyValues[forcedTalkHotkeyIndex];
-                    P.Config.Save();
+                    C.ForcedTalkKey = hotkeyValues[forcedTalkHotkeyIndex];
+                    C.Save();
                 }
             }
 
@@ -96,37 +96,37 @@ public static class Bothers
         if (ImGui.CollapsingHeader("Desynthesis and Aetherial Reduction"))
         {
             // 3. SalvageDialog
-            var desynthDialog = P.Config.DesynthDialogEnabled;
+            var desynthDialog = C.DesynthDialogEnabled;
             if (ImGui.Checkbox("SalvageDialog", ref desynthDialog))
             {
-                P.Config.DesynthDialogEnabled = desynthDialog;
-                P.Config.Save();
+                C.DesynthDialogEnabled = desynthDialog;
+                C.Save();
             }
             ImGuiEx.IndentedTextColored("Remove the Desynthesis menu confirmation.");
 
             // 4. SalvageDialog (Bulk)
-            //var desynthBulkDialog = P.Config.DesynthBulkDialogEnabled;
+            //var desynthBulkDialog = C.DesynthBulkDialogEnabled;
             //if (ImGui.Checkbox("SalvageDialog (Bulk)", ref desynthBulkDialog))
             //{
-            //    P.Config.DesynthBulkDialogEnabled = desynthBulkDialog;
-            //    P.Config.Save();
+            //    C.DesynthBulkDialogEnabled = desynthBulkDialog;
+            //    C.Save();
             //}
             //ImGuiEx.IndentedTextColored("Check the bulk desynthesis button when using the SalvageDialog feature.");
 
             // 5. SalvageResults
-            var desynthResultsDialog = P.Config.DesynthesisResults;
+            var desynthResultsDialog = C.DesynthesisResults;
             if (ImGui.Checkbox("SalvageResults", ref desynthResultsDialog))
             {
-                P.Config.DesynthesisResults = desynthResultsDialog;
-                P.Config.Save();
+                C.DesynthesisResults = desynthResultsDialog;
+                C.Save();
             }
             ImGuiEx.IndentedTextColored("Automatically closes the SalvageResults window when done desynthesizing.");
 
-            var purifyResultsDialog = P.Config.AetherialReductionResults;
+            var purifyResultsDialog = C.AetherialReductionResults;
             if (ImGui.Checkbox("PurifyResult", ref purifyResultsDialog))
             {
-                P.Config.AetherialReductionResults = purifyResultsDialog;
-                P.Config.Save();
+                C.AetherialReductionResults = purifyResultsDialog;
+                C.Save();
             }
             ImGuiEx.IndentedTextColored("Automatically closes the PurifyResult window when done reducing.");
         }
@@ -136,27 +136,27 @@ public static class Bothers
 
         if (ImGui.CollapsingHeader("Melding"))
         {
-            var meld = P.Config.MaterialAttachDialogEnabled;
+            var meld = C.MaterialAttachDialogEnabled;
             if (ImGui.Checkbox("MateriaAttachDialog", ref meld))
             {
-                P.Config.MaterialAttachDialogEnabled = meld;
-                P.Config.Save();
+                C.MaterialAttachDialogEnabled = meld;
+                C.Save();
             }
             ImGuiEx.IndentedTextColored("Remove the materia melding confirmation menu.");
 
-            var materialize = P.Config.MaterializeDialogEnabled;
+            var materialize = C.MaterializeDialogEnabled;
             if (ImGui.Checkbox("MaterializeDialog", ref materialize))
             {
-                P.Config.MaterializeDialogEnabled = materialize;
-                P.Config.Save();
+                C.MaterializeDialogEnabled = materialize;
+                C.Save();
             }
             ImGuiEx.IndentedTextColored("Remove the create new (extract) materia confirmation.");
 
-            var materiaRetrieve = P.Config.MateriaRetrieveDialogEnabled;
+            var materiaRetrieve = C.MateriaRetrieveDialogEnabled;
             if (ImGui.Checkbox("MateriaRetrieveDialog", ref materiaRetrieve))
             {
-                P.Config.MateriaRetrieveDialogEnabled = materiaRetrieve;
-                P.Config.Save();
+                C.MateriaRetrieveDialogEnabled = materiaRetrieve;
+                C.Save();
             }
             ImGuiEx.IndentedTextColored("Remove the retrieve materia confirmation.");
         }
@@ -166,55 +166,55 @@ public static class Bothers
 
         if (ImGui.CollapsingHeader("Retainers and Submersibles"))
         {
-            var retainerTaskAsk = P.Config.RetainerTaskAskEnabled;
+            var retainerTaskAsk = C.RetainerTaskAskEnabled;
             if (ImGui.Checkbox("RetainerTaskAsk", ref retainerTaskAsk))
             {
-                P.Config.RetainerTaskAskEnabled = retainerTaskAsk;
-                P.Config.Save();
+                C.RetainerTaskAskEnabled = retainerTaskAsk;
+                C.Save();
             }
             ImGuiEx.IndentedTextColored("Skip the confirmation in the final dialog before sending out a retainer.");
 
-            var retainerTaskResult = P.Config.RetainerTaskResultEnabled;
+            var retainerTaskResult = C.RetainerTaskResultEnabled;
             if (ImGui.Checkbox("RetainerTaskResult", ref retainerTaskResult))
             {
-                P.Config.RetainerTaskResultEnabled = retainerTaskResult;
-                P.Config.Save();
+                C.RetainerTaskResultEnabled = retainerTaskResult;
+                C.Save();
             }
             ImGuiEx.IndentedTextColored("Automatically send a retainer on the same venture as before when receiving an item.");
 
-            var retainerListDialog = P.Config.RetainerTransferListConfirm;
+            var retainerListDialog = C.RetainerTransferListConfirm;
             if (ImGui.Checkbox("RetainerItemTransferList", ref retainerListDialog))
             {
-                P.Config.RetainerTransferListConfirm = retainerListDialog;
-                P.Config.Save();
+                C.RetainerTransferListConfirm = retainerListDialog;
+                C.Save();
             }
             ImGuiEx.IndentedTextColored("Skip the confirmation in the RetainerItemTransferList window to entrust all items to the retainer.");
 
-            var retainerProgressDialog = P.Config.RetainerTransferProgressConfirm;
+            var retainerProgressDialog = C.RetainerTransferProgressConfirm;
             if (ImGui.Checkbox("RetainerItemTransferProgress", ref retainerProgressDialog))
             {
-                P.Config.RetainerTransferProgressConfirm = retainerProgressDialog;
-                P.Config.Save();
+                C.RetainerTransferProgressConfirm = retainerProgressDialog;
+                C.Save();
             }
             ImGuiEx.IndentedTextColored("Automatically closes the RetainerItemTransferProgress window when finished entrusting items.");
 
-            var finalize = P.Config.AirShipExplorationResultFinalize;
+            var finalize = C.AirShipExplorationResultFinalize;
             if (ImGui.Checkbox("AirShipExplorationResult - Finalize", ref finalize))
             {
-                if (finalize && P.Config.AirShipExplorationResultRedeploy)
-                    P.Config.AirShipExplorationResultRedeploy = false;
-                P.Config.AirShipExplorationResultFinalize = finalize;
-                P.Config.Save();
+                if (finalize && C.AirShipExplorationResultRedeploy)
+                    C.AirShipExplorationResultRedeploy = false;
+                C.AirShipExplorationResultFinalize = finalize;
+                C.Save();
             }
             ImGuiEx.IndentedTextColored("Automatically finalize submersible reports when the AirShipExplorationResult window opens.");
 
-            var redeploy = P.Config.AirShipExplorationResultRedeploy;
+            var redeploy = C.AirShipExplorationResultRedeploy;
             if (ImGui.Checkbox("AirShipExplorationResult - Redeploy", ref redeploy))
             {
-                if (redeploy && P.Config.AirShipExplorationResultFinalize)
-                    P.Config.AirShipExplorationResultFinalize = false;
-                P.Config.AirShipExplorationResultRedeploy = redeploy;
-                P.Config.Save();
+                if (redeploy && C.AirShipExplorationResultFinalize)
+                    C.AirShipExplorationResultFinalize = false;
+                C.AirShipExplorationResultRedeploy = redeploy;
+                C.Save();
             }
             ImGuiEx.IndentedTextColored("Automatically redeploy submersibles when the AirShipExplorationResult window opens.");
         }
@@ -224,27 +224,27 @@ public static class Bothers
 
         if (ImGui.CollapsingHeader("Duties"))
         {
-            var contentsFinderConfirm = P.Config.ContentsFinderConfirmEnabled;
+            var contentsFinderConfirm = C.ContentsFinderConfirmEnabled;
             if (ImGui.Checkbox("ContentsFinderConfirm", ref contentsFinderConfirm))
             {
-                P.Config.ContentsFinderConfirmEnabled = contentsFinderConfirm;
+                C.ContentsFinderConfirmEnabled = contentsFinderConfirm;
 
                 if (!contentsFinderConfirm)
-                    P.Config.ContentsFinderOneTimeConfirmEnabled = false;
+                    C.ContentsFinderOneTimeConfirmEnabled = false;
 
-                P.Config.Save();
+                C.Save();
             }
             ImGuiEx.IndentedTextColored("Automatically commence duties when ready.");
 
-            var contentsFinderOneTimeConfirm = P.Config.ContentsFinderOneTimeConfirmEnabled;
+            var contentsFinderOneTimeConfirm = C.ContentsFinderOneTimeConfirmEnabled;
             if (ImGui.Checkbox("ContentsFinderOneTimeConfirm", ref contentsFinderOneTimeConfirm))
             {
-                P.Config.ContentsFinderOneTimeConfirmEnabled = contentsFinderOneTimeConfirm;
+                C.ContentsFinderOneTimeConfirmEnabled = contentsFinderOneTimeConfirm;
 
                 if (contentsFinderOneTimeConfirm)
-                    P.Config.ContentsFinderConfirmEnabled = true;
+                    C.ContentsFinderConfirmEnabled = true;
 
-                P.Config.Save();
+                C.Save();
             }
             ImGuiEx.IndentedTextColored("Automatically commence duties when ready, but only once. Requires Contents Finder Confirm, and disables both after activation.");
         }
@@ -254,19 +254,19 @@ public static class Bothers
 
         if (ImGui.CollapsingHeader("PvP"))
         {
-            var ccquit = P.Config.MKSRecordQuit;
+            var ccquit = C.MKSRecordQuit;
             if (ImGui.Checkbox("MKSRecord", ref ccquit))
             {
-                P.Config.MKSRecordQuit = ccquit;
-                P.Config.Save();
+                C.MKSRecordQuit = ccquit;
+                C.Save();
             }
             ImGuiEx.IndentedTextColored("Automatically leave the Crystalline Conflict match when the results appear.");
 
-            var flquit = P.Config.FrontlineRecordQuit;
+            var flquit = C.FrontlineRecordQuit;
             if (ImGui.Checkbox("FrontlineRecord", ref flquit))
             {
-                P.Config.FrontlineRecordQuit = flquit;
-                P.Config.Save();
+                C.FrontlineRecordQuit = flquit;
+                C.Save();
             }
             ImGuiEx.IndentedTextColored("Automatically leave the Frontline match when the results appear.");
         }
@@ -276,68 +276,68 @@ public static class Bothers
 
         if (ImGui.CollapsingHeader("Minigames and Special Events"))
         {
-            var lotto = P.Config.LotteryWeeklyInput;
+            var lotto = C.LotteryWeeklyInput;
             if (ImGui.Checkbox("LotteryWeeklyInput", ref lotto))
             {
-                P.Config.LotteryWeeklyInput = lotto;
-                P.Config.Save();
+                C.LotteryWeeklyInput = lotto;
+                C.Save();
             }
             ImGuiEx.IndentedTextColored("Automatically purchase a Jumbo Cactpot ticket with a random number.");
 
             // 19. HWDLottery
-            var kupo = P.Config.KupoOfFortune;
+            var kupo = C.KupoOfFortune;
             if (ImGui.Checkbox("HWDLottery", ref kupo))
             {
-                P.Config.KupoOfFortune = kupo;
-                P.Config.Save();
+                C.KupoOfFortune = kupo;
+                C.Save();
             }
             ImGuiEx.IndentedTextColored("Automatically select a kupo of fortune reward. This will instantly complete a single kupo ticket but is unable to continue to the next automatically.");
 
-            var lovQuit = P.Config.LordOfVerminionQuit;
+            var lovQuit = C.LordOfVerminionQuit;
             if (ImGui.Checkbox("LovmResult", ref lovQuit))
             {
-                P.Config.LordOfVerminionQuit = lovQuit;
-                P.Config.Save();
+                C.LordOfVerminionQuit = lovQuit;
+                C.Save();
             }
             ImGuiEx.IndentedTextColored("Automatically quit Lord of Verminion when the results menu appears.");
 
-            var fgsEnter = P.Config.FallGuysRegisterConfirm;
+            var fgsEnter = C.FallGuysRegisterConfirm;
             if (ImGui.Checkbox("FGSEnterDialog", ref fgsEnter))
             {
-                P.Config.FallGuysRegisterConfirm = fgsEnter;
-                P.Config.Save();
+                C.FallGuysRegisterConfirm = fgsEnter;
+                C.Save();
             }
             ImGuiEx.IndentedTextColored("Automatically register for Blunderville when speaking with the Blunderville Registrar.");
 
-            var fgsExit = P.Config.FallGuysExitConfirm;
+            var fgsExit = C.FallGuysExitConfirm;
             if (ImGui.Checkbox("FGSExitDialog", ref fgsExit))
             {
-                P.Config.FallGuysExitConfirm = fgsExit;
-                P.Config.Save();
+                C.FallGuysExitConfirm = fgsExit;
+                C.Save();
             }
             ImGuiEx.IndentedTextColored("Automatically confirm the exit prompt when leaving Blunderville.");
 
-            var fashionQuit = P.Config.FashionCheckQuit;
+            var fashionQuit = C.FashionCheckQuit;
             if (ImGui.Checkbox("FashionCheck", ref fashionQuit))
             {
-                P.Config.FashionCheckQuit = fashionQuit;
-                P.Config.Save();
+                C.FashionCheckQuit = fashionQuit;
+                C.Save();
             }
             ImGuiEx.IndentedTextColored("Automatically confirm the Fashion Reports results.");
 
-            var chocoboQuit = P.Config.ChocoboRacingQuit;
+            var chocoboQuit = C.ChocoboRacingQuit;
             if (ImGui.Checkbox("RaceChocoboResult", ref chocoboQuit))
             {
-                P.Config.ChocoboRacingQuit = chocoboQuit;
-                P.Config.Save();
+                C.ChocoboRacingQuit = chocoboQuit;
+                C.Save();
             }
             ImGuiEx.IndentedTextColored("Automatically quit Chocobo Racing when the results menu appears.");
 
-            var shopCard = P.Config.ShopCardDialog;
+            var shopCard = C.ShopCardDialog;
             if (ImGui.Checkbox("ShopCardDialog", ref shopCard))
             {
-                P.Config.ShopCardDialog = shopCard;
-                P.Config.Save();
+                C.ShopCardDialog = shopCard;
+                C.Save();
             }
             ImGuiEx.IndentedTextColored("Automatically confirm selling Triple Triad cards in the saucer.");
         }
@@ -347,19 +347,19 @@ public static class Bothers
 
         if (ImGui.CollapsingHeader("Shops"))
         {
-            var inclusionShopRemember = P.Config.InclusionShopRememberEnabled;
+            var inclusionShopRemember = C.InclusionShopRememberEnabled;
             if (ImGui.Checkbox("InclusionShopRemember", ref inclusionShopRemember))
             {
-                P.Config.InclusionShopRememberEnabled = inclusionShopRemember;
-                P.Config.Save();
+                C.InclusionShopRememberEnabled = inclusionShopRemember;
+                C.Save();
             }
             ImGuiEx.IndentedTextColored("Remember the last panel visited on the scrip exchange window.");
 
-            var shopItemExchange = P.Config.ShopExchangeItemDialogEnabled;
+            var shopItemExchange = C.ShopExchangeItemDialogEnabled;
             if (ImGui.Checkbox("ShopExchangeItemDialog", ref shopItemExchange))
             {
-                P.Config.ShopExchangeItemDialogEnabled = shopItemExchange;
-                P.Config.Save();
+                C.ShopExchangeItemDialogEnabled = shopItemExchange;
+                C.Save();
             }
             ImGuiEx.IndentedTextColored("Automatically exchange items/currencies in various shops (e.g., scrip vendors).");
         }
@@ -368,67 +368,67 @@ public static class Bothers
 
         if (ImGui.CollapsingHeader("Other"))
         {
-            var deliveries = P.Config.CustomDeliveries;
+            var deliveries = C.CustomDeliveries;
             if (ImGui.Checkbox("SatisfactionSupply", ref deliveries))
             {
-                P.Config.CustomDeliveries = deliveries;
-                P.Config.Save();
+                C.CustomDeliveries = deliveries;
+                C.Save();
             }
             ImGuiEx.IndentedTextColored("Automatically turn in any available collectibles for Custom Deliveries.");
 
-            var grandCompanySupplyReward = P.Config.GrandCompanySupplyReward;
+            var grandCompanySupplyReward = C.GrandCompanySupplyReward;
             if (ImGui.Checkbox("GrandCompanySupplyReward", ref grandCompanySupplyReward))
             {
-                P.Config.GrandCompanySupplyReward = grandCompanySupplyReward;
-                P.Config.Save();
+                C.GrandCompanySupplyReward = grandCompanySupplyReward;
+                C.Save();
             }
             ImGuiEx.IndentedTextColored("Skip the confirmation when submitting Grand Company expert delivery items.");
 
-            var journalResultComplete = P.Config.JournalResultCompleteEnabled;
+            var journalResultComplete = C.JournalResultCompleteEnabled;
             if (ImGui.Checkbox("JournalResultComplete", ref journalResultComplete))
             {
-                P.Config.JournalResultCompleteEnabled = journalResultComplete;
-                P.Config.Save();
+                C.JournalResultCompleteEnabled = journalResultComplete;
+                C.Save();
             }
             ImGuiEx.IndentedTextColored("Automatically confirm quest reward acceptance when there is nothing to choose.");
 
-            var guildLeveDifficulty = P.Config.GuildLeveDifficultyConfirm;
+            var guildLeveDifficulty = C.GuildLeveDifficultyConfirm;
             if (ImGui.Checkbox("GuildLeveDifficulty", ref guildLeveDifficulty))
             {
-                P.Config.GuildLeveDifficultyConfirm = guildLeveDifficulty;
-                P.Config.Save();
+                C.GuildLeveDifficultyConfirm = guildLeveDifficulty;
+                C.Save();
             }
             ImGuiEx.IndentedTextColored("Automatically confirms guild leves upon initiation at the highest difficulty.");
 
-            var dkt = P.Config.DataCentreTravelConfirmEnabled;
+            var dkt = C.DataCentreTravelConfirmEnabled;
             if (ImGui.Checkbox("DataCentreTravelConfirm", ref dkt))
             {
-                P.Config.DataCentreTravelConfirmEnabled = dkt;
-                P.Config.Save();
+                C.DataCentreTravelConfirmEnabled = dkt;
+                C.Save();
             }
             ImGuiEx.IndentedTextColored("Automatically accept the Data Center travel confirmation.");
 
-            var mpr = P.Config.MiragePrismRemoveDispel;
+            var mpr = C.MiragePrismRemoveDispel;
             if (ImGui.Checkbox("MiragePrismRemoveDispel", ref mpr))
             {
-                P.Config.MiragePrismRemoveDispel = mpr;
-                P.Config.Save();
+                C.MiragePrismRemoveDispel = mpr;
+                C.Save();
             }
             ImGuiEx.IndentedTextColored("Automatically dispel glamours when using Glamour Dispellers.");
 
-            var mpe = P.Config.MiragePrismExecuteCast;
+            var mpe = C.MiragePrismExecuteCast;
             if (ImGui.Checkbox("MiragePrismExecuteCast", ref mpe))
             {
-                P.Config.MiragePrismExecuteCast = mpe;
-                P.Config.Save();
+                C.MiragePrismExecuteCast = mpe;
+                C.Save();
             }
             ImGuiEx.IndentedTextColored("Automatically cast glamours when using Glamour Prisms.");
 
-            var bpu = P.Config.BannerPreviewUpdate;
+            var bpu = C.BannerPreviewUpdate;
             if (ImGui.Checkbox("BannerPreviewUpdate", ref bpu))
             {
-                P.Config.BannerPreviewUpdate = bpu;
-                P.Config.Save();
+                C.BannerPreviewUpdate = bpu;
+                C.Save();
             }
             ImGuiEx.IndentedTextColored("Automatically update portraits.");
         }
@@ -438,40 +438,40 @@ public static class Bothers
         #region Forays
         if (ImGui.CollapsingHeader("Forays"))
         {
-            var itemInspection = P.Config.ItemInspectionResultEnabled;
+            var itemInspection = C.ItemInspectionResultEnabled;
             if (ImGui.Checkbox("ItemInspectionResult", ref itemInspection))
             {
-                P.Config.ItemInspectionResultEnabled = itemInspection;
-                P.Config.Save();
+                C.ItemInspectionResultEnabled = itemInspection;
+                C.Save();
             }
             ImGuiEx.IndentedTextColored("Eureka/Bozja lockboxes, forgotten fragments, and more. Warning: this does not check if you are maxed on items. Rate limiter (pause after N items).");
 
             if (itemInspection)
             {
                 ImGui.Indent();
-                var rateLimit = P.Config.ItemInspectionResultRateLimiter;
+                var rateLimit = C.ItemInspectionResultRateLimiter;
                 if (ImGui.InputInt(string.Empty, ref rateLimit))
                 {
-                    P.Config.ItemInspectionResultRateLimiter = rateLimit;
-                    P.Config.Save();
+                    C.ItemInspectionResultRateLimiter = rateLimit;
+                    C.Save();
                 }
                 ImGui.Unindent();
                 ImGuiEx.IndentedTextColored("Rate limiter (pause after N items, 0 to disable).");
             }
 
-            var wksAnnounceHide = P.Config.WKSAnnounceHide;
+            var wksAnnounceHide = C.WKSAnnounceHide;
             if (ImGui.Checkbox("WKSAnnounceHide", ref wksAnnounceHide))
             {
-                P.Config.WKSAnnounceHide = wksAnnounceHide;
-                P.Config.Save();
+                C.WKSAnnounceHide = wksAnnounceHide;
+                C.Save();
             }
             ImGuiEx.IndentedTextColored("Hide Cosmic Exploration announcements.");
 
-            var wksRewardClose = P.Config.WKSRewardClose;
+            var wksRewardClose = C.WKSRewardClose;
             if (ImGui.Checkbox("WKSRewardHide", ref wksRewardClose))
             {
-                P.Config.WKSRewardClose = wksRewardClose;
-                P.Config.Save();
+                C.WKSRewardClose = wksRewardClose;
+                C.Save();
             }
             ImGuiEx.IndentedTextColored("Automatically close the Cosmic Exploration rewards window.");
         }

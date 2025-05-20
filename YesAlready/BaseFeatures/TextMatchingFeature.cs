@@ -1,3 +1,6 @@
+using Dalamud.Game.ClientState.Conditions;
+using ECommons.GameHelpers;
+using Lumina.Excel.Sheets;
 using System;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -73,19 +76,45 @@ public abstract class TextMatchingFeature : AddonFeature
     protected void LogVerbose(string message) => PluginLog.Verbose($"[{GetType().Name}]: {message}");
     protected void LogError(string message) => PluginLog.Error($"[{GetType().Name}]: {message}");
 
-    protected int? GetMatchingIndex(string[] entries)
+    protected int? GetMatchingIndex(string pattern, string text, bool isRegex)
     {
-        var nodes = P.Config.GetAllNodes().OfType<ListEntryNode>();
-        foreach (var node in nodes)
+        if (isRegex)
         {
-            if (!node.Enabled || string.IsNullOrEmpty(node.Text))
-                continue;
-
-            for (var i = 0; i < entries.Length; i++)
+            try
             {
-                if (EntryMatchesText(node.Text, entries[i], node.IsTextRegex))
-                    return i;
+                var regex = new Regex(pattern.Trim('/'), RegexOptions.Compiled | RegexOptions.IgnoreCase);
+                var match = regex.Match(text);
+                if (match.Success)
+                {
+                    LogVerbose($"Matched on regex {pattern} ({text})");
+                    return match.Index;
+                }
             }
+            catch (Exception ex)
+            {
+                LogError($"Invalid regex pattern {pattern}: {ex.Message}");
+                return null;
+            }
+        }
+        else
+        {
+            var index = text.IndexOf(pattern, StringComparison.OrdinalIgnoreCase);
+            if (index != -1)
+            {
+                LogVerbose($"Matched on text {pattern} ({text})");
+                return index;
+            }
+        }
+        LogVerbose($"No match on {pattern} ({text})");
+        return null;
+    }
+
+    protected int? GetMatchingIndex(string[] entries, string pattern, bool isRegex)
+    {
+        for (var i = 0; i < entries.Length; i++)
+        {
+            if (EntryMatchesText(pattern, entries[i], isRegex))
+                return i;
         }
         return null;
     }
@@ -98,5 +127,78 @@ public abstract class TextMatchingFeature : AddonFeature
             P.LastSeenListTarget = P.LastSeenListTarget = Svc.Targets.Target != null ? Svc.Targets.Target.Name.GetText() ?? string.Empty : string.Empty;
         }
         catch { }
+    }
+
+    protected bool CheckRestrictions(ITextNode node)
+    {
+        if (node is IZoneRestrictedNode { ZoneRestricted: true } zoneNode)
+        {
+            if (GenericHelpers.GetRow<TerritoryType>(Player.Territory) is { PlaceName.ValueNullable.Name: var name })
+            {
+                if (!EntryMatchesText(zoneNode.ZoneText, name.ToString(), zoneNode.ZoneIsRegex))
+                {
+                    Log($"Zone restriction not met: {name} does not match {zoneNode.ZoneText}");
+                    return false;
+                }
+            }
+        }
+
+        if (node is ITargetRestrictedNode { TargetRestricted: true } targetNode)
+        {
+            if (Svc.Targets.Target is { Name: var name })
+            {
+                if (EntryMatchesText(targetNode.TargetText, name.ToString(), targetNode.TargetIsRegex))
+                {
+                    Log($"Target restriction met: {name} matches {targetNode.TargetText}");
+                    return true;
+                }
+                else
+                {
+                    Log($"Target restriction not met: {name} does not match {targetNode.TargetText}");
+                    return false;
+                }
+            }
+        }
+
+        if (node is IPlayerConditionRestrictedNode { RequiresPlayerConditions: true } playerConditionNode)
+        {
+            var conditions = playerConditionNode.PlayerConditions.Replace(" ", "").Split(',');
+            Log($"[{nameof(IPlayerConditionRestrictedNode)}] Conditions: {string.Join(", ", conditions)}");
+            if (conditions.All(condition => Enum.TryParse<ConditionFlag>(condition.StartsWith('!') ? condition[1..] : condition, out var flag) && (condition.StartsWith('!') ? !Svc.Condition[flag] : Svc.Condition[flag])))
+            {
+                Log($"Matched on {node.Name} and all conditions are true");
+                return true;
+            }
+            else
+            {
+                Log($"Matched on {node.Name}, but not all conditions were met");
+                return false;
+            }
+        }
+
+        if (node is INumberRestrictedNode { IsConditional: true } numberNode)
+        {
+            if (numberNode.ConditionalNumberRegex?.IsMatch(node.Name) ?? false)
+            {
+                PluginLog.Debug("AddonSelectYesNo: Is conditional matches");
+                if (numberNode.ConditionalNumberRegex?.Match(node.Name) is { Success: true, Value: var result } && int.TryParse(result, out var value))
+                {
+                    PluginLog.Debug($"AddonSelectYesNo: Is conditional - {value}");
+                    return numberNode.ComparisonType switch
+                    {
+                        ComparisonType.LessThan => value < numberNode.ConditionalNumber,
+                        ComparisonType.GreaterThan => value > numberNode.ConditionalNumber,
+                        ComparisonType.LessThanOrEqual => value <= numberNode.ConditionalNumber,
+                        ComparisonType.GreaterThanOrEqual => value >= numberNode.ConditionalNumber,
+                        ComparisonType.Equal => value == numberNode.ConditionalNumber,
+                        _ => throw new Exception("Uncaught enum"),
+                    };
+                }
+            }
+
+            return false;
+        }
+
+        return true;
     }
 }

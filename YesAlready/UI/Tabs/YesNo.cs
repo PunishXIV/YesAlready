@@ -9,7 +9,7 @@ using YesAlready.Utils;
 namespace YesAlready.UI.Tabs;
 public class YesNo
 {
-    private static TextFolderNode RootFolder => P.Config.RootFolder;
+    private static TextFolderNode RootFolder => C.RootFolder;
 
     public static void DrawButtons()
     {
@@ -21,7 +21,7 @@ public class YesNo
         {
             var newNode = new TextEntryNode { Enabled = false, Text = "Your text goes here" };
             RootFolder.Children.Add(newNode);
-            P.Config.Save();
+            C.Save();
         }
 
         ImGui.SameLine();
@@ -33,7 +33,7 @@ public class YesNo
             var selectNo = io.KeyAlt;
 
             Configuration.CreateTextNode(RootFolder, zoneRestricted, createFolder, selectNo);
-            P.Config.Save();
+            C.Save();
         }
 
         ImGui.SameLine();
@@ -41,7 +41,7 @@ public class YesNo
         {
             var newNode = new TextFolderNode { Name = "Untitled folder" };
             RootFolder.Children.Add(newNode);
-            P.Config.Save();
+            C.Save();
         }
 
         var sb = new StringBuilder();
@@ -82,28 +82,28 @@ public class YesNo
         using var popup = ImRaii.Popup("SelectYesno additional options");
         if (popup.Success)
         {
-            var gimmickConfirm = P.Config.GimmickYesNo;
+            var gimmickConfirm = C.GimmickYesNo;
             if (ImGui.Checkbox("Auto GimmickYesNo", ref gimmickConfirm))
             {
-                P.Config.GimmickYesNo = gimmickConfirm;
-                P.Config.Save();
+                C.GimmickYesNo = gimmickConfirm;
+                C.Save();
             }
             ImGuiEx.IndentedTextColored("Automatically confirm any Yesno dialogs that are part of the GimmickYesNo sheet.\nThese are mostly the dungeon Yesnos like \"Unlock this door?\" or \"Pickup this item?\"", wrapped: false);
 
-            var pfConfirm = P.Config.PartyFinderJoinConfirm;
+            var pfConfirm = C.PartyFinderJoinConfirm;
             if (ImGui.Checkbox("LookingForGroup x SelectYesno", ref pfConfirm))
             {
-                P.Config.PartyFinderJoinConfirm = pfConfirm;
-                P.Config.Save();
+                C.PartyFinderJoinConfirm = pfConfirm;
+                C.Save();
             }
 
             ImGuiEx.IndentedTextColored("Automatically confirm when joining a party finder group.", wrapped: false);
 
-            var autoCollect = P.Config.AutoCollectable;
+            var autoCollect = C.AutoCollectable;
             if (ImGui.Checkbox("Auto Collectables", ref autoCollect))
             {
-                P.Config.AutoCollectable = autoCollect;
-                P.Config.Save();
+                C.AutoCollectable = autoCollect;
+                C.Save();
             }
 
             ImGuiEx.IndentedTextColored("Automatically accept collectables that are worth turning in and decline insufficient ones.", wrapped: false);
@@ -140,7 +140,7 @@ public class YesNo
             if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
             {
                 node.Enabled = !node.Enabled;
-                P.Config.Save();
+                C.Save();
                 return;
             }
             else if (ImGui.IsMouseClicked(ImGuiMouseButton.Right))
@@ -148,10 +148,10 @@ public class YesNo
                 var io = ImGui.GetIO();
                 if (io.KeyCtrl && io.KeyShift)
                 {
-                    if (P.Config.TryFindParent(node, out var parent))
+                    if (C.TryFindParent(node, out var parent))
                     {
                         parent!.Children.Remove(node);
-                        P.Config.Save();
+                        C.Save();
                     }
 
                     return;
@@ -175,7 +175,7 @@ public class YesNo
         if (ImGui.Checkbox("Enabled", ref enabled))
         {
             textNode.Enabled = enabled;
-            P.Config.Save();
+            C.Save();
         }
 
         ImGui.SameLine(100f);
@@ -184,7 +184,7 @@ public class YesNo
         if (ImGui.Button(title))
         {
             textNode.IsYes = !isYes;
-            P.Config.Save();
+            C.Save();
         }
 
         var trashAltWidth = ImGuiEx.GetIconButtonWidth(FontAwesomeIcon.TrashAlt);
@@ -192,10 +192,10 @@ public class YesNo
         ImGui.SameLine(ImGui.GetContentRegionMax().X - trashAltWidth);
         if (ImGuiEx.IconButton(FontAwesomeIcon.TrashAlt, "Delete"))
         {
-            if (P.Config.TryFindParent(textNode, out var parentNode))
+            if (C.TryFindParent(textNode, out var parentNode))
             {
                 parentNode!.Children.Remove(textNode);
-                P.Config.Save();
+                C.Save();
             }
         }
 
@@ -203,14 +203,14 @@ public class YesNo
         if (ImGui.InputText($"##{textNode.Name}-matchText", ref matchText, 10_000, ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EnterReturnsTrue))
         {
             textNode.Text = matchText;
-            P.Config.Save();
+            C.Save();
         }
 
         var zoneRestricted = textNode.ZoneRestricted;
         if (ImGui.Checkbox("Zone Restricted", ref zoneRestricted))
         {
             textNode.ZoneRestricted = zoneRestricted;
-            P.Config.Save();
+            C.Save();
         }
 
         var searchWidth = ImGuiEx.GetIconButtonWidth(FontAwesomeIcon.Search);
@@ -227,12 +227,12 @@ public class YesNo
             if (P.TerritoryNames.TryGetValue(currentID, out var zoneName))
             {
                 textNode.ZoneText = zoneName;
-                P.Config.Save();
+                C.Save();
             }
             else
             {
                 textNode.ZoneText = "Could not find name";
-                P.Config.Save();
+                C.Save();
             }
         }
 
@@ -240,14 +240,14 @@ public class YesNo
         if (ImGui.InputText($"##{textNode.Name}-zoneText", ref zoneText, 10_000, ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EnterReturnsTrue))
         {
             textNode.ZoneText = zoneText;
-            P.Config.Save();
+            C.Save();
         }
 
         var conditionRestricted = textNode.RequiresPlayerConditions;
         if (ImGui.Checkbox("Condition Restricted", ref conditionRestricted))
         {
             textNode.RequiresPlayerConditions = conditionRestricted;
-            P.Config.Save();
+            C.Save();
         }
         ImGuiComponents.HelpMarker($"Conditions can either be their name (case sensitive) or ID. They must be comma separated if there are multiple. Condition restricted only allows the match to go through if all conditions are met. If you would like to invert a condition, put a \"!\" in front of it.");
 
@@ -259,7 +259,7 @@ public class YesNo
         if (ImGui.InputText($"##{textNode.Name}-playerConditionsText", ref playerConditions, 10_000, ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EnterReturnsTrue))
         {
             textNode.PlayerConditions = playerConditions;
-            P.Config.Save();
+            C.Save();
         }
 
         ImGui.NewLine();
@@ -268,7 +268,7 @@ public class YesNo
         if (ImGui.Checkbox("Is Conditional", ref conditional))
         {
             textNode.IsConditional = conditional;
-            P.Config.Save();
+            C.Save();
         }
 
         ImGui.Text("Currently only supports number extraction");
@@ -277,7 +277,7 @@ public class YesNo
         if (ImGui.InputText($"##{textNode.Name}-conditionalText", ref conditionalText, 10_000, ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EnterReturnsTrue))
         {
             textNode.ConditionalNumberTemplate = conditionalText;
-            P.Config.Save();
+            C.Save();
         }
 
         var comparisonType = textNode.ComparisonType;
@@ -289,7 +289,7 @@ public class YesNo
                 if (ImGui.Selectable(MainWindow.ComparisonTypeToText(c), isSelected))
                 {
                     textNode.ComparisonType = c;
-                    P.Config.Save();
+                    C.Save();
                 }
 
                 if (isSelected)
@@ -302,7 +302,7 @@ public class YesNo
         if (ImGui.InputInt($"##{textNode.Name}-conditionalNumber", ref conditionalNumber, 1, 10, ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EnterReturnsTrue))
         {
             textNode.ConditionalNumber = conditionalNumber;
-            P.Config.Save();
+            C.Save();
         }
     }
 }

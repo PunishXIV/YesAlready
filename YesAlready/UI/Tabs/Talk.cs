@@ -6,7 +6,7 @@ using System.Text;
 namespace YesAlready.UI.Tabs;
 public static class Talk
 {
-    private static TextFolderNode TalkRootFolder => P.Config.TalkRootFolder;
+    private static TextFolderNode TalkRootFolder => C.TalkRootFolder;
 
     public static void DrawButtons()
     {
@@ -18,7 +18,7 @@ public static class Talk
         {
             var newNode = new TalkEntryNode { Enabled = false, TargetText = "Your text goes here" };
             TalkRootFolder.Children.Add(newNode);
-            P.Config.Save();
+            C.Save();
         }
 
         ImGui.SameLine();
@@ -30,7 +30,7 @@ public static class Talk
                 var targetName = P.LastSeenTalkTarget = Utils.SEString.GetSeStringText(target.Name);
                 var newNode = new TalkEntryNode { Enabled = true, TargetText = targetName };
                 TalkRootFolder.Children.Add(newNode);
-                P.Config.Save();
+                C.Save();
             }
             else
                 Svc.Toasts.ShowError("Unable to add entry: no target selected.");
@@ -41,7 +41,7 @@ public static class Talk
         {
             var newNode = new TextFolderNode { Name = "Untitled folder" };
             TalkRootFolder.Children.Add(newNode);
-            P.Config.Save();
+            C.Save();
         }
 
         var sb = new StringBuilder();
@@ -91,7 +91,7 @@ public static class Talk
             if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
             {
                 node.Enabled = !node.Enabled;
-                P.Config.Save();
+                C.Save();
                 return;
             }
             else if (ImGui.IsMouseClicked(ImGuiMouseButton.Right))
@@ -99,10 +99,10 @@ public static class Talk
                 var io = ImGui.GetIO();
                 if (io.KeyCtrl && io.KeyShift)
                 {
-                    if (P.Config.TryFindParent(node, out var parent))
+                    if (C.TryFindParent(node, out var parent))
                     {
                         parent!.Children.Remove(node);
-                        P.Config.Save();
+                        C.Save();
                     }
 
                     return;
@@ -126,7 +126,7 @@ public static class Talk
         if (ImGui.Checkbox("Enabled", ref enabled))
         {
             node.Enabled = enabled;
-            P.Config.Save();
+            C.Save();
         }
 
         var trashAltWidth = Utils.ImGuiEx.GetIconButtonWidth(FontAwesomeIcon.TrashAlt);
@@ -134,10 +134,10 @@ public static class Talk
         ImGui.SameLine(ImGui.GetContentRegionMax().X - trashAltWidth);
         if (Utils.ImGuiEx.IconButton(FontAwesomeIcon.TrashAlt, "Delete"))
         {
-            if (P.Config.TryFindParent(node, out var parentNode))
+            if (C.TryFindParent(node, out var parentNode))
             {
                 parentNode!.Children.Remove(node);
-                P.Config.Save();
+                C.Save();
             }
         }
 
@@ -152,12 +152,12 @@ public static class Talk
             if (!string.IsNullOrEmpty(name))
             {
                 node.TargetText = name;
-                P.Config.Save();
+                C.Save();
             }
             else
             {
                 node.TargetText = "Could not find target";
-                P.Config.Save();
+                C.Save();
             }
         }
 
@@ -167,7 +167,7 @@ public static class Talk
         if (ImGui.InputText($"##{node.Name}-targetText", ref targetText, 10_000, ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EnterReturnsTrue))
         {
             node.TargetText = targetText;
-            P.Config.Save();
+            C.Save();
         }
     }
 }

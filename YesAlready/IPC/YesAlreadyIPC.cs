@@ -6,5 +6,5 @@ internal static class YesAlreadyIPC
 
     internal static void Dispose() => Svc.PluginInterface.GetIpcProvider<bool, object>("YesAlready.SetPluginEnabled").UnregisterAction();
 
-    private static void SetPluginEnabled(bool state) => P.Config.Enabled = state;
+    private static void SetPluginEnabled(bool state) => C.Enabled = state;
 }
