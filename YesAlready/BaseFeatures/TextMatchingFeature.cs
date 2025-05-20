@@ -13,6 +13,8 @@ public abstract class TextMatchingFeature : AddonFeature
 
     protected override unsafe void HandleAddonEvent(AddonEvent eventType, AddonArgs addonInfo, AtkUnitBase* atk)
     {
+        if (!P.Active) return;
+
         if (eventType is AddonEvent.PreFinalize && addonInfo.AddonName is "SelectString" or "SelectIconString")
         {
             SetEntry();
