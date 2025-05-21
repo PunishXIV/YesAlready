@@ -1,4 +1,5 @@
 using Dalamud.Game.ClientState.Keys;
+using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Plugin;
@@ -82,7 +83,6 @@ public class YesAlready : IDalamudPlugin
 
     public T? GetFeature<T>() where T : BaseFeature
     {
-        var featureAssembly = Assembly.GetExecutingAssembly();
         var type = typeof(T);
 
         if (!typeof(BaseFeature).IsAssignableFrom(type) || type.IsAbstract)
