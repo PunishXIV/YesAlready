@@ -1,13 +1,14 @@
 using Dalamud.Game.ClientState.Keys;
-using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using ECommons.EzDTR;
 using ECommons.EzHookManager;
+using ECommons.GameHelpers;
 using ECommons.SimpleGui;
 using ECommons.Singletons;
+using Lumina.Excel.Sheets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -57,7 +58,7 @@ public class YesAlready : IDalamudPlugin
         ToggleFeatures(true);
 
         Svc.Framework.Update += FrameworkUpdate;
-        Svc.PluginInterface.UiBuilder.OpenMainUi += DrawConfigUI;
+        Svc.PluginInterface.UiBuilder.OpenMainUi += EzConfigGui.Toggle;
 
         EzSignatureHelper.Initialize(this);
     }
@@ -97,13 +98,9 @@ public class YesAlready : IDalamudPlugin
     public void Dispose()
     {
         Svc.Framework.Update -= FrameworkUpdate;
-        Svc.PluginInterface.UiBuilder.OpenMainUi -= DrawConfigUI;
+        Svc.PluginInterface.UiBuilder.OpenMainUi -= EzConfigGui.Toggle;
         ECommonsMain.Dispose();
     }
-
-    public void DrawConfigUI() => EzConfigGui.Window.IsOpen ^= true;
-    internal void OpenZoneListUi() => EzConfigGui.WindowSystem.Windows.First(w => w.WindowName == ZoneListWindow.Title).IsOpen ^= true;
-    internal void OpenConditionsListUi() => EzConfigGui.WindowSystem.Windows.First(w => w.WindowName == ConditionsListWindow.Title).IsOpen ^= true;
 
     internal Dictionary<uint, string> TerritoryNames { get; private set; } = [];
     internal string LastSeenDialogText { get; set; } = string.Empty;
@@ -185,7 +182,7 @@ public class YesAlready : IDalamudPlugin
     {
         if (arguments.IsNullOrEmpty())
         {
-            EzConfigGui.Window.IsOpen ^= true;
+            EzConfigGui.Toggle();
             return;
         }
 
@@ -253,7 +250,7 @@ public class YesAlready : IDalamudPlugin
         sb.AppendLine($"{Command} lasttalk - Add the last seen target during a Talk dialog.");
         sb.AppendLine($"{Command} dutyconfirm - Toggle duty confirm.");
         sb.AppendLine($"{Command} onetimeconfirm - Toggles duty confirm as well as one-time confirm.");
-        Utils.SEString.PrintPluginMessage(sb.ToString());
+        Svc.Chat.PrintPluginMessage(sb);
     }
 
     private void CommandAddNode(bool zoneRestricted, bool createFolder, bool selectNo)
@@ -266,10 +263,10 @@ public class YesAlready : IDalamudPlugin
             return;
         }
 
-        Configuration.CreateTextNode(C.RootFolder, zoneRestricted, createFolder, selectNo);
+        Configuration.CreateNode<TextEntryNode>(C.RootFolder, createFolder, zoneRestricted ? GenericHelpers.GetRow<TerritoryType>(Player.Territory)?.Name.ExtractText() : null, !selectNo);
         C.Save();
 
-        Utils.SEString.PrintPluginMessage("Added a new text entry.");
+        Svc.Chat.PrintPluginMessage("Added a new text entry.");
     }
 
     private void CommandAddOkNode(bool createFolder)
@@ -282,10 +279,10 @@ public class YesAlready : IDalamudPlugin
             return;
         }
 
-        Configuration.CreateOkNode(C.RootFolder, createFolder);
+        Configuration.CreateNode<OkEntryNode>(C.RootFolder, createFolder);
         C.Save();
 
-        Utils.SEString.PrintPluginMessage("Added a new text entry.");
+        Svc.Chat.PrintPluginMessage("Added a new text entry.");
     }
 
     private void CommandAddListNode()
@@ -311,7 +308,7 @@ public class YesAlready : IDalamudPlugin
         parent.Children.Add(newNode);
         C.Save();
 
-        Utils.SEString.PrintPluginMessage("Added a new list entry.");
+        Svc.Chat.PrintPluginMessage("Added a new list entry.");
     }
 
     private void CommandAddTalkNode()
@@ -330,7 +327,7 @@ public class YesAlready : IDalamudPlugin
         parent.Children.Add(newNode);
         C.Save();
 
-        Utils.SEString.PrintPluginMessage("Added a new talk entry.");
+        Svc.Chat.PrintPluginMessage("Added a new talk entry.");
     }
 
     private void ToggleDutyConfirm()
@@ -340,7 +337,7 @@ public class YesAlready : IDalamudPlugin
         C.Save();
 
         var state = C.ContentsFinderConfirmEnabled ? "enabled" : "disabled";
-        Utils.SEString.PrintPluginMessage($"Duty Confirm {state}.");
+        Svc.Chat.PrintPluginMessage($"Duty Confirm {state}.");
     }
 
     private void ToggleOneTimeConfirm()
@@ -350,7 +347,7 @@ public class YesAlready : IDalamudPlugin
         C.Save();
 
         var state = C.ContentsFinderOneTimeConfirmEnabled ? "enabled" : "disabled";
-        Utils.SEString.PrintPluginMessage($"Duty Confirm and One Time Confirm {state}.");
+        Svc.Chat.PrintPluginMessage($"Duty Confirm and One Time Confirm {state}.");
     }
 
     #endregion

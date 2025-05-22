@@ -7,4 +7,5 @@ global using ECommons.Logging;
 global using ECommons.UIHelpers.AddonMasterImplementations;
 global using FFXIVClientStructs.FFXIV.Component.GUI;
 global using YesAlready.BaseFeatures;
+global using YesAlready.Utils;
 global using static YesAlready.YesAlready;

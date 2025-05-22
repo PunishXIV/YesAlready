@@ -3,8 +3,10 @@ using Dalamud.Interface;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
+using ECommons.GameHelpers;
 using ECommons.Reflection;
 using ImGuiNET;
+using Lumina.Excel.Sheets;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
@@ -329,13 +331,13 @@ internal class MainWindow : Window
                         var createFolder = io.KeyShift;
                         var selectNo = io.KeyAlt;
 
-                        Configuration.CreateTextNode(folderNode, zoneRestricted, createFolder, selectNo);
+                        Configuration.CreateNode<TextEntryNode>(C.RootFolder, createFolder, zoneRestricted ? GenericHelpers.GetRow<TerritoryType>(Player.Territory)?.Name.ExtractText() : null, !selectNo);
                         C.Save();
                     }
                     else if (root == OkRootFolder || root == NumericsRootFolder)
                     {
                         var createFolder = ImGui.GetIO().KeyShift;
-                        Configuration.CreateOkNode(folderNode, createFolder);
+                        Configuration.CreateNode<OkEntryNode>(folderNode, createFolder);
                         C.Save();
                     }
                     else if (root == ListRootFolder)

@@ -28,7 +28,7 @@ internal class SatisfactionSupply : AddonFeature
             {
                 if (WillOvercap(atk, index))
                 {
-                    Utils.SEString.PrintPluginMessage("Further turn in will overcap scrips.");
+                    Svc.Chat.PrintPluginMessage("Further turn in will overcap scrips.");
                     Disabled = true;
                     return;
                 }

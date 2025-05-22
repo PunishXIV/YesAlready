@@ -196,30 +196,6 @@ public partial class Configuration() : IPluginConfiguration
         chosenFolder.Children.Add(newNode);
     }
 
-    // Keep these as convenience methods that call the generic version
-    public static void CreateTextNode(TextFolderNode folder, bool zoneRestricted, bool createFolder, bool selectNo)
-    {
-        string? zoneName = null;
-        if (zoneRestricted)
-        {
-            var currentID = Svc.ClientState.TerritoryType;
-            if (!P.TerritoryNames.TryGetValue(currentID, out zoneName))
-                return;
-        }
-
-        CreateNode<TextEntryNode>(folder, createFolder, zoneName, !selectNo);
-    }
-
-    public static void CreateOkNode(TextFolderNode folder, bool createFolder)
-    {
-        CreateNode<OkEntryNode>(folder, createFolder);
-    }
-
-    public static void CreateNumericsNode(TextFolderNode folder, bool createFolder)
-    {
-        CreateNode<NumericsEntryNode>(folder, createFolder);
-    }
-
     public void Migrate()
     {
         IMigration[] migrations = [new V2()];

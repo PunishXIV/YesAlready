@@ -8,8 +8,8 @@ internal class InputNumeric : TextMatchingFeature
 {
     protected override unsafe string GetSetLastSeenText(AtkUnitBase* atk)
     {
-        var text = Utils.SEString.GetSeStringText(new nint(atk->AtkValues[6].String));
-        P.LastSeenNumericsText = text;
+        var text = atk->AtkValues[6].String;
+        P.LastSeenNumericsText = atk->AtkValues[6].String;
         return text;
     }
 
@@ -35,7 +35,7 @@ internal class InputNumeric : TextMatchingFeature
         var min = atk->AtkValues[2].UInt;
         var max = atk->AtkValues[3].UInt;
 
-        PluginLog.Debug("AddonInputNumeric: Selecting ok");
+        Log("Selecting ok");
         var value = Math.Clamp(node.IsPercent ? (uint)Math.Ceiling(max * (node.Percentage / 100f)) : (uint)node.Quantity, min, max);
         Callback.Fire(atk, true, (int)value);
     }

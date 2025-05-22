@@ -14,7 +14,7 @@ public static class Ok
         var newStyle = new Vector2(style.ItemSpacing.X / 2, style.ItemSpacing.Y);
         ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, newStyle);
 
-        if (Utils.ImGuiEx.IconButton(FontAwesomeIcon.Plus, "Add new entry"))
+        if (ImGuiEx.IconButton(FontAwesomeIcon.Plus, "Add new entry"))
         {
             var newNode = new OkEntryNode { Enabled = false, Text = "Your text goes here" };
             OkRootFolder.Children.Add(newNode);
@@ -22,17 +22,17 @@ public static class Ok
         }
 
         ImGui.SameLine();
-        if (Utils.ImGuiEx.IconButton(FontAwesomeIcon.SearchPlus, "Add last seen as new entry"))
+        if (ImGuiEx.IconButton(FontAwesomeIcon.SearchPlus, "Add last seen as new entry"))
         {
             var io = ImGui.GetIO();
             var createFolder = io.KeyShift;
 
-            Configuration.CreateOkNode(OkRootFolder, createFolder);
+            Configuration.CreateNode<OkEntryNode>(OkRootFolder, createFolder);
             C.Save();
         }
 
         ImGui.SameLine();
-        if (Utils.ImGuiEx.IconButton(FontAwesomeIcon.FolderPlus, "Add folder"))
+        if (ImGuiEx.IconButton(FontAwesomeIcon.FolderPlus, "Add folder"))
         {
             var newNode = new TextFolderNode { Name = "Untitled folder" };
             OkRootFolder.Children.Add(newNode);
@@ -59,7 +59,7 @@ public static class Ok
         sb.AppendLine("  - SelectOk");
 
         ImGui.SameLine();
-        Utils.ImGuiEx.IconButton(FontAwesomeIcon.QuestionCircle, sb.ToString());
+        ImGuiEx.IconButton(FontAwesomeIcon.QuestionCircle, sb.ToString());
         if (ImGui.IsItemHovered()) ImGui.SetTooltip(sb.ToString());
 
         ImGui.PopStyleVar(); // ItemSpacing
@@ -83,7 +83,7 @@ public static class Ok
             ImGui.PopStyleColor();
 
         if (!validRegex)
-            Utils.ImGuiEx.TextTooltip("Invalid Text Regex");
+            ImGuiEx.TextTooltip("Invalid Text Regex");
 
         if (ImGui.IsItemHovered())
         {
@@ -128,10 +128,10 @@ public static class Ok
             C.Save();
         }
 
-        var trashAltWidth = Utils.ImGuiEx.GetIconButtonWidth(FontAwesomeIcon.TrashAlt);
+        var trashAltWidth = ImGuiEx.GetIconButtonWidth(FontAwesomeIcon.TrashAlt);
 
         ImGui.SameLine(ImGui.GetContentRegionMax().X - trashAltWidth);
-        if (Utils.ImGuiEx.IconButton(FontAwesomeIcon.TrashAlt, "Delete"))
+        if (ImGuiEx.IconButton(FontAwesomeIcon.TrashAlt, "Delete"))
         {
             if (C.TryFindParent(node, out var parentNode))
             {

@@ -21,7 +21,7 @@ internal class ItemInspectionResut : AddonFeature
             if (am.Description.TextValue.Contains('※') || am.Description.TextValue.Contains("liées à Garde-la-Reine"))
             {
                 am.ItemName.Payloads.Insert(0, new TextPayload("Received: "));
-                Utils.SEString.PrintPluginMessage(am.ItemName);
+                Svc.Chat.PrintPluginMessage(am.ItemName);
             }
 
             itemInspectionCount++;
@@ -29,7 +29,7 @@ internal class ItemInspectionResut : AddonFeature
             if (rateLimiter != 0 && itemInspectionCount % rateLimiter == 0)
             {
                 itemInspectionCount = 0;
-                Utils.SEString.PrintPluginMessage("Rate limited, pausing item inspection loop.");
+                Svc.Chat.PrintPluginMessage("Rate limited, pausing item inspection loop.");
                 return;
             }
 

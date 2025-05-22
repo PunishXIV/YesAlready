@@ -14,7 +14,7 @@ public static class Lists
         var newStyle = new Vector2(style.ItemSpacing.X / 2, style.ItemSpacing.Y);
         ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, newStyle);
 
-        if (Utils.ImGuiEx.IconButton(FontAwesomeIcon.Plus, "Add new entry"))
+        if (ImGuiEx.IconButton(FontAwesomeIcon.Plus, "Add new entry"))
         {
             var newNode = new ListEntryNode { Enabled = false, Text = "Your text goes here" };
             ListRootFolder.Children.Add(newNode);
@@ -22,7 +22,7 @@ public static class Lists
         }
 
         ImGui.SameLine();
-        if (Utils.ImGuiEx.IconButton(FontAwesomeIcon.SearchPlus, "Add last selected as new entry"))
+        if (ImGuiEx.IconButton(FontAwesomeIcon.SearchPlus, "Add last selected as new entry"))
         {
             var newNode = new ListEntryNode { Enabled = true, Text = P.LastSeenListSelection, TargetRestricted = true, TargetText = P.LastSeenListTarget };
             ListRootFolder.Children.Add(newNode);
@@ -30,7 +30,7 @@ public static class Lists
         }
 
         ImGui.SameLine();
-        if (Utils.ImGuiEx.IconButton(FontAwesomeIcon.FolderPlus, "Add folder"))
+        if (ImGuiEx.IconButton(FontAwesomeIcon.FolderPlus, "Add folder"))
         {
             var newNode = new TextFolderNode { Name = "Untitled folder" };
             ListRootFolder.Children.Add(newNode);
@@ -55,7 +55,7 @@ public static class Lists
         sb.AppendLine("  - SelectIconString");
 
         ImGui.SameLine();
-        Utils.ImGuiEx.IconButton(FontAwesomeIcon.QuestionCircle, sb.ToString());
+        ImGuiEx.IconButton(FontAwesomeIcon.QuestionCircle, sb.ToString());
 
         ImGui.PopStyleVar(); // ItemSpacing
     }
@@ -79,11 +79,11 @@ public static class Lists
             ImGui.PopStyleColor();
 
         if (!validRegex && !validTarget)
-            Utils.ImGuiEx.TextTooltip("Invalid Text and Target Regex");
+            ImGuiEx.TextTooltip("Invalid Text and Target Regex");
         else if (!validRegex)
-            Utils.ImGuiEx.TextTooltip("Invalid Text Regex");
+            ImGuiEx.TextTooltip("Invalid Text Regex");
         else if (!validTarget)
-            Utils.ImGuiEx.TextTooltip("Invalid Target Regex");
+            ImGuiEx.TextTooltip("Invalid Target Regex");
 
         if (ImGui.IsItemHovered())
         {
@@ -128,10 +128,10 @@ public static class Lists
             C.Save();
         }
 
-        var trashAltWidth = Utils.ImGuiEx.GetIconButtonWidth(FontAwesomeIcon.TrashAlt);
+        var trashAltWidth = ImGuiEx.GetIconButtonWidth(FontAwesomeIcon.TrashAlt);
 
         ImGui.SameLine(ImGui.GetContentRegionMax().X - trashAltWidth);
-        if (Utils.ImGuiEx.IconButton(FontAwesomeIcon.TrashAlt, "Delete"))
+        if (ImGuiEx.IconButton(FontAwesomeIcon.TrashAlt, "Delete"))
         {
             if (C.TryFindParent(node, out var parentNode))
             {
@@ -154,10 +154,10 @@ public static class Lists
             C.Save();
         }
 
-        var searchPlusWidth = Utils.ImGuiEx.GetIconButtonWidth(FontAwesomeIcon.SearchPlus);
+        var searchPlusWidth = ImGuiEx.GetIconButtonWidth(FontAwesomeIcon.SearchPlus);
 
         ImGui.SameLine(ImGui.GetContentRegionMax().X - searchPlusWidth);
-        if (Utils.ImGuiEx.IconButton(FontAwesomeIcon.SearchPlus, "Fill with current target"))
+        if (ImGuiEx.IconButton(FontAwesomeIcon.SearchPlus, "Fill with current target"))
         {
             var target = Svc.Targets.Target;
             var name = target?.Name?.TextValue ?? string.Empty;

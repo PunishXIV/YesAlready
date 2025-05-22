@@ -1,9 +1,13 @@
 using Dalamud.Interface;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility.Raii;
+using ECommons.GameHelpers;
+using ECommons.SimpleGui;
 using ImGuiNET;
+using Lumina.Excel.Sheets;
 using System.Numerics;
 using System.Text;
+using YesAlready.Interface;
 using YesAlready.Utils;
 
 namespace YesAlready.UI.Tabs;
@@ -32,7 +36,7 @@ public class YesNo
             var createFolder = io.KeyShift;
             var selectNo = io.KeyAlt;
 
-            Configuration.CreateTextNode(RootFolder, zoneRestricted, createFolder, selectNo);
+            Configuration.CreateNode<TextEntryNode>(C.RootFolder, createFolder, zoneRestricted ? GenericHelpers.GetRow<TerritoryType>(Player.Territory)?.Name.ExtractText() : null, !selectNo);
             C.Save();
         }
 
@@ -218,7 +222,7 @@ public class YesNo
 
         ImGui.SameLine(ImGui.GetContentRegionMax().X - searchWidth);
         if (ImGuiEx.IconButton(FontAwesomeIcon.Search, "Zone List"))
-            P.OpenZoneListUi();
+            EzConfigGui.GetWindow<ZoneListWindow>()?.Toggle();
 
         ImGui.SameLine(ImGui.GetContentRegionMax().X - searchWidth - searchPlusWidth - spacing.X);
         if (ImGuiEx.IconButton(FontAwesomeIcon.SearchPlus, "Fill with current zone"))
@@ -253,7 +257,7 @@ public class YesNo
 
         ImGui.SameLine(ImGui.GetContentRegionMax().X - searchWidth);
         if (ImGuiEx.IconButton(FontAwesomeIcon.Search, "Conditions List"))
-            P.OpenConditionsListUi();
+            EzConfigGui.GetWindow<ConditionsListWindow>()?.Toggle();
 
         var playerConditions = textNode.PlayerConditions;
         if (ImGui.InputText($"##{textNode.Name}-playerConditionsText", ref playerConditions, 10_000, ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EnterReturnsTrue))

@@ -7,7 +7,7 @@ internal class Talk : TextMatchingFeature
 {
     protected override unsafe string GetSetLastSeenText(AtkUnitBase* atk)
     {
-        var text = Svc.Targets.Target is { Name: var name } ? Utils.SEString.GetSeStringText(name) : string.Empty;
+        var text = Svc.Targets.Target is { Name: var name } ? name.TextValue : string.Empty;
         P.LastSeenTalkTarget = text;
         return text;
     }
