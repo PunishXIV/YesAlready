@@ -6,7 +6,6 @@ using Dalamud.Interface.Windowing;
 using ECommons.GameHelpers;
 using ECommons.Reflection;
 using ImGuiNET;
-using Lumina.Excel.Sheets;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
@@ -66,7 +65,7 @@ internal class MainWindow : Window
         using var tabs = ImRaii.TabBar("Tabs");
         if (tabs)
         {
-            coreTab.Draw();
+            //coreTab.Draw();
             DisplayGenericOptions("YesNo", YesNo.DrawButtons, () => DisplayNodes(YesNoRootFolder, () => new TextEntryNode() { Enabled = false, Text = "Add some text here!" }));
             DisplayGenericOptions("Ok", Ok.DrawButtons, () => DisplayNodes(OkRootFolder, () => new OkEntryNode() { Enabled = false, Text = "Add some text here!" }));
             DisplayGenericOptions("List", Lists.DrawButtons, () => DisplayNodes(ListRootFolder, () => new ListEntryNode() { Enabled = false, Text = "Add some text here!" }));
@@ -116,7 +115,7 @@ internal class MainWindow : Window
                     }
                     config.Call("QueueSave", []);
                 }
-                ImGuiEx.IndentedTextColored($"Display the status of the {Name} in the Server Info Bar (DTR Bar). Clicking toggles the plugin.");
+                ImGuiX.IndentedTextColored($"Display the status of the {Name} in the Server Info Bar (DTR Bar). Clicking toggles the plugin.");
             }
             catch (Exception e)
             {
@@ -143,7 +142,7 @@ internal class MainWindow : Window
                 }
             }
         }
-        ImGuiEx.IndentedTextColored($"Select the chat channel for {Name} messages to output to.");
+        ImGuiX.IndentedTextColored($"Select the chat channel for {Name} messages to output to.");
     }
 
     // ====================================================================================================
@@ -200,7 +199,7 @@ internal class MainWindow : Window
             ImGui.PopStyleColor();
 
         if (!validRegex)
-            ImGuiEx.TextTooltip("Invalid Text Regex");
+            ImGuiX.TextTooltip("Invalid Text Regex");
 
         if (ImGui.IsItemHovered())
         {
@@ -305,7 +304,7 @@ internal class MainWindow : Window
             {
                 ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, spacing);
 
-                if (ImGuiEx.IconButton(FontAwesomeIcon.Plus, "Add entry"))
+                if (ImGuiX.IconButton(FontAwesomeIcon.Plus, "Add entry"))
                 {
                     if (root == YesNoRootFolder)
                     {
@@ -322,7 +321,7 @@ internal class MainWindow : Window
                 }
 
                 ImGui.SameLine();
-                if (ImGuiEx.IconButton(FontAwesomeIcon.SearchPlus, "Add last seen as new entry"))
+                if (ImGuiX.IconButton(FontAwesomeIcon.SearchPlus, "Add last seen as new entry"))
                 {
                     if (root == YesNoRootFolder)
                     {
@@ -331,7 +330,7 @@ internal class MainWindow : Window
                         var createFolder = io.KeyShift;
                         var selectNo = io.KeyAlt;
 
-                        Configuration.CreateNode<TextEntryNode>(C.RootFolder, createFolder, zoneRestricted ? GenericHelpers.GetRow<TerritoryType>(Player.Territory)?.Name.ExtractText() : null, !selectNo);
+                        Configuration.CreateNode<TextEntryNode>(C.RootFolder, createFolder, zoneRestricted ? GenericHelpers.GetRow<Lumina.Excel.Sheets.TerritoryType>(Player.Territory)?.Name.ExtractText() : null, !selectNo);
                         C.Save();
                     }
                     else if (root == OkRootFolder || root == NumericsRootFolder)
@@ -355,16 +354,16 @@ internal class MainWindow : Window
                 }
 
                 ImGui.SameLine();
-                if (ImGuiEx.IconButton(FontAwesomeIcon.FolderPlus, "Add folder"))
+                if (ImGuiX.IconButton(FontAwesomeIcon.FolderPlus, "Add folder"))
                 {
                     var newNode = new TextFolderNode { Name = "Untitled folder" };
                     folderNode.Children.Add(newNode);
                     C.Save();
                 }
 
-                var trashWidth = ImGuiEx.GetIconButtonWidth(FontAwesomeIcon.TrashAlt);
+                var trashWidth = ImGuiX.GetIconButtonWidth(FontAwesomeIcon.TrashAlt);
                 ImGui.SameLine(ImGui.GetContentRegionMax().X - trashWidth);
-                if (ImGuiEx.IconButton(FontAwesomeIcon.TrashAlt, "Delete"))
+                if (ImGuiX.IconButton(FontAwesomeIcon.TrashAlt, "Delete"))
                 {
                     if (C.TryFindParent(node, out var parentNode))
                     {

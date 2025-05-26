@@ -16,7 +16,7 @@ public static class Custom
         var newStyle = new Vector2(style.ItemSpacing.X / 2, style.ItemSpacing.Y);
         using var _ = ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, newStyle);
 
-        if (ImGuiEx.IconButton(FontAwesomeIcon.Plus, "Add new entry"))
+        if (ImGuiX.IconButton(FontAwesomeIcon.Plus, "Add new entry"))
         {
             var newNode = new CustomEntryNode
             {
@@ -44,7 +44,7 @@ public static class Custom
         sb.AppendLine("   Effect: When opening the Character addon, it will instantly be closed. Probably not useful.");
 
         ImGui.SameLine();
-        ImGuiEx.IconButton(FontAwesomeIcon.QuestionCircle, sb.ToString());
+        ImGuiX.IconButton(FontAwesomeIcon.QuestionCircle, sb.ToString());
         if (ImGui.IsItemHovered()) ImGui.SetTooltip(sb.ToString());
     }
 
@@ -59,10 +59,10 @@ public static class Custom
             CustomAddonCallbacks.Toggle();
         }
 
-        var trashAltWidth = ImGuiEx.GetIconButtonWidth(FontAwesomeIcon.TrashAlt);
+        var trashAltWidth = ImGuiX.GetIconButtonWidth(FontAwesomeIcon.TrashAlt);
 
         ImGui.SameLine(ImGui.GetContentRegionMax().X - trashAltWidth);
-        if (ImGuiEx.IconButton(FontAwesomeIcon.TrashAlt, "Delete"))
+        if (ImGuiX.IconButton(FontAwesomeIcon.TrashAlt, "Delete"))
         {
             if (C.TryFindParent(node, out var parentNode))
             {

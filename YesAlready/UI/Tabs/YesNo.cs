@@ -21,7 +21,7 @@ public class YesNo
         var newStyle = new Vector2(style.ItemSpacing.X / 2, style.ItemSpacing.Y);
         using var _ = ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, newStyle);
 
-        if (ImGuiEx.IconButton(FontAwesomeIcon.Plus, "Add new entry"))
+        if (ImGuiX.IconButton(FontAwesomeIcon.Plus, "Add new entry"))
         {
             var newNode = new TextEntryNode { Enabled = false, Text = "Your text goes here" };
             RootFolder.Children.Add(newNode);
@@ -29,7 +29,7 @@ public class YesNo
         }
 
         ImGui.SameLine();
-        if (ImGuiEx.IconButton(FontAwesomeIcon.SearchPlus, "Add last seen as new entry"))
+        if (ImGuiX.IconButton(FontAwesomeIcon.SearchPlus, "Add last seen as new entry"))
         {
             var io = ImGui.GetIO();
             var zoneRestricted = io.KeyCtrl;
@@ -41,7 +41,7 @@ public class YesNo
         }
 
         ImGui.SameLine();
-        if (ImGuiEx.IconButton(FontAwesomeIcon.FolderPlus, "Add folder"))
+        if (ImGuiX.IconButton(FontAwesomeIcon.FolderPlus, "Add folder"))
         {
             var newNode = new TextFolderNode { Name = "Untitled folder" };
             RootFolder.Children.Add(newNode);
@@ -72,7 +72,7 @@ public class YesNo
         sb.AppendLine("  - SelectYesNo");
 
         ImGui.SameLine();
-        ImGuiEx.IconButton(FontAwesomeIcon.QuestionCircle, sb.ToString());
+        ImGuiX.IconButton(FontAwesomeIcon.QuestionCircle, sb.ToString());
         if (ImGui.IsItemHovered()) ImGui.SetTooltip(sb.ToString());
 
         ImGui.SameLine();
@@ -92,7 +92,7 @@ public class YesNo
                 C.GimmickYesNo = gimmickConfirm;
                 C.Save();
             }
-            ImGuiEx.IndentedTextColored("Automatically confirm any Yesno dialogs that are part of the GimmickYesNo sheet.\nThese are mostly the dungeon Yesnos like \"Unlock this door?\" or \"Pickup this item?\"", wrapped: false);
+            ImGuiX.IndentedTextColored("Automatically confirm any Yesno dialogs that are part of the GimmickYesNo sheet.\nThese are mostly the dungeon Yesnos like \"Unlock this door?\" or \"Pickup this item?\"", wrapped: false);
 
             var pfConfirm = C.PartyFinderJoinConfirm;
             if (ImGui.Checkbox("LookingForGroup x SelectYesno", ref pfConfirm))
@@ -101,7 +101,7 @@ public class YesNo
                 C.Save();
             }
 
-            ImGuiEx.IndentedTextColored("Automatically confirm when joining a party finder group.", wrapped: false);
+            ImGuiX.IndentedTextColored("Automatically confirm when joining a party finder group.", wrapped: false);
 
             var autoCollect = C.AutoCollectable;
             if (ImGui.Checkbox("Auto Collectables", ref autoCollect))
@@ -110,7 +110,7 @@ public class YesNo
                 C.Save();
             }
 
-            ImGuiEx.IndentedTextColored("Automatically accept collectables that are worth turning in and decline insufficient ones.", wrapped: false);
+            ImGuiX.IndentedTextColored("Automatically accept collectables that are worth turning in and decline insufficient ones.", wrapped: false);
         }
     }
 
@@ -133,11 +133,11 @@ public class YesNo
             ImGui.PopStyleColor();
 
         if (!validRegex && !validZone)
-            ImGuiEx.TextTooltip("Invalid Text and Zone Regex");
+            ImGuiX.TextTooltip("Invalid Text and Zone Regex");
         else if (!validRegex)
-            ImGuiEx.TextTooltip("Invalid Text Regex");
+            ImGuiX.TextTooltip("Invalid Text Regex");
         else if (!validZone)
-            ImGuiEx.TextTooltip("Invalid Zone Regex");
+            ImGuiX.TextTooltip("Invalid Zone Regex");
 
         if (ImGui.IsItemHovered())
         {
@@ -191,10 +191,10 @@ public class YesNo
             C.Save();
         }
 
-        var trashAltWidth = ImGuiEx.GetIconButtonWidth(FontAwesomeIcon.TrashAlt);
+        var trashAltWidth = ImGuiX.GetIconButtonWidth(FontAwesomeIcon.TrashAlt);
 
         ImGui.SameLine(ImGui.GetContentRegionMax().X - trashAltWidth);
-        if (ImGuiEx.IconButton(FontAwesomeIcon.TrashAlt, "Delete"))
+        if (ImGuiX.IconButton(FontAwesomeIcon.TrashAlt, "Delete"))
         {
             if (C.TryFindParent(textNode, out var parentNode))
             {
@@ -217,15 +217,15 @@ public class YesNo
             C.Save();
         }
 
-        var searchWidth = ImGuiEx.GetIconButtonWidth(FontAwesomeIcon.Search);
-        var searchPlusWidth = ImGuiEx.GetIconButtonWidth(FontAwesomeIcon.SearchPlus);
+        var searchWidth = ImGuiX.GetIconButtonWidth(FontAwesomeIcon.Search);
+        var searchPlusWidth = ImGuiX.GetIconButtonWidth(FontAwesomeIcon.SearchPlus);
 
         ImGui.SameLine(ImGui.GetContentRegionMax().X - searchWidth);
-        if (ImGuiEx.IconButton(FontAwesomeIcon.Search, "Zone List"))
+        if (ImGuiX.IconButton(FontAwesomeIcon.Search, "Zone List"))
             EzConfigGui.GetWindow<ZoneListWindow>()?.Toggle();
 
         ImGui.SameLine(ImGui.GetContentRegionMax().X - searchWidth - searchPlusWidth - spacing.X);
-        if (ImGuiEx.IconButton(FontAwesomeIcon.SearchPlus, "Fill with current zone"))
+        if (ImGuiX.IconButton(FontAwesomeIcon.SearchPlus, "Fill with current zone"))
         {
             var currentID = Svc.ClientState.TerritoryType;
             if (P.TerritoryNames.TryGetValue(currentID, out var zoneName))
@@ -256,7 +256,7 @@ public class YesNo
         ImGuiComponents.HelpMarker($"Conditions can either be their name (case sensitive) or ID. They must be comma separated if there are multiple. Condition restricted only allows the match to go through if all conditions are met. If you would like to invert a condition, put a \"!\" in front of it.");
 
         ImGui.SameLine(ImGui.GetContentRegionMax().X - searchWidth);
-        if (ImGuiEx.IconButton(FontAwesomeIcon.Search, "Conditions List"))
+        if (ImGuiX.IconButton(FontAwesomeIcon.Search, "Conditions List"))
             EzConfigGui.GetWindow<ConditionsListWindow>()?.Toggle();
 
         var playerConditions = textNode.PlayerConditions;

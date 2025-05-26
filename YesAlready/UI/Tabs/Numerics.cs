@@ -14,7 +14,7 @@ public static class Numerics
         var newStyle = new Vector2(style.ItemSpacing.X / 2, style.ItemSpacing.Y);
         ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, newStyle);
 
-        if (ImGuiEx.IconButton(FontAwesomeIcon.Plus, "Add new entry"))
+        if (ImGuiX.IconButton(FontAwesomeIcon.Plus, "Add new entry"))
         {
             var newNode = new NumericsEntryNode { Enabled = false, Text = "Your text goes here" };
             NumericsRootFolder.Children.Add(newNode);
@@ -22,7 +22,7 @@ public static class Numerics
         }
 
         ImGui.SameLine();
-        if (ImGuiEx.IconButton(FontAwesomeIcon.SearchPlus, "Add last seen as new entry"))
+        if (ImGuiX.IconButton(FontAwesomeIcon.SearchPlus, "Add last seen as new entry"))
         {
             var io = ImGui.GetIO();
             var createFolder = io.KeyShift;
@@ -32,7 +32,7 @@ public static class Numerics
         }
 
         ImGui.SameLine();
-        if (ImGuiEx.IconButton(FontAwesomeIcon.FolderPlus, "Add folder"))
+        if (ImGuiX.IconButton(FontAwesomeIcon.FolderPlus, "Add folder"))
         {
             var newNode = new TextFolderNode { Name = "Untitled folder" };
             NumericsRootFolder.Children.Add(newNode);
@@ -59,7 +59,7 @@ public static class Numerics
         sb.AppendLine("  - InputNumeric");
 
         ImGui.SameLine();
-        ImGuiEx.IconButton(FontAwesomeIcon.QuestionCircle, sb.ToString());
+        ImGuiX.IconButton(FontAwesomeIcon.QuestionCircle, sb.ToString());
         if (ImGui.IsItemHovered()) ImGui.SetTooltip(sb.ToString());
 
         ImGui.PopStyleVar(); // ItemSpacing
@@ -76,10 +76,10 @@ public static class Numerics
             C.Save();
         }
 
-        var trashAltWidth = ImGuiEx.GetIconButtonWidth(FontAwesomeIcon.TrashAlt);
+        var trashAltWidth = ImGuiX.GetIconButtonWidth(FontAwesomeIcon.TrashAlt);
 
         ImGui.SameLine(ImGui.GetContentRegionMax().X - trashAltWidth);
-        if (ImGuiEx.IconButton(FontAwesomeIcon.TrashAlt, "Delete"))
+        if (ImGuiX.IconButton(FontAwesomeIcon.TrashAlt, "Delete"))
         {
             if (C.TryFindParent(node, out var parentNode))
             {

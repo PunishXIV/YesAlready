@@ -6,7 +6,7 @@ using System.Numerics;
 
 namespace YesAlready.Utils;
 
-internal static class ImGuiEx
+internal static class ImGuiX
 {
     private static Vector4 shadedColor = new(0.68f, 0.68f, 0.68f, 1.0f);
 

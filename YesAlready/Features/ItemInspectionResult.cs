@@ -3,7 +3,7 @@ using Dalamud.Game.Text.SeStringHandling.Payloads;
 namespace YesAlready.Features;
 
 [AddonFeature(AddonEvent.PostSetup)]
-internal class ItemInspectionResut : AddonFeature
+internal class ItemInspectionResult : AddonFeature
 {
     private int itemInspectionCount = 0;
 

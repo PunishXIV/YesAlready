@@ -50,7 +50,7 @@ public static class Bothers
                 C.Save();
             }
 
-            ImGuiEx.IndentedTextColored("While this key is held, the plugin is disabled.");
+            ImGuiX.IndentedTextColored("While this key is held, the plugin is disabled.");
 
             // 2. Forced Yes Hotkey
             if (!hotkeyValues.Contains(C.ForcedYesKey))
@@ -87,7 +87,7 @@ public static class Bothers
                 }
             }
 
-            ImGuiEx.IndentedTextColored("2. While this key is held, any Yes/No prompt will always default to yes, and all talk dialogue will be skipped. Be careful.");
+            ImGuiX.IndentedTextColored("2. While this key is held, any Yes/No prompt will always default to yes, and all talk dialogue will be skipped. Be careful.");
         }
 
         #endregion
@@ -102,7 +102,7 @@ public static class Bothers
                 C.DesynthDialogEnabled = desynthDialog;
                 C.Save();
             }
-            ImGuiEx.IndentedTextColored("Remove the Desynthesis menu confirmation.");
+            ImGuiX.IndentedTextColored("Remove the Desynthesis menu confirmation.");
 
             // 4. SalvageDialog (Bulk)
             //var desynthBulkDialog = C.DesynthBulkDialogEnabled;
@@ -120,7 +120,7 @@ public static class Bothers
                 C.DesynthesisResults = desynthResultsDialog;
                 C.Save();
             }
-            ImGuiEx.IndentedTextColored("Automatically closes the SalvageResults window when done desynthesizing.");
+            ImGuiX.IndentedTextColored("Automatically closes the SalvageResults window when done desynthesizing.");
 
             var purifyResultsDialog = C.AetherialReductionResults;
             if (ImGui.Checkbox("PurifyResult", ref purifyResultsDialog))
@@ -128,7 +128,7 @@ public static class Bothers
                 C.AetherialReductionResults = purifyResultsDialog;
                 C.Save();
             }
-            ImGuiEx.IndentedTextColored("Automatically closes the PurifyResult window when done reducing.");
+            ImGuiX.IndentedTextColored("Automatically closes the PurifyResult window when done reducing.");
         }
 
         #endregion
@@ -142,7 +142,7 @@ public static class Bothers
                 C.MaterialAttachDialogEnabled = meld;
                 C.Save();
             }
-            ImGuiEx.IndentedTextColored("Remove the materia melding confirmation menu.");
+            ImGuiX.IndentedTextColored("Remove the materia melding confirmation menu.");
 
             var materialize = C.MaterializeDialogEnabled;
             if (ImGui.Checkbox("MaterializeDialog", ref materialize))
@@ -150,7 +150,7 @@ public static class Bothers
                 C.MaterializeDialogEnabled = materialize;
                 C.Save();
             }
-            ImGuiEx.IndentedTextColored("Remove the create new (extract) materia confirmation.");
+            ImGuiX.IndentedTextColored("Remove the create new (extract) materia confirmation.");
 
             var materiaRetrieve = C.MateriaRetrieveDialogEnabled;
             if (ImGui.Checkbox("MateriaRetrieveDialog", ref materiaRetrieve))
@@ -158,7 +158,7 @@ public static class Bothers
                 C.MateriaRetrieveDialogEnabled = materiaRetrieve;
                 C.Save();
             }
-            ImGuiEx.IndentedTextColored("Remove the retrieve materia confirmation.");
+            ImGuiX.IndentedTextColored("Remove the retrieve materia confirmation.");
         }
 
         #endregion
@@ -172,7 +172,7 @@ public static class Bothers
                 C.RetainerTaskAskEnabled = retainerTaskAsk;
                 C.Save();
             }
-            ImGuiEx.IndentedTextColored("Skip the confirmation in the final dialog before sending out a retainer.");
+            ImGuiX.IndentedTextColored("Skip the confirmation in the final dialog before sending out a retainer.");
 
             var retainerTaskResult = C.RetainerTaskResultEnabled;
             if (ImGui.Checkbox("RetainerTaskResult", ref retainerTaskResult))
@@ -180,7 +180,7 @@ public static class Bothers
                 C.RetainerTaskResultEnabled = retainerTaskResult;
                 C.Save();
             }
-            ImGuiEx.IndentedTextColored("Automatically send a retainer on the same venture as before when receiving an item.");
+            ImGuiX.IndentedTextColored("Automatically send a retainer on the same venture as before when receiving an item.");
 
             var retainerListDialog = C.RetainerTransferListConfirm;
             if (ImGui.Checkbox("RetainerItemTransferList", ref retainerListDialog))
@@ -188,7 +188,7 @@ public static class Bothers
                 C.RetainerTransferListConfirm = retainerListDialog;
                 C.Save();
             }
-            ImGuiEx.IndentedTextColored("Skip the confirmation in the RetainerItemTransferList window to entrust all items to the retainer.");
+            ImGuiX.IndentedTextColored("Skip the confirmation in the RetainerItemTransferList window to entrust all items to the retainer.");
 
             var retainerProgressDialog = C.RetainerTransferProgressConfirm;
             if (ImGui.Checkbox("RetainerItemTransferProgress", ref retainerProgressDialog))
@@ -196,7 +196,7 @@ public static class Bothers
                 C.RetainerTransferProgressConfirm = retainerProgressDialog;
                 C.Save();
             }
-            ImGuiEx.IndentedTextColored("Automatically closes the RetainerItemTransferProgress window when finished entrusting items.");
+            ImGuiX.IndentedTextColored("Automatically closes the RetainerItemTransferProgress window when finished entrusting items.");
 
             var finalize = C.AirShipExplorationResultFinalize;
             if (ImGui.Checkbox("AirShipExplorationResult - Finalize", ref finalize))
@@ -206,7 +206,7 @@ public static class Bothers
                 C.AirShipExplorationResultFinalize = finalize;
                 C.Save();
             }
-            ImGuiEx.IndentedTextColored("Automatically finalize submersible reports when the AirShipExplorationResult window opens.");
+            ImGuiX.IndentedTextColored("Automatically finalize submersible reports when the AirShipExplorationResult window opens.");
 
             var redeploy = C.AirShipExplorationResultRedeploy;
             if (ImGui.Checkbox("AirShipExplorationResult - Redeploy", ref redeploy))
@@ -216,7 +216,7 @@ public static class Bothers
                 C.AirShipExplorationResultRedeploy = redeploy;
                 C.Save();
             }
-            ImGuiEx.IndentedTextColored("Automatically redeploy submersibles when the AirShipExplorationResult window opens.");
+            ImGuiX.IndentedTextColored("Automatically redeploy submersibles when the AirShipExplorationResult window opens.");
         }
 
         #endregion
@@ -234,7 +234,7 @@ public static class Bothers
 
                 C.Save();
             }
-            ImGuiEx.IndentedTextColored("Automatically commence duties when ready.");
+            ImGuiX.IndentedTextColored("Automatically commence duties when ready.");
 
             var contentsFinderOneTimeConfirm = C.ContentsFinderOneTimeConfirmEnabled;
             if (ImGui.Checkbox("ContentsFinderOneTimeConfirm", ref contentsFinderOneTimeConfirm))
@@ -246,7 +246,7 @@ public static class Bothers
 
                 C.Save();
             }
-            ImGuiEx.IndentedTextColored("Automatically commence duties when ready, but only once. Requires Contents Finder Confirm, and disables both after activation.");
+            ImGuiX.IndentedTextColored("Automatically commence duties when ready, but only once. Requires Contents Finder Confirm, and disables both after activation.");
         }
 
         #endregion
@@ -260,7 +260,7 @@ public static class Bothers
                 C.MKSRecordQuit = ccquit;
                 C.Save();
             }
-            ImGuiEx.IndentedTextColored("Automatically leave the Crystalline Conflict match when the results appear.");
+            ImGuiX.IndentedTextColored("Automatically leave the Crystalline Conflict match when the results appear.");
 
             var flquit = C.FrontlineRecordQuit;
             if (ImGui.Checkbox("FrontlineRecord", ref flquit))
@@ -268,7 +268,7 @@ public static class Bothers
                 C.FrontlineRecordQuit = flquit;
                 C.Save();
             }
-            ImGuiEx.IndentedTextColored("Automatically leave the Frontline match when the results appear.");
+            ImGuiX.IndentedTextColored("Automatically leave the Frontline match when the results appear.");
         }
 
         #endregion
@@ -282,7 +282,7 @@ public static class Bothers
                 C.LotteryWeeklyInput = lotto;
                 C.Save();
             }
-            ImGuiEx.IndentedTextColored("Automatically purchase a Jumbo Cactpot ticket with a random number.");
+            ImGuiX.IndentedTextColored("Automatically purchase a Jumbo Cactpot ticket with a random number.");
 
             // 19. HWDLottery
             var kupo = C.KupoOfFortune;
@@ -291,7 +291,7 @@ public static class Bothers
                 C.KupoOfFortune = kupo;
                 C.Save();
             }
-            ImGuiEx.IndentedTextColored("Automatically select a kupo of fortune reward. This will instantly complete a single kupo ticket but is unable to continue to the next automatically.");
+            ImGuiX.IndentedTextColored("Automatically select a kupo of fortune reward. This will instantly complete a single kupo ticket but is unable to continue to the next automatically.");
 
             var lovQuit = C.LordOfVerminionQuit;
             if (ImGui.Checkbox("LovmResult", ref lovQuit))
@@ -299,7 +299,7 @@ public static class Bothers
                 C.LordOfVerminionQuit = lovQuit;
                 C.Save();
             }
-            ImGuiEx.IndentedTextColored("Automatically quit Lord of Verminion when the results menu appears.");
+            ImGuiX.IndentedTextColored("Automatically quit Lord of Verminion when the results menu appears.");
 
             var fgsEnter = C.FallGuysRegisterConfirm;
             if (ImGui.Checkbox("FGSEnterDialog", ref fgsEnter))
@@ -307,7 +307,7 @@ public static class Bothers
                 C.FallGuysRegisterConfirm = fgsEnter;
                 C.Save();
             }
-            ImGuiEx.IndentedTextColored("Automatically register for Blunderville when speaking with the Blunderville Registrar.");
+            ImGuiX.IndentedTextColored("Automatically register for Blunderville when speaking with the Blunderville Registrar.");
 
             var fgsExit = C.FallGuysExitConfirm;
             if (ImGui.Checkbox("FGSExitDialog", ref fgsExit))
@@ -315,7 +315,7 @@ public static class Bothers
                 C.FallGuysExitConfirm = fgsExit;
                 C.Save();
             }
-            ImGuiEx.IndentedTextColored("Automatically confirm the exit prompt when leaving Blunderville.");
+            ImGuiX.IndentedTextColored("Automatically confirm the exit prompt when leaving Blunderville.");
 
             var fashionQuit = C.FashionCheckQuit;
             if (ImGui.Checkbox("FashionCheck", ref fashionQuit))
@@ -323,7 +323,7 @@ public static class Bothers
                 C.FashionCheckQuit = fashionQuit;
                 C.Save();
             }
-            ImGuiEx.IndentedTextColored("Automatically confirm the Fashion Reports results.");
+            ImGuiX.IndentedTextColored("Automatically confirm the Fashion Reports results.");
 
             var chocoboQuit = C.ChocoboRacingQuit;
             if (ImGui.Checkbox("RaceChocoboResult", ref chocoboQuit))
@@ -331,7 +331,7 @@ public static class Bothers
                 C.ChocoboRacingQuit = chocoboQuit;
                 C.Save();
             }
-            ImGuiEx.IndentedTextColored("Automatically quit Chocobo Racing when the results menu appears.");
+            ImGuiX.IndentedTextColored("Automatically quit Chocobo Racing when the results menu appears.");
 
             var shopCard = C.ShopCardDialog;
             if (ImGui.Checkbox("ShopCardDialog", ref shopCard))
@@ -339,7 +339,7 @@ public static class Bothers
                 C.ShopCardDialog = shopCard;
                 C.Save();
             }
-            ImGuiEx.IndentedTextColored("Automatically confirm selling Triple Triad cards in the saucer.");
+            ImGuiX.IndentedTextColored("Automatically confirm selling Triple Triad cards in the saucer.");
         }
 
         #endregion
@@ -353,7 +353,7 @@ public static class Bothers
                 C.InclusionShopRememberEnabled = inclusionShopRemember;
                 C.Save();
             }
-            ImGuiEx.IndentedTextColored("Remember the last panel visited on the scrip exchange window.");
+            ImGuiX.IndentedTextColored("Remember the last panel visited on the scrip exchange window.");
 
             var shopItemExchange = C.ShopExchangeItemDialogEnabled;
             if (ImGui.Checkbox("ShopExchangeItemDialog", ref shopItemExchange))
@@ -361,7 +361,7 @@ public static class Bothers
                 C.ShopExchangeItemDialogEnabled = shopItemExchange;
                 C.Save();
             }
-            ImGuiEx.IndentedTextColored("Automatically exchange items/currencies in various shops (e.g., scrip vendors).");
+            ImGuiX.IndentedTextColored("Automatically exchange items/currencies in various shops (e.g., scrip vendors).");
         }
         #endregion
         #region Other
@@ -374,7 +374,7 @@ public static class Bothers
                 C.CustomDeliveries = deliveries;
                 C.Save();
             }
-            ImGuiEx.IndentedTextColored("Automatically turn in any available collectibles for Custom Deliveries.");
+            ImGuiX.IndentedTextColored("Automatically turn in any available collectibles for Custom Deliveries.");
 
             var grandCompanySupplyReward = C.GrandCompanySupplyReward;
             if (ImGui.Checkbox("GrandCompanySupplyReward", ref grandCompanySupplyReward))
@@ -382,7 +382,7 @@ public static class Bothers
                 C.GrandCompanySupplyReward = grandCompanySupplyReward;
                 C.Save();
             }
-            ImGuiEx.IndentedTextColored("Skip the confirmation when submitting Grand Company expert delivery items.");
+            ImGuiX.IndentedTextColored("Skip the confirmation when submitting Grand Company expert delivery items.");
 
             var journalResultComplete = C.JournalResultCompleteEnabled;
             if (ImGui.Checkbox("JournalResultComplete", ref journalResultComplete))
@@ -390,7 +390,7 @@ public static class Bothers
                 C.JournalResultCompleteEnabled = journalResultComplete;
                 C.Save();
             }
-            ImGuiEx.IndentedTextColored("Automatically confirm quest reward acceptance when there is nothing to choose.");
+            ImGuiX.IndentedTextColored("Automatically confirm quest reward acceptance when there is nothing to choose.");
 
             var guildLeveDifficulty = C.GuildLeveDifficultyConfirm;
             if (ImGui.Checkbox("GuildLeveDifficulty", ref guildLeveDifficulty))
@@ -398,7 +398,7 @@ public static class Bothers
                 C.GuildLeveDifficultyConfirm = guildLeveDifficulty;
                 C.Save();
             }
-            ImGuiEx.IndentedTextColored("Automatically confirms guild leves upon initiation at the highest difficulty.");
+            ImGuiX.IndentedTextColored("Automatically confirms guild leves upon initiation at the highest difficulty.");
 
             var dkt = C.DataCentreTravelConfirmEnabled;
             if (ImGui.Checkbox("DataCentreTravelConfirm", ref dkt))
@@ -406,7 +406,7 @@ public static class Bothers
                 C.DataCentreTravelConfirmEnabled = dkt;
                 C.Save();
             }
-            ImGuiEx.IndentedTextColored("Automatically accept the Data Center travel confirmation.");
+            ImGuiX.IndentedTextColored("Automatically accept the Data Center travel confirmation.");
 
             var mpr = C.MiragePrismRemoveDispel;
             if (ImGui.Checkbox("MiragePrismRemoveDispel", ref mpr))
@@ -414,7 +414,7 @@ public static class Bothers
                 C.MiragePrismRemoveDispel = mpr;
                 C.Save();
             }
-            ImGuiEx.IndentedTextColored("Automatically dispel glamours when using Glamour Dispellers.");
+            ImGuiX.IndentedTextColored("Automatically dispel glamours when using Glamour Dispellers.");
 
             var mpe = C.MiragePrismExecuteCast;
             if (ImGui.Checkbox("MiragePrismExecuteCast", ref mpe))
@@ -422,7 +422,7 @@ public static class Bothers
                 C.MiragePrismExecuteCast = mpe;
                 C.Save();
             }
-            ImGuiEx.IndentedTextColored("Automatically cast glamours when using Glamour Prisms.");
+            ImGuiX.IndentedTextColored("Automatically cast glamours when using Glamour Prisms.");
 
             var bpu = C.BannerPreviewUpdate;
             if (ImGui.Checkbox("BannerPreviewUpdate", ref bpu))
@@ -430,7 +430,7 @@ public static class Bothers
                 C.BannerPreviewUpdate = bpu;
                 C.Save();
             }
-            ImGuiEx.IndentedTextColored("Automatically update portraits.");
+            ImGuiX.IndentedTextColored("Automatically update portraits.");
         }
 
         #endregion
@@ -444,7 +444,7 @@ public static class Bothers
                 C.ItemInspectionResultEnabled = itemInspection;
                 C.Save();
             }
-            ImGuiEx.IndentedTextColored("Eureka/Bozja lockboxes, forgotten fragments, and more. Warning: this does not check if you are maxed on items. Rate limiter (pause after N items).");
+            ImGuiX.IndentedTextColored("Eureka/Bozja lockboxes, forgotten fragments, and more. Warning: this does not check if you are maxed on items. Rate limiter (pause after N items).");
 
             if (itemInspection)
             {
@@ -456,7 +456,7 @@ public static class Bothers
                     C.Save();
                 }
                 ImGui.Unindent();
-                ImGuiEx.IndentedTextColored("Rate limiter (pause after N items, 0 to disable).");
+                ImGuiX.IndentedTextColored("Rate limiter (pause after N items, 0 to disable).");
             }
 
             var wksAnnounceHide = C.WKSAnnounceHide;
@@ -465,7 +465,7 @@ public static class Bothers
                 C.WKSAnnounceHide = wksAnnounceHide;
                 C.Save();
             }
-            ImGuiEx.IndentedTextColored("Hide Cosmic Exploration announcements.");
+            ImGuiX.IndentedTextColored("Hide Cosmic Exploration announcements.");
 
             var wksRewardClose = C.WKSRewardClose;
             if (ImGui.Checkbox("WKSRewardHide", ref wksRewardClose))
@@ -473,7 +473,7 @@ public static class Bothers
                 C.WKSRewardClose = wksRewardClose;
                 C.Save();
             }
-            ImGuiEx.IndentedTextColored("Automatically close the Cosmic Exploration rewards window.");
+            ImGuiX.IndentedTextColored("Automatically close the Cosmic Exploration rewards window.");
         }
         #endregion
     }
