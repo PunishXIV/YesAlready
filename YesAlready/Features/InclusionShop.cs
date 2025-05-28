@@ -1,6 +1,5 @@
 using System;
 using ECommons.EzHookManager;
-using YesAlready.Utils;
 using ValueType = FFXIVClientStructs.FFXIV.Component.GUI.ValueType;
 
 namespace YesAlready.Features;

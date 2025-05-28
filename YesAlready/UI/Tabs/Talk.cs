@@ -27,7 +27,7 @@ public static class Talk
             var target = Svc.Targets.Target;
             if (target != null)
             {
-                var targetName = P.LastSeenTalkTarget = target.Name.TextValue;
+                var targetName = Service.Watcher.LastSeenTalkTarget = target.Name.TextValue;
                 var newNode = new TalkEntryNode { Enabled = true, TargetText = targetName };
                 TalkRootFolder.Children.Add(newNode);
                 C.Save();

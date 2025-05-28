@@ -270,8 +270,8 @@ public class ConcreteNodeConverter : JsonConverter
         };
     }
 
-    public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer) =>
-        throw new NotImplementedException();
+    public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
+        => throw new NotImplementedException();
 
     private static T CreateObject<T>(JObject jObject, JsonSerializer serializer) where T : new()
     {
@@ -280,6 +280,6 @@ public class ConcreteNodeConverter : JsonConverter
         return obj;
     }
 
-    private static string SimpleName(Type type) =>
-        $"{type.FullName}, {type.Assembly.GetName().Name}";
+    private static string SimpleName(Type type)
+        => $"{type.FullName}, {type.Assembly.GetName().Name}";
 }

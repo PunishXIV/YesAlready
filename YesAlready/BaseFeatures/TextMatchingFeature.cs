@@ -72,10 +72,6 @@ public abstract class TextMatchingFeature : AddonFeature
         return false;
     }
 
-    protected void Log(string message) => PluginLog.Debug($"[{GetType().Name}]: {message}");
-    protected void LogVerbose(string message) => PluginLog.Verbose($"[{GetType().Name}]: {message}");
-    protected void LogError(string message) => PluginLog.Error($"[{GetType().Name}]: {message}");
-
     protected int? GetMatchingIndex(string pattern, string text, bool isRegex)
     {
         if (isRegex)
@@ -123,10 +119,16 @@ public abstract class TextMatchingFeature : AddonFeature
     {
         try
         {
-            P.LastSeenListSelection = P.LastSeenListIndex < P.LastSeenListEntries.Length ? P.LastSeenListEntries?[P.LastSeenListIndex].Text ?? string.Empty : string.Empty;
-            P.LastSeenListTarget = P.LastSeenListTarget = Svc.Targets.Target != null ? Svc.Targets.Target.Name.GetText() ?? string.Empty : string.Empty;
+            Service.Watcher.LastSeenListSelection = Service.Watcher.LastSeenListIndex < Service.Watcher.LastSeenListEntries.Length ? Service.Watcher.LastSeenListEntries?[Service.Watcher.LastSeenListIndex].Text ?? string.Empty : string.Empty;
+            Service.Watcher.LastSeenListTarget = Service.Watcher.LastSeenListTarget = Svc.Targets.Target != null ? Svc.Targets.Target.Name.GetText() ?? string.Empty : string.Empty;
         }
         catch { }
+    }
+
+    protected class LastEntry
+    {
+        public uint TargetDataId { get; set; }
+        public string EntryText { get; set; } = string.Empty;
     }
 
     protected bool CheckRestrictions(ITextNode node)

@@ -43,4 +43,8 @@ public abstract class AddonFeature : BaseFeature
 
     protected abstract unsafe void HandleAddonEvent(AddonEvent eventType, AddonArgs addonInfo, AtkUnitBase* atk);
     protected abstract bool IsEnabled();
+
+    protected void Log(string msg) => PluginLog.Debug($"[{GetType().Name}]: {msg}");
+    protected void LogVerbose(string message) => PluginLog.Verbose($"[{GetType().Name}]: {message}");
+    protected void LogError(string message) => PluginLog.Error($"[{GetType().Name}]: {message}");
 }

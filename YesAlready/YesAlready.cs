@@ -1,8 +1,6 @@
-using Dalamud.Game.ClientState.Keys;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Plugin;
-using Dalamud.Plugin.Services;
 using ECommons.EzDTR;
 using ECommons.EzHookManager;
 using ECommons.GameHelpers;
@@ -13,11 +11,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Text;
 using YesAlready.Interface;
 using YesAlready.UI;
-using ValueType = FFXIVClientStructs.FFXIV.Component.GUI.ValueType;
 
 namespace YesAlready;
 
@@ -30,21 +26,17 @@ public class YesAlready : IDalamudPlugin
     private const string Command = "/yesalready";
     private readonly string[] Aliases = ["/pyes"];
 
-    private unsafe delegate void* FireCallbackDelegate(AtkUnitBase* atkUnitBase, int valueCount, AtkValue* atkValues, byte updateVisibility);
-    [EzHook("E8 ?? ?? ?? ?? 0F B6 E8 8B 44 24 20", detourName: nameof(FireCallbackDetour), true)]
-    private readonly EzHook<FireCallbackDelegate> FireCallbackHook = null!;
-
     internal bool Active => C.Enabled && !Service.BlockListHandler.Locked;
 
     public YesAlready(IDalamudPluginInterface pluginInterface)
     {
         P = this;
         ECommonsMain.Init(pluginInterface, P);
-        SingletonServiceManager.Initialize(typeof(Service));
 
         C = Svc.PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
         C.Migrate();
 
+        SingletonServiceManager.Initialize(typeof(Service));
         EzConfigGui.Init(new MainWindow().Draw);
         EzConfigGui.WindowSystem.AddWindow(new ZoneListWindow());
         EzConfigGui.WindowSystem.AddWindow(new ConditionsListWindow());
@@ -57,10 +49,7 @@ public class YesAlready : IDalamudPlugin
         LoadTerritories();
         ToggleFeatures(true);
 
-        Svc.Framework.Update += FrameworkUpdate;
         Svc.PluginInterface.UiBuilder.OpenMainUi += EzConfigGui.Toggle;
-
-        EzSignatureHelper.Initialize(this);
     }
 
     public static void ToggleFeatures(bool enable)
@@ -97,84 +86,15 @@ public class YesAlready : IDalamudPlugin
 
     public void Dispose()
     {
-        Svc.Framework.Update -= FrameworkUpdate;
         Svc.PluginInterface.UiBuilder.OpenMainUi -= EzConfigGui.Toggle;
         ECommonsMain.Dispose();
     }
 
     internal Dictionary<uint, string> TerritoryNames { get; private set; } = [];
-    internal string LastSeenDialogText { get; set; } = string.Empty;
-    internal string LastSeenOkText { get; set; } = string.Empty;
-    internal string LastSeenListSelection { get; set; } = string.Empty;
-    internal int LastSeenListIndex { get; set; }
-    internal string LastSeenListTarget { get; set; } = string.Empty;
-    internal (int Index, string Text)[] LastSeenListEntries { get; set; } = [];
-    internal string LastSeenTalkTarget { get; set; } = string.Empty;
-    internal string LastSeenNumericsText { get; set; } = string.Empty;
-    internal DateTime EscapeLastPressed { get; private set; } = DateTime.MinValue;
-    internal string EscapeTargetName { get; private set; } = string.Empty;
-    internal bool ForcedYesKeyPressed { get; private set; } = false;
-    internal bool ForcedTalkKeyPressed { get; private set; } = false;
-    internal bool DisableKeyPressed { get; private set; } = false;
-    internal ListEntryNode LastSelectedListNode { get; set; } = new();
 
     private void LoadTerritories()
-        => TerritoryNames = GenericHelpers.FindRows<Lumina.Excel.Sheets.TerritoryType>(r => r.PlaceName.IsValid && !r.PlaceName.Value.Name.IsEmpty)
+        => TerritoryNames = GenericHelpers.FindRows<TerritoryType>(r => r.PlaceName.IsValid && !r.PlaceName.Value.Name.IsEmpty)
             .Select((r, n) => (r.RowId, PlaceName: r.PlaceName.Value.Name.ToString())).ToDictionary(t => t.RowId, t => t.PlaceName);
-
-    private bool wasDisableKeyPressed;
-    private void FrameworkUpdate(IFramework framework)
-    {
-        if (!P.Active && !wasDisableKeyPressed) return;
-        DisableKeyPressed = C.DisableKey != VirtualKey.NO_KEY && Svc.KeyState[C.DisableKey];
-
-        if (P.Active && DisableKeyPressed && !wasDisableKeyPressed)
-            C.Enabled = false;
-        else if (!P.Active && !DisableKeyPressed && wasDisableKeyPressed)
-            C.Enabled = true;
-
-        wasDisableKeyPressed = DisableKeyPressed;
-
-        ForcedYesKeyPressed = C.ForcedYesKey != VirtualKey.NO_KEY && Svc.KeyState[C.ForcedYesKey];
-
-        ForcedTalkKeyPressed = C.ForcedTalkKey != VirtualKey.NO_KEY && C.SeparateForcedKeys && Svc.KeyState[C.ForcedTalkKey];
-
-        if (Svc.KeyState[VirtualKey.ESCAPE])
-        {
-            EscapeLastPressed = DateTime.Now;
-
-            var target = Svc.Targets.Target;
-            EscapeTargetName = target != null ? target.Name.GetText() : string.Empty;
-        }
-    }
-
-    private unsafe void* FireCallbackDetour(AtkUnitBase* atkUnitBase, int valueCount, AtkValue* atkValues, byte updateVisibility)
-    {
-        if (atkUnitBase->NameString is not ("SelectString" or "SelectIconString"))
-            return FireCallbackHook.Original(atkUnitBase, valueCount, atkValues, updateVisibility);
-
-        try
-        {
-            var atkValueList = Enumerable.Range(0, valueCount)
-                .Select<int, object>(i => atkValues[i].Type switch
-                {
-                    ValueType.Int => atkValues[i].Int,
-                    ValueType.String => Marshal.PtrToStringUTF8(new IntPtr(atkValues[i].String)) ?? string.Empty,
-                    ValueType.UInt => atkValues[i].UInt,
-                    ValueType.Bool => atkValues[i].Byte != 0,
-                    _ => $"Unknown Type: {atkValues[i].Type}"
-                })
-                .ToList();
-            PluginLog.Debug($"Callback triggered on {atkUnitBase->NameString} with values: {string.Join(", ", atkValueList.Select(value => value.ToString()))}");
-            LastSeenListIndex = atkValues[0].Int;
-        }
-        catch (Exception ex)
-        {
-            PluginLog.Error($"Exception in {nameof(FireCallbackDetour)}: {ex.Message}");
-            return FireCallbackHook.Original(atkUnitBase, valueCount, atkValues, updateVisibility);
-        }
-        return FireCallbackHook.Original(atkUnitBase, valueCount, atkValues, updateVisibility);
-    }
 
     #region Commands
 
@@ -255,7 +175,7 @@ public class YesAlready : IDalamudPlugin
 
     private void CommandAddNode(bool zoneRestricted, bool createFolder, bool selectNo)
     {
-        var text = LastSeenDialogText;
+        var text = Service.Watcher.LastSeenDialogText;
 
         if (text.IsNullOrEmpty())
         {
@@ -271,7 +191,7 @@ public class YesAlready : IDalamudPlugin
 
     private void CommandAddOkNode(bool createFolder)
     {
-        var text = LastSeenOkText;
+        var text = Service.Watcher.LastSeenOkText;
 
         if (text.IsNullOrEmpty())
         {
@@ -287,8 +207,8 @@ public class YesAlready : IDalamudPlugin
 
     private void CommandAddListNode()
     {
-        var text = LastSeenListSelection;
-        var target = LastSeenListTarget;
+        var text = Service.Watcher.LastSeenListSelection;
+        var target = Service.Watcher.LastSeenListTarget;
 
         if (text.IsNullOrEmpty())
         {
@@ -313,7 +233,7 @@ public class YesAlready : IDalamudPlugin
 
     private void CommandAddTalkNode()
     {
-        var target = LastSeenTalkTarget;
+        var target = Service.Watcher.LastSeenTalkTarget;
 
         if (target.IsNullOrEmpty())
         {

@@ -8,7 +8,6 @@ using Lumina.Excel.Sheets;
 using System.Numerics;
 using System.Text;
 using YesAlready.Interface;
-using YesAlready.Utils;
 
 namespace YesAlready.UI.Tabs;
 public class YesNo

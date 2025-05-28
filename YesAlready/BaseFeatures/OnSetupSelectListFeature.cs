@@ -18,44 +18,44 @@ internal abstract class OnSetupSelectListFeature : BaseFeature, IDisposable
         onItemSelectedHook?.Dispose();
     }
 
-    protected unsafe int? GetMatchingIndex(string[] entries)
-    {
-        var millisSinceLastEscape = (DateTime.Now - P.EscapeLastPressed).TotalMilliseconds;
+    //protected unsafe int? GetMatchingIndex(string[] entries)
+    //{
+    //    var millisSinceLastEscape = (DateTime.Now - Service.Watcher.EscapeLastPressed).TotalMilliseconds;
 
-        var target = Svc.Targets.Target;
-        var targetName = target != null ? target.Name.GetText() : string.Empty;
+    //    var target = Svc.Targets.Target;
+    //    var targetName = target != null ? target.Name.GetText() : string.Empty;
 
-        var nodes = C.GetAllNodes().OfType<ListEntryNode>();
-        foreach (var node in nodes)
-        {
-            if (!node.Enabled || string.IsNullOrEmpty(node.Text))
-                continue;
+    //    var nodes = C.GetAllNodes().OfType<ListEntryNode>();
+    //    foreach (var node in nodes)
+    //    {
+    //        if (!node.Enabled || string.IsNullOrEmpty(node.Text))
+    //            continue;
 
-            if (millisSinceLastEscape < 1000 && node == P.LastSelectedListNode && targetName == P.EscapeTargetName)
-                continue;
+    //        if (millisSinceLastEscape < 1000 && node == Service.Watcher.LastSelectedListNode && targetName == Service.Watcher.EscapeTargetName)
+    //            continue;
 
-            var (matched, index) = EntryMatchesTexts(node, entries);
-            if (!matched)
-                continue;
+    //        var (matched, index) = EntryMatchesTexts(node, entries);
+    //        if (!matched)
+    //            continue;
 
-            if (node.TargetRestricted && !string.IsNullOrEmpty(node.TargetText))
-            {
-                if (!string.IsNullOrEmpty(targetName) && EntryMatchesTargetName(node, targetName))
-                {
-                    PluginLog.Debug($"OnSetupSelectListFeature: Matched on {node.Text} ({node.TargetText})");
-                    P.LastSelectedListNode = node;
-                    return index;
-                }
-            }
-            else
-            {
-                PluginLog.Debug($"OnSetupSelectListFeature: Matched on {node.Text}");
-                P.LastSelectedListNode = node;
-                return index;
-            }
-        }
-        return null;
-    }
+    //        if (node.TargetRestricted && !string.IsNullOrEmpty(node.TargetText))
+    //        {
+    //            if (!string.IsNullOrEmpty(targetName) && EntryMatchesTargetName(node, targetName))
+    //            {
+    //                PluginLog.Debug($"OnSetupSelectListFeature: Matched on {node.Text} ({node.TargetText})");
+    //                Service.Watcher.LastSelectedListNode = node;
+    //                return index;
+    //            }
+    //        }
+    //        else
+    //        {
+    //            PluginLog.Debug($"OnSetupSelectListFeature: Matched on {node.Text}");
+    //            Service.Watcher.LastSelectedListNode = node;
+    //            return index;
+    //        }
+    //    }
+    //    return null;
+    //}
 
     protected unsafe void SetupOnItemSelectedHook(PopupMenu* popupMenu)
     {
@@ -72,8 +72,8 @@ internal abstract class OnSetupSelectListFeature : BaseFeature, IDisposable
         try
         {
             var target = Svc.Targets.Target;
-            var targetName = P.LastSeenListTarget = target != null ? target.Name.GetText() : string.Empty;
-            P.LastSeenListSelection = P.LastSeenListEntries[(int)inputData[2]].Text;
+            var targetName = Service.Watcher.LastSeenListTarget = target != null ? target.Name.GetText() : string.Empty;
+            Service.Watcher.LastSeenListSelection = Service.Watcher.LastSeenListEntries[(int)inputData[2]].Text;
         }
         catch (Exception ex)
         {

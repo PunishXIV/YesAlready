@@ -24,7 +24,7 @@ public static class Lists
         ImGui.SameLine();
         if (ImGuiX.IconButton(FontAwesomeIcon.SearchPlus, "Add last selected as new entry"))
         {
-            var newNode = new ListEntryNode { Enabled = true, Text = P.LastSeenListSelection, TargetRestricted = true, TargetText = P.LastSeenListTarget };
+            var newNode = new ListEntryNode { Enabled = true, Text = Service.Watcher.LastSeenListSelection, TargetRestricted = true, TargetText = Service.Watcher.LastSeenListTarget };
             ListRootFolder.Children.Add(newNode);
             C.Save();
         }

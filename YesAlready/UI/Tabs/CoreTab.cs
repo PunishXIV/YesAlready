@@ -18,8 +18,7 @@ public class CoreTab : BaseTab
         Folders
     }
 
-    private ViewMode currentViewMode = ViewMode.ByType;
-    public ViewMode CurrentViewMode => currentViewMode;
+    public ViewMode CurrentViewMode { get; private set; } = ViewMode.ByType;
 
     private string searchFilter = "";
     private bool showDisabled = true;
@@ -87,13 +86,13 @@ public class CoreTab : BaseTab
     {
         ImGui.SameLine();
         ImGui.SetNextItemWidth(150);
-        if (ImGui.BeginCombo("##ViewMode", currentViewMode.ToString()))
+        if (ImGui.BeginCombo("##ViewMode", CurrentViewMode.ToString()))
         {
             foreach (ViewMode mode in Enum.GetValues(typeof(ViewMode)))
             {
-                if (ImGui.Selectable(mode.ToString(), currentViewMode == mode))
+                if (ImGui.Selectable(mode.ToString(), CurrentViewMode == mode))
                 {
-                    currentViewMode = mode;
+                    CurrentViewMode = mode;
                 }
             }
             ImGui.EndCombo();
@@ -146,12 +145,12 @@ public class CoreTab : BaseTab
 
             if (ImGui.CollapsingHeader("Yes/No Dialogs"))
             {
-                if (ImGui.Selectable(P.LastSeenDialogText))
+                if (ImGui.Selectable(Service.Watcher.LastSeenDialogText))
                 {
                     var newNode = new TextEntryNode
                     {
                         Enabled = false,
-                        Text = P.LastSeenDialogText
+                        Text = Service.Watcher.LastSeenDialogText
                     };
                     C.RootFolder.Children.Add(newNode);
                     C.Save();
@@ -160,12 +159,12 @@ public class CoreTab : BaseTab
 
             if (ImGui.CollapsingHeader("OK Dialogs"))
             {
-                if (ImGui.Selectable(P.LastSeenOkText))
+                if (ImGui.Selectable(Service.Watcher.LastSeenOkText))
                 {
                     var newNode = new OkEntryNode
                     {
                         Enabled = false,
-                        Text = P.LastSeenOkText
+                        Text = Service.Watcher.LastSeenOkText
                     };
                     C.RootFolder.Children.Add(newNode);
                     C.Save();
@@ -174,12 +173,12 @@ public class CoreTab : BaseTab
 
             if (ImGui.CollapsingHeader("List Dialogs"))
             {
-                if (ImGui.Selectable(P.LastSeenListSelection))
+                if (ImGui.Selectable(Service.Watcher.LastSeenListSelection))
                 {
                     var newNode = new ListEntryNode
                     {
                         Enabled = false,
-                        Text = P.LastSeenListSelection
+                        Text = Service.Watcher.LastSeenListSelection
                     };
                     C.RootFolder.Children.Add(newNode);
                     C.Save();
@@ -188,12 +187,12 @@ public class CoreTab : BaseTab
 
             if (ImGui.CollapsingHeader("Talk Dialogs"))
             {
-                if (ImGui.Selectable(P.LastSeenTalkTarget))
+                if (ImGui.Selectable(Service.Watcher.LastSeenTalkTarget))
                 {
                     var newNode = new TalkEntryNode
                     {
                         Enabled = false,
-                        TargetText = P.LastSeenTalkTarget
+                        TargetText = Service.Watcher.LastSeenTalkTarget
                     };
                     C.RootFolder.Children.Add(newNode);
                     C.Save();
@@ -202,12 +201,12 @@ public class CoreTab : BaseTab
 
             if (ImGui.CollapsingHeader("Numeric Dialogs"))
             {
-                if (ImGui.Selectable(P.LastSeenNumericsText))
+                if (ImGui.Selectable(Service.Watcher.LastSeenNumericsText))
                 {
                     var newNode = new NumericsEntryNode
                     {
                         Enabled = false,
-                        Text = P.LastSeenNumericsText
+                        Text = Service.Watcher.LastSeenNumericsText
                     };
                     C.RootFolder.Children.Add(newNode);
                     C.Save();
@@ -220,7 +219,7 @@ public class CoreTab : BaseTab
 
     private void DrawNodeList()
     {
-        switch (currentViewMode)
+        switch (CurrentViewMode)
         {
             case ViewMode.ByType:
                 DrawByTypeView();

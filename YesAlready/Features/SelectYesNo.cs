@@ -13,13 +13,13 @@ internal class SelectYesno : TextMatchingFeature
     protected override unsafe string GetSetLastSeenText(AtkUnitBase* atk)
     {
         var text = new AddonMaster.SelectYesno(atk).TextLegacy;
-        P.LastSeenDialogText = text;
+        Service.Watcher.LastSeenDialogText = text;
         return text;
     }
 
     protected override unsafe object? ShouldProceed(string text, AtkUnitBase* atk)
     {
-        if (P.ForcedYesKeyPressed)
+        if (Service.Watcher.ForcedYesKeyPressed)
         {
             Log($"Forced yes hotkey pressed");
             return new TextEntryNode { IsYes = true };

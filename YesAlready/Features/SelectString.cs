@@ -9,7 +9,7 @@ internal class SelectString : TextMatchingFeature
     protected override unsafe string GetSetLastSeenText(AtkUnitBase* atk)
     {
         var addon = new AddonMaster.SelectString(atk);
-        P.LastSeenListEntries = [.. addon.Entries.Select(x => (x.Index, x.Text))];
+        Service.Watcher.LastSeenListEntries = [.. addon.Entries.Select(x => (x.Index, x.Text))];
         return string.Join(", ", addon.Entries.Select(x => x.Text));
     }
 
@@ -27,9 +27,15 @@ internal class SelectString : TextMatchingFeature
             if (!CheckRestrictions(node))
                 continue;
 
+            if (Service.Watcher.LastSelectedListEntry is { } last && last.TargetDataId == Svc.Targets.Target?.DataId && last.Node == node)
+                continue;
+
             var index = GetMatchingIndex(entries, node.Text, node.IsTextRegex);
             if (index.HasValue)
+            {
+                Service.Watcher.LastSelectedListEntry = new() { TargetDataId = Svc.Targets.Target?.DataId ?? 0, Node = node };
                 return index.Value;
+            }
         }
 
         return null;

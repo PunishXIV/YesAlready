@@ -71,6 +71,8 @@ public partial class Configuration() : IPluginConfiguration
     public bool BannerPreviewUpdate { get; set; } = false;
     public bool WKSRewardClose { get; set; } = false;
     public bool WKSAnnounceHide { get; set; } = false;
+    public bool DifficultySelectYesNoEnabled { get; set; } = false;
+    public Features.DifficultySelectYesNo.Difficulty DifficultySelectYesNo { get; set; } = Features.DifficultySelectYesNo.Difficulty.VeryEasy;
 
     public List<CustomBother> CustomCallbacks { get; set; } = [];
 
@@ -158,21 +160,21 @@ public partial class Configuration() : IPluginConfiguration
         switch (newNode)
         {
             case TextEntryNode textNode:
-                textNode.Text = P.LastSeenDialogText;
+                textNode.Text = Service.Watcher.LastSeenDialogText;
                 if (isYes.HasValue)
                     textNode.IsYes = isYes.Value;
                 break;
             case OkEntryNode okNode:
-                okNode.Text = P.LastSeenOkText;
+                okNode.Text = Service.Watcher.LastSeenOkText;
                 break;
             case ListEntryNode listNode:
-                listNode.Text = P.LastSeenListSelection;
+                listNode.Text = Service.Watcher.LastSeenListSelection;
                 break;
             case TalkEntryNode talkNode:
-                talkNode.Text = P.LastSeenTalkTarget;
+                talkNode.Text = Service.Watcher.LastSeenTalkTarget;
                 break;
             case NumericsEntryNode numericsNode:
-                numericsNode.Text = P.LastSeenNumericsText;
+                numericsNode.Text = Service.Watcher.LastSeenNumericsText;
                 break;
         }
 

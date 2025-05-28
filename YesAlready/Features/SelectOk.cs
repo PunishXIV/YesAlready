@@ -8,7 +8,7 @@ internal class SelectOk : TextMatchingFeature
     protected override unsafe string GetSetLastSeenText(AtkUnitBase* atk)
     {
         var text = new AddonMaster.SelectOk(atk).Text;
-        P.LastSeenOkText = text;
+        Service.Watcher.LastSeenOkText = text;
         return text;
     }
 

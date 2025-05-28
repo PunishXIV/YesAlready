@@ -1,9 +1,9 @@
 ﻿using Dalamud.Game.ClientState.Keys;
 using Dalamud.Interface.Utility.Raii;
+using ECommons.ImGuiMethods;
 using ImGuiNET;
 using System;
 using System.Linq;
-using YesAlready.Utils;
 
 namespace YesAlready.UI.Tabs;
 public static class Bothers
@@ -247,6 +247,24 @@ public static class Bothers
                 C.Save();
             }
             ImGuiX.IndentedTextColored("Automatically commence duties when ready, but only once. Requires Contents Finder Confirm, and disables both after activation.");
+
+            //var dutyDifficulty = C.DifficultySelectYesNoEnabled;
+            //if (ImGui.Checkbox("SelectYesNoDifficulty", ref dutyDifficulty))
+            //{
+            //    C.DifficultySelectYesNoEnabled = dutyDifficulty;
+            //    C.Save();
+            //}
+
+            //if (C.DifficultySelectYesNoEnabled)
+            //{
+            //    var difficulty = C.DifficultySelectYesNo;
+            //    if (ImGuiEx.EnumCombo("SelectYesNoDifficulty", ref difficulty))
+            //    {
+            //        C.DifficultySelectYesNo = difficulty;
+            //        C.Save();
+            //    }
+            //}
+            //ImGuiX.IndentedTextColored("Automatically commence solo duties at the selected difficulty.");
         }
 
         #endregion

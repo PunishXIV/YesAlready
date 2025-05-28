@@ -10,7 +10,6 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using YesAlready.UI.Tabs;
-using YesAlready.Utils;
 using static YesAlready.UI.Tabs.CoreTab;
 
 namespace YesAlready.UI;
@@ -341,13 +340,13 @@ internal class MainWindow : Window
                     }
                     else if (root == ListRootFolder)
                     {
-                        var newNode = new ListEntryNode() { Enabled = true, Text = P.LastSeenListSelection, TargetRestricted = true, TargetText = P.LastSeenListTarget };
+                        var newNode = new ListEntryNode() { Enabled = true, Text = Service.Watcher.LastSeenListSelection, TargetRestricted = true, TargetText = Service.Watcher.LastSeenListTarget };
                         folderNode.Children.Add(newNode);
                         C.Save();
                     }
                     else if (root == TalkRootFolder)
                     {
-                        var newNode = new TalkEntryNode() { Enabled = true, TargetText = P.LastSeenTalkTarget };
+                        var newNode = new TalkEntryNode() { Enabled = true, TargetText = Service.Watcher.LastSeenTalkTarget };
                         folderNode.Children.Add(newNode);
                         C.Save();
                     }

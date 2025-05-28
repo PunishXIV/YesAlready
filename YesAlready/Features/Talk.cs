@@ -8,13 +8,13 @@ internal class Talk : TextMatchingFeature
     protected override unsafe string GetSetLastSeenText(AtkUnitBase* atk)
     {
         var text = Svc.Targets.Target is { Name: var name } ? name.TextValue : string.Empty;
-        P.LastSeenTalkTarget = text;
+        Service.Watcher.LastSeenTalkTarget = text;
         return text;
     }
 
     protected override unsafe object? ShouldProceed(string text, AtkUnitBase* atk)
     {
-        if (P.ForcedYesKeyPressed && !C.SeparateForcedKeys || P.ForcedTalkKeyPressed)
+        if (Service.Watcher.ForcedYesKeyPressed && !C.SeparateForcedKeys || Service.Watcher.ForcedTalkKeyPressed)
         {
             PluginLog.Debug($"{nameof(Talk)}: Forced hotkey pressed");
             return true;

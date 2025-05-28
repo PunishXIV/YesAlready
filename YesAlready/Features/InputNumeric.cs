@@ -9,7 +9,7 @@ internal class InputNumeric : TextMatchingFeature
     protected override unsafe string GetSetLastSeenText(AtkUnitBase* atk)
     {
         var text = atk->AtkValues[6].String;
-        P.LastSeenNumericsText = atk->AtkValues[6].String;
+        Service.Watcher.LastSeenNumericsText = atk->AtkValues[6].String;
         return text;
     }
 
