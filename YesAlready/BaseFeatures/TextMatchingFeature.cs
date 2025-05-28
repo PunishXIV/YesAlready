@@ -149,12 +149,7 @@ public abstract class TextMatchingFeature : AddonFeature
         {
             if (Svc.Targets.Target is { Name: var name })
             {
-                if (EntryMatchesText(targetNode.TargetText, name.ToString(), targetNode.TargetIsRegex))
-                {
-                    Log($"Target restriction met: {name} matches {targetNode.TargetText}");
-                    return true;
-                }
-                else
+                if (!EntryMatchesText(targetNode.TargetText, name.ToString(), targetNode.TargetIsRegex))
                 {
                     Log($"Target restriction not met: {name} does not match {targetNode.TargetText}");
                     return false;
@@ -166,12 +161,7 @@ public abstract class TextMatchingFeature : AddonFeature
         {
             var conditions = playerConditionNode.PlayerConditions.Replace(" ", "").Split(',');
             Log($"[{nameof(IPlayerConditionRestrictedNode)}] Conditions: {string.Join(", ", conditions)}");
-            if (conditions.All(condition => Enum.TryParse<ConditionFlag>(condition.StartsWith('!') ? condition[1..] : condition, out var flag) && (condition.StartsWith('!') ? !Svc.Condition[flag] : Svc.Condition[flag])))
-            {
-                Log($"Matched on {node.Name} and all conditions are true");
-                return true;
-            }
-            else
+            if (!conditions.All(condition => Enum.TryParse<ConditionFlag>(condition.StartsWith('!') ? condition[1..] : condition, out var flag) && (condition.StartsWith('!') ? !Svc.Condition[flag] : Svc.Condition[flag])))
             {
                 Log($"Matched on {node.Name}, but not all conditions were met");
                 return false;
