@@ -155,6 +155,11 @@ public abstract class TextMatchingFeature : AddonFeature
                     return false;
                 }
             }
+            else
+            {
+                Log($"Target restriction not met: No target selected");
+                return false;
+            }
         }
 
         if (node is IPlayerConditionRestrictedNode { RequiresPlayerConditions: true } playerConditionNode)
