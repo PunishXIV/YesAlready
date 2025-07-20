@@ -1,4 +1,5 @@
-using Dalamud.Memory;
+using Dalamud.Game.Text;
+using Dalamud.Utility;
 using Lumina.Excel.Sheets;
 using System;
 using System.Collections.Generic;
@@ -40,33 +41,33 @@ internal class SelectYesno : TextMatchingFeature
         if (C.AutoCollectable && collectablePatterns.Any(text.Contains))
         {
             Log($"Entry is collectable");
-            var fish = GenericHelpers.FindRow<Item>(x => x.ItemSearchCategory.RowId == 46 && !x.Singular.IsEmpty && MemoryHelper.ReadSeStringNullTerminated(new nint(atk->AtkValues[15].String)).GetText().Contains(x.Singular.GetText(), StringComparison.InvariantCultureIgnoreCase));
-            if (fish != null)
+            var name = Enum.GetValues<SeIconChar>().Cast<SeIconChar>().Aggregate(atk->AtkValues[15].String.AsDalamudSeString().GetText(), (current, enumValue) => current.Replace(enumValue.ToIconString(), "")).Trim();
+            if (GenericHelpers.FindRow<Item>(x => x.IsCollectable && !x.Singular.IsEmpty && name.Contains(x.Singular.GetText(), StringComparison.InvariantCultureIgnoreCase)) is { RowId: > 0 } item)
             {
-                Log($"Detected fish [{fish}] {fish.Value.Name}");
-                if (fish.Value.RowId != 0 && int.TryParse(Regex.Match(text, @"\d+").Value, out var value))
+                Log($"Detected item [{item}] {item.Name}");
+                if (int.TryParse(Regex.Match(text, @"\d+").Value, out var value))
                 {
-                    if (GenericHelpers.FindRow<CollectablesShopItem>(x => x.Item.Value.RowId == fish.Value.RowId) is { } collectability)
+                    if (GenericHelpers.FindRow<CollectablesShopItem>(x => x.Item.Value.RowId == item.RowId) is { } collectability)
                     {
                         var min = collectability.CollectablesShopRefine.Value.LowCollectability;
                         Log($"Minimum collectability required is {min}, value detected is {value}");
                         if (value >= min)
                         {
-                            Log($"Entry is [{fish}] {fish.Value.Name} with a sufficient collectability of {value}");
+                            Log($"Entry is [{item}] {item.Name} with a sufficient collectability of {value}");
                             return new TextEntryNode { IsYes = true };
                         }
                         else
                         {
-                            Log($"Entry is [{fish}] {fish.Value.Name} with an insufficient collectability of {value}");
+                            Log($"Entry is [{item}] {item.Name} with an insufficient collectability of {value}");
                             return new TextEntryNode { IsYes = false };
                         }
                     }
                     else
-                        Log($"Failed to find matching CollectablesShopItem for [{fish.Value.RowId}] {fish.Value.Name}.");
+                        Log($"Failed to find matching CollectablesShopItem for [{item.RowId}] {item.Name}.");
                 }
             }
             else
-                Log($"Failed to match any fish to {MemoryHelper.ReadSeStringNullTerminated(new nint(atk->AtkValues[15].String)).GetText()}");
+                Log($"Failed to match any collectable to {name} [original={atk->AtkValues[15].String}]");
         }
 
         var nodes = C.GetAllNodes().OfType<TextEntryNode>();
