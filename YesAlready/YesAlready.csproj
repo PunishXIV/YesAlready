@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project Sdk="Dalamud.NET.Sdk/12.0.2">
+<Project Sdk="Dalamud.NET.Sdk/13.0.0">
 	<PropertyGroup>
 		<Authors>daemitus, croizat</Authors>
 		<Version>0.0.0.0</Version>
 		<LangVersion>preview</LangVersion>
 	</PropertyGroup>
-
 	<ItemGroup>
-		<ProjectReference Include="..\ECommons\ECommons\ECommons.csproj" />
+	  <PackageReference Include="ECommons" Version="3.0.0.8" />
 	</ItemGroup>
 </Project>

@@ -38,7 +38,7 @@ public class CustomAddonCallbacks : BaseFeature
         if (C.CustomRootFolder.Children.OfType<CustomEntryNode>().FirstOrDefault(x => x.Addon == addonInfo.AddonName && x.Enabled) is { } node)
         {
             var callbacks = CallbackToArray(node.CallbackParams);
-            Callback.Fire((AtkUnitBase*)addonInfo.Addon, node.UpdateState, callbacks);
+            Callback.Fire((AtkUnitBase*)addonInfo.Addon.Address, node.UpdateState, callbacks);
         }
     }
 

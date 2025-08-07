@@ -45,10 +45,10 @@ internal class SatisfactionSupply : AddonFeature
         var invItem = FindItemInInventory(item.Id);
         if (invItem is null) return true;
         var invItemColectability = InventoryManager.Instance()->GetInventoryContainer(invItem.Value.inv)->GetInventorySlot(invItem.Value.slot)->SpiritbondOrCollectability;
-        var wc = InventoryManager.Instance()->GetInventoryItemCount(AgentSatisfactionSupply.Instance()->CrafterScripId1);
-        var pc = InventoryManager.Instance()->GetInventoryItemCount(AgentSatisfactionSupply.Instance()->CrafterScripId2);
-        var wg = InventoryManager.Instance()->GetInventoryItemCount(AgentSatisfactionSupply.Instance()->GathererScripId1);
-        var pg = InventoryManager.Instance()->GetInventoryItemCount(AgentSatisfactionSupply.Instance()->GathererScripId2);
+        var wc = InventoryManager.Instance()->GetInventoryItemCount(AgentSatisfactionSupply.Instance()->CrafterScripIds[0]);
+        var pc = InventoryManager.Instance()->GetInventoryItemCount(AgentSatisfactionSupply.Instance()->CrafterScripIds[1]);
+        var wg = InventoryManager.Instance()->GetInventoryItemCount(AgentSatisfactionSupply.Instance()->GathererScripIds[0]);
+        var pg = InventoryManager.Instance()->GetInventoryItemCount(AgentSatisfactionSupply.Instance()->GathererScripIds[1]);
 
         // this is awful
         if (invItemColectability >= item.Collectability3)
@@ -173,7 +173,7 @@ internal class SatisfactionSupply : AddonFeature
     {
         if (SlotsFilled.Contains(i)) return true;
 
-        var contextMenu = (AtkUnitBase*)Svc.GameGui.GetAddonByName("ContextIconMenu", 1);
+        var contextMenu = (AtkUnitBase*)Svc.GameGui.GetAddonByName("ContextIconMenu", 1).Address;
 
         if (contextMenu is null || !contextMenu->IsVisible)
         {

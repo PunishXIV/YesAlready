@@ -3,7 +3,7 @@ using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility.Raii;
 using ECommons.GameHelpers;
 using ECommons.SimpleGui;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using Lumina.Excel.Sheets;
 using System.Numerics;
 using System.Text;
@@ -302,7 +302,7 @@ public class YesNo
         }
 
         var conditionalNumber = textNode.ConditionalNumber;
-        if (ImGui.InputInt($"##{textNode.Name}-conditionalNumber", ref conditionalNumber, 1, 10, ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EnterReturnsTrue))
+        if (ImGui.InputInt($"##{textNode.Name}-conditionalNumber", ref conditionalNumber, 1, 10, flags: ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EnterReturnsTrue))
         {
             textNode.ConditionalNumber = conditionalNumber;
             C.Save();

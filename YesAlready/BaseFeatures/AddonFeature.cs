@@ -38,7 +38,7 @@ public abstract class AddonFeature : BaseFeature
     protected virtual unsafe void OnAddonEvent(AddonEvent eventType, AddonArgs addonInfo)
     {
         if (!P.Active || !IsEnabled()) return;
-        HandleAddonEvent(eventType, addonInfo, (AtkUnitBase*)addonInfo.Addon);
+        HandleAddonEvent(eventType, addonInfo, (AtkUnitBase*)addonInfo.Addon.Address);
     }
 
     protected abstract unsafe void HandleAddonEvent(AddonEvent eventType, AddonArgs addonInfo, AtkUnitBase* atk);

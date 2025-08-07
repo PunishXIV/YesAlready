@@ -5,8 +5,6 @@ VisualStudioVersion = 17.6.33513.286
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YesAlready", "YesAlready\YesAlready.csproj", "{DAA660F8-DB97-4FC2-8453-8B36E9F0D6A7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ECommons", "ECommons\ECommons\ECommons.csproj", "{BAE99E1B-3AD1-493F-A005-1411B57809BD}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{37B4FD10-037C-4094-8C1D-4B2742430799}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
@@ -23,10 +21,6 @@ Global
 		{DAA660F8-DB97-4FC2-8453-8B36E9F0D6A7}.Debug|x64.Build.0 = Debug|x64
 		{DAA660F8-DB97-4FC2-8453-8B36E9F0D6A7}.Release|x64.ActiveCfg = Release|x64
 		{DAA660F8-DB97-4FC2-8453-8B36E9F0D6A7}.Release|x64.Build.0 = Release|x64
-		{BAE99E1B-3AD1-493F-A005-1411B57809BD}.Debug|x64.ActiveCfg = Debug|x64
-		{BAE99E1B-3AD1-493F-A005-1411B57809BD}.Debug|x64.Build.0 = Debug|x64
-		{BAE99E1B-3AD1-493F-A005-1411B57809BD}.Release|x64.ActiveCfg = Release|x64
-		{BAE99E1B-3AD1-493F-A005-1411B57809BD}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
