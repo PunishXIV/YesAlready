@@ -1,10 +1,12 @@
+using Dalamud.Game.Inventory;
 using Dalamud.Plugin.Services;
 using ECommons.Throttlers;
+using ECommons.UIHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
+using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace YesAlready.Features;
 
@@ -20,109 +22,22 @@ internal class SatisfactionSupply : AddonFeature
     protected override unsafe void HandleAddonEvent(AddonEvent eventType, AddonArgs addonInfo, AtkUnitBase* atk)
     {
         if (Disabled || !GenericHelpers.IsAddonReady(atk)) return;
+        var reader = new ReaderSatisfactionSupply(atk);
 
-        var atkValues = new[] { atk->AtkValues[22].Int, atk->AtkValues[31].Int, atk->AtkValues[40].Int };
-        foreach (var (index, value) in atkValues.Select((value, index) => (index, value)))
+        foreach (var (value, index) in reader.Quantities.WithIndex())
         {
             if (value != 0 && !GenericHelpers.TryGetAddonByName<AtkUnitBase>("Request", out var _))
             {
-                if (WillOvercap(atk, index))
+                if (reader.WillItemOvercap(AgentSatisfactionSupply.Instance()->Items[index], Log))
                 {
                     Svc.Chat.PrintPluginMessage("Further turn in will overcap scrips.");
                     Disabled = true;
                     return;
                 }
+                Log($"Turning in item #{AgentSatisfactionSupply.Instance()->Items[index].Id}");
                 Callback.Fire(atk, false, 1, index);
             }
         }
-    }
-
-    private static unsafe bool WillOvercap(AtkUnitBase* addon, int row)
-    {
-        var agent = AgentSatisfactionSupply.Instance();
-        if (agent == null) return true;
-        var item = agent->Items[row];
-        var invItem = FindItemInInventory(item.Id);
-        if (invItem is null) return true;
-        var invItemColectability = InventoryManager.Instance()->GetInventoryContainer(invItem.Value.inv)->GetInventorySlot(invItem.Value.slot)->SpiritbondOrCollectability;
-        var wc = InventoryManager.Instance()->GetInventoryItemCount(AgentSatisfactionSupply.Instance()->CrafterScripIds[0]);
-        var pc = InventoryManager.Instance()->GetInventoryItemCount(AgentSatisfactionSupply.Instance()->CrafterScripIds[1]);
-        var wg = InventoryManager.Instance()->GetInventoryItemCount(AgentSatisfactionSupply.Instance()->GathererScripIds[0]);
-        var pg = InventoryManager.Instance()->GetInventoryItemCount(AgentSatisfactionSupply.Instance()->GathererScripIds[1]);
-
-        // this is awful
-        if (invItemColectability >= item.Collectability3)
-        {
-            switch (row)
-            {
-                case 0:
-                    if (wc + addon->AtkValues[61].Int > 4000 || pc + addon->AtkValues[64].Int > 4000)
-                        return true;
-                    break;
-                case 1:
-                    if (wg + addon->AtkValues[89].Int > 4000 || pg + addon->AtkValues[92].Int > 4000)
-                        return true;
-                    break;
-                case 2:
-                    if (wg + addon->AtkValues[117].Int > 4000 || pg + addon->AtkValues[120].Int > 4000)
-                        return true;
-                    break;
-            }
-        }
-        if (invItemColectability >= item.Collectability2)
-        {
-            switch (row)
-            {
-                case 0:
-                    if (wc + addon->AtkValues[60].Int > 4000 || pc + addon->AtkValues[63].Int > 4000)
-                        return true;
-                    break;
-                case 1:
-                    if (wg + addon->AtkValues[88].Int > 4000 || pg + addon->AtkValues[91].Int > 4000)
-                        return true;
-                    break;
-                case 2:
-                    if (wg + addon->AtkValues[116].Int > 4000 || pg + addon->AtkValues[119].Int > 4000)
-                        return true;
-                    break;
-            }
-        }
-        if (invItemColectability >= item.Collectability1)
-        {
-            switch (row)
-            {
-                case 0:
-                    if (wc + addon->AtkValues[59].Int > 4000 || pc + addon->AtkValues[62].Int > 4000)
-                        return true;
-                    break;
-                case 1:
-                    if (wg + addon->AtkValues[87].Int > 4000 || pg + addon->AtkValues[90].Int > 4000)
-                        return true;
-                    break;
-                case 2:
-                    if (wg + addon->AtkValues[115].Int > 4000 || pg + addon->AtkValues[118].Int > 4000)
-                        return true;
-                    break;
-            }
-        }
-        return false;
-    }
-
-    private static unsafe (InventoryType inv, int slot)? FindItemInInventory(uint itemId)
-    {
-        IEnumerable<InventoryType> x = [InventoryType.Inventory1, InventoryType.Inventory2, InventoryType.Inventory3, InventoryType.Inventory4];
-        foreach (var inv in x)
-        {
-            var cont = InventoryManager.Instance()->GetInventoryContainer(inv);
-            for (var i = 0; i < cont->Size; ++i)
-            {
-                if (cont->GetInventorySlot(i)->ItemId == itemId)
-                {
-                    return (inv, i);
-                }
-            }
-        }
-        return null;
     }
 
     public override void Enable()
@@ -216,5 +131,70 @@ internal class SatisfactionSupply : AddonFeature
         }
         else
             RequestAllow = 0;
+    }
+}
+
+public unsafe class ReaderSatisfactionSupply(AtkUnitBase* UnitBase, int BeginOffset = 0) : AtkReader(UnitBase, BeginOffset)
+{
+    public List<int> Quantities => [DoHQuantity, MinBotQuantity, FshQuantity];
+    public int DoHQuantity => ReadInt(22) ?? 0;
+    public int MinBotQuantity => ReadInt(31) ?? 0;
+    public int FshQuantity => ReadInt(40) ?? 0;
+
+    public AgentSatisfactionSupply.ItemInfo DoHItem => AgentSatisfactionSupply.Instance()->Items[0];
+    public AgentSatisfactionSupply.ItemInfo MinBotItem => AgentSatisfactionSupply.Instance()->Items[1];
+    public AgentSatisfactionSupply.ItemInfo FshItem => AgentSatisfactionSupply.Instance()->Items[2];
+
+    public Span<uint> CraftScripIds => AgentSatisfactionSupply.Instance()->CrafterScripIds;
+    public Span<uint> GatherScripIds => AgentSatisfactionSupply.Instance()->GathererScripIds;
+
+    public bool WillItemOvercap(AgentSatisfactionSupply.ItemInfo item, Action<string> log)
+    {
+        if (GetItem(item.Id) is { SpiritbondOrCollectability: var collectability })
+        {
+            log($"Checking overcap for item #{item.Id} with collectability {collectability}");
+            if (collectability > item.Collectability3)
+            {
+                log($"Item #{item.Id} [{item.Reward1Quantity[2]} > {CurrencyManager.Instance()->GetItemCountRemaining(item.Reward1Id)} || {item.Reward2Quantity[2]} > {CurrencyManager.Instance()->GetItemCountRemaining(item.Reward2Id)}]");
+                return CurrencyManager.Instance()->GetItemCountRemaining(item.Reward1Id) < item.Reward1Quantity[2] || CurrencyManager.Instance()->GetItemCountRemaining(item.Reward2Id) < item.Reward2Quantity[2];
+            }
+            if (collectability > item.Collectability2)
+            {
+                log($"Item #{item.Id} [{item.Reward1Quantity[1]} > {CurrencyManager.Instance()->GetItemCountRemaining(item.Reward1Id)} || {item.Reward2Quantity[1]} > {CurrencyManager.Instance()->GetItemCountRemaining(item.Reward2Id)}]");
+                return CurrencyManager.Instance()->GetItemCountRemaining(item.Reward1Id) < item.Reward1Quantity[1] || CurrencyManager.Instance()->GetItemCountRemaining(item.Reward2Id) < item.Reward2Quantity[1];
+            }
+            if (collectability > item.Collectability1)
+            {
+                log($"Item #{item.Id} [{item.Reward1Quantity[0]} > {CurrencyManager.Instance()->GetItemCountRemaining(item.Reward1Id)} || {item.Reward2Quantity[0]} > {CurrencyManager.Instance()->GetItemCountRemaining(item.Reward2Id)}]");
+                return CurrencyManager.Instance()->GetItemCountRemaining(item.Reward1Id) < item.Reward1Quantity[0] || CurrencyManager.Instance()->GetItemCountRemaining(item.Reward2Id) < item.Reward2Quantity[0];
+            }
+        }
+        throw new Exception($"Failed to find item [{item.Id}] in inventory");
+    }
+
+    public List<CollectabilityReward> DoHRewards => Loop<CollectabilityReward>(59, 1, 6);
+    public List<CollectabilityReward> MinBotRewards => Loop<CollectabilityReward>(87, 1, 6);
+    public List<CollectabilityReward> FshRewards => Loop<CollectabilityReward>(115, 1, 6);
+    public class CollectabilityReward(nint UnitBasePtr, int BeginOffset = 0) : AtkReader(UnitBasePtr, BeginOffset)
+    {
+        public uint Scrip1LowCollectability => ReadUInt(0) ?? 0;
+        public uint Scrip1MedCollectability => ReadUInt(1) ?? 0;
+        public uint Scrip1HighCollectability => ReadUInt(2) ?? 0;
+        public uint Scrip2LowCollectability => ReadUInt(3) ?? 0;
+        public uint Scrip2MedCollectability => ReadUInt(4) ?? 0;
+        public uint Scrip2HighCollectability => ReadUInt(5) ?? 0;
+    }
+
+    private GameInventoryItem? GetItem(uint itemId)
+    {
+        IEnumerable<GameInventoryType> types = [GameInventoryType.Inventory1, GameInventoryType.Inventory2, GameInventoryType.Inventory3, GameInventoryType.Inventory4];
+        foreach (var type in types)
+        {
+            var items = Svc.GameInventory.GetInventoryItems(type);
+            foreach (var item in items)
+                if (item.BaseItemId == itemId)
+                    return item;
+        }
+        return null;
     }
 }
