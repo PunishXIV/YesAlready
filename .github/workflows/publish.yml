@@ -9,7 +9,7 @@ jobs:
   Build:
     runs-on: ubuntu-latest
     env:
-        DALAMUD_HOME: /tmp/dalamud
+      DALAMUD_HOME: /tmp/dalamud
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -23,7 +23,7 @@ jobs:
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: 9.0.x
-          
+
       - name: Download config.yaml
         run: curl -L https://raw.githubusercontent.com/goatcorp/dalamud-declarative/main/config.yaml -o config.yaml
 
@@ -35,7 +35,8 @@ jobs:
       - name: Extract Latest Track Name
         id: latest_track
         run: |
-          latest_entry=$(yq eval '.tracks | to_entries | sort_by(.value.applicableGameVersion, (.key == "release")) | .[-1]' config.yaml)
+          # Filter out tracks with alias field and get the latest non-aliased track
+          latest_entry=$(yq eval '.tracks | to_entries | map(select(.value.alias == null)) | sort_by(.value.applicableGameVersion, (.key == "release")) | .[-1]' config.yaml)
           track_name=$(echo "$latest_entry" | yq eval '.key' -)
           echo "result=$track_name" >> $GITHUB_OUTPUT
 
@@ -59,10 +60,10 @@ jobs:
         id: dynamis
         with:
           plugin_id: 26
-          internal_name: "YesAlready"
+          internal_name: 'YesAlready'
           version_number: ${{ env.tag }}
-          path: "YesAlready/bin/Release/YesAlready/latest.zip"
-          type: "latest"
-          dalamud_version: "13"
+          path: 'YesAlready/bin/Release/YesAlready/latest.zip'
+          type: 'latest'
+          dalamud_version: '13'
         env:
           PUBLISHER_KEY: ${{ secrets.PUBLISHER_KEY }}
