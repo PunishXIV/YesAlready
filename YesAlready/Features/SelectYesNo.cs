@@ -97,10 +97,11 @@ internal class SelectYesno : TextMatchingFeature
 
     private static readonly List<Regex> lfgPatterns =
     [
-        new(@"^Do you wish to join the party\?$"),
-        new(@"^Do you wish to join the alliance\?$"),
-        new(@"^Do you wish to join the cross-world party\?$"),
-        new(@"^Do you wish to join the cross-world alliance\?$")
+        new Regex(@"Join .* party\?"),
+        new Regex(@".*のパーティに参加します。よろしいですか？"),
+        new Regex(@"Der Gruppe von .* beitreten\?"),
+        new Regex(@"Rejoindre l'équipe de .*\?")
+        // if someone could add the chinese and korean translations that'd be nice
     ];
 
     private readonly List<string> collectablePatterns =
