@@ -63,7 +63,15 @@ internal class SelectYesno : TextMatchingFeature
                         }
                     }
                     else
-                        Log($"Failed to find matching CollectablesShopItem for [{item.RowId}] {item.Name}.");
+                    {
+                        if (item.AetherialReduce > 0)
+                        {
+                            Log($"Entry is [#{item.RowId}] {item.Name} and probably an aethersand fish. Skipping collectability check.");
+                            return new TextEntryNode { IsYes = true };
+                        }
+                        else
+                            Log($"Failed to find matching CollectablesShopItem for [{item.RowId}] {item.Name} and it probably isn't an aethersand fish.");
+                    }
                 }
             }
             else
