@@ -64,13 +64,18 @@ internal class SelectYesno : TextMatchingFeature
                     }
                     else
                     {
-                        if (item.AetherialReduce > 0)
+                        if (item.AetherialReduce > 0) // aethersand fish aren't turned in for scrips so collectability doesn't matter
                         {
                             Log($"Entry is [#{item.RowId}] {item.Name} and probably an aethersand fish. Skipping collectability check.");
                             return new TextEntryNode { IsYes = true };
                         }
+                        else if (GenericHelpers.TryGetRow<WKSItemInfo>(item.AdditionalData.RowId, out var wksItem)) // stellar fish are scored based on collective collectability so individual doesn't matter
+                        {
+                            Log($"Entry is [#{item.RowId}] {item.Name} for {wksItem.WKSItemSubCategory.ValueNullable?.Name ?? "null"}. Skipping collectability check.");
+                            return new TextEntryNode { IsYes = true };
+                        }
                         else
-                            Log($"Failed to find matching CollectablesShopItem for [{item.RowId}] {item.Name} and it probably isn't an aethersand fish.");
+                            Log($"Failed to find matching CollectablesShopItem for [{item.RowId}] {item.Name}. Not an aethersand fish or a CE fish. Ping the dev or create a git issue if you found this message erroneously.");
                     }
                 }
             }
