@@ -28,7 +28,10 @@ internal class SelectString : TextMatchingFeature
                 continue;
 
             if (Service.Watcher.LastSelectedListEntry is { } last && last.TargetDataId == Svc.Targets.Target?.DataId && last.Node == node)
+            {
+                Log($"Skipping match because it was the same as last");
                 continue;
+            }
 
             var index = GetMatchingIndex(entries, node.Text, node.IsTextRegex);
             if (index.HasValue)
