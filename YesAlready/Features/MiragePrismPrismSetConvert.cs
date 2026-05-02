@@ -27,10 +27,11 @@ public class MiragePrismPrismSetConvert : AddonFeature
             {
                 if (item.Flag is not CustomAddonMaster.ReaderMiragePrismPrismSetConvert.ItemFlag.Unfilled)
                     continue;
-                Service.TaskManager.Enqueue(() => am.TryHandOver(i), $"HandInSlot{i}");
+                var s = i;
+                Service.TaskManager.Enqueue(() => am.TryHandOver(s), $"HandInSlot{s}");
                 Service.TaskManager.Enqueue(() => item.Flag is CustomAddonMaster.ReaderMiragePrismPrismSetConvert.ItemFlag.Filled);
             }
-            am.StoreAsGlamour();
+            Service.TaskManager.Enqueue(am.StoreAsGlamour);
         }
     }
 
@@ -82,7 +83,7 @@ public class MiragePrismPrismSetConvert : AddonFeature
                 }
                 else
                 {
-                    Callback.Fire(contextMenu, true, 0, 0, 1021003u, 0u, 0);
+                    Callback.Fire(contextMenu, true, 0, 0, Items[slot].ItemIconId, 0u, 0);
                     PluginLog.Debug($"Filled slot {slot}");
                     return true;
                 }
