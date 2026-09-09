@@ -35,12 +35,22 @@ public abstract class TextMatchingFeature : AddonFeature
 
         if (ShouldProceed(text, atk) is { } matchingNode)
         {
-            Log("Proceeding");
+            var msg = matchingNode switch
+            {
+                ITextNode { Name: { Length: > 0 } name } => $"Matched on [{name}] -> [{text}]",
+                int index when Service.Watcher.LastSelectedListEntry?.Node is { Name: { Length: > 0 } name } => $"Matched [{name}] -> [{GetListEntryText(index, text)}]",
+                int index => $"Matched on index #{index} -> [{GetListEntryText(index, text)}]",
+                _ => $"Matched on {text}",
+            };
+            Log(msg);
             Proceed(atk, matchingNode);
         }
         else
             Log("Not proceeding");
     }
+
+    private static string GetListEntryText(int index, string fallback)
+        => index >= 0 && index < Service.Watcher.LastSeenListEntries.Length ? Service.Watcher.LastSeenListEntries[index].Text : fallback;
 
     protected bool EntryMatchesText(string pattern, string text, bool isRegex)
     {

@@ -132,9 +132,7 @@ internal class SelectYesno : TextMatchingFeature
             return string.Empty;
 
         var se = MemoryHelper.ReadSeStringNullTerminated((nint)addon->StandardTypedAtkValues->PromptText.String.Value);
-        return string.Join(string.Empty, se.Payloads.OfType<TextPayload>().Select(t => t.Text))
-            .Replace('\n', ' ')
-            .Trim();
+        return string.Join(string.Empty, se.Payloads.OfType<TextPayload>().Select(t => t.Text)).Replace('\n', ' ').Trim();
     }
 
     private readonly List<string> collectablePatterns =
