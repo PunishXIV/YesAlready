@@ -46,6 +46,6 @@ internal class SelectString : TextMatchingFeature
     protected override unsafe void Proceed(AtkUnitBase* atk, object? matchingNode)
     {
         if (matchingNode is not int index) return;
-        AddonSelectString.Select(index);
+        Callback.Fire(atk, true, index);
     }
 }
