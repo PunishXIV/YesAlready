@@ -19,7 +19,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="croizat.clib" Version="1.0.82" />
+	  <PackageReference Include="croizat.clib" Version="1.0.94" />
 	  <PackageReference Include="ECommons" Version="3.2.0.19" />
 	</ItemGroup>
 </Project>
