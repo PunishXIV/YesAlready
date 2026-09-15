@@ -7,18 +7,16 @@ internal class SalvageResult : AddonFeature
 {
     protected override unsafe void HandleAddonEvent(AddonEvent eventType, AddonArgs addonInfo)
     {
-        var atk = addonInfo.GetAddon<AtkUnitBase>();
-        if (!atk->IsAddonReady()) return;
-
         switch (addonInfo.AddonName)
         {
             case "SalvageResult":
-                atk->GetComponentButtonById(15)->Click(); // CloseButton
+                if (addonInfo.GetAddon<AddonSalvageResult>()->GetComponentButtonById(15) is not null and var closeBtn)
+                    closeBtn->Click();
                 break;
 
             case "SalvageAutoDialog":
                 var addon = addonInfo.GetAddon<AddonSalvageAutoDialog>();
-                if (!addon->IsDesynthesizing)
+                if (!addon->IsDesynthesizing && addon->EndDesynthesisButton is not null)
                     addon->EndDesynthesisButton->Click();
                 break;
         }
