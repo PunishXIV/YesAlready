@@ -22,16 +22,10 @@ internal class ItemInspectionResult : AddonFeature
             return;
 
         var values = addon->TypedAtkValues;
-        var description = values->Description.Type == AtkValueType.String
-            ? MemoryHelper.ReadSeStringNullTerminated((nint)values->Description.String.Value).GetText()
-            : descNode->NodeText.GetText();
-
+        var description = values->Description.Type == AtkValueType.String ? MemoryHelper.ReadSeStringNullTerminated((nint)values->Description.String.Value).GetText() : descNode->NodeText.GetText();
         if (description.Contains('※') || description.Contains("liées à Garde-la-Reine"))
         {
-            var itemName = addon->ShowingAltName != 0 && !addon->ItemNameAlt.IsEmpty
-                ? addon->ItemNameAlt.ToString()
-                : (!addon->ItemName.IsEmpty ? addon->ItemName.ToString() : nameNode->NodeText.GetText());
-            Svc.Chat.PrintPluginMessage(new SeString(new TextPayload("Received: "), new TextPayload(itemName)));
+            Svc.Chat.PrintPluginMessage(new SeString(new TextPayload("Received: "), new TextPayload(nameNode->NodeText.GetText())));
         }
 
         itemInspectionCount++;
