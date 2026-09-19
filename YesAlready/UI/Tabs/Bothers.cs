@@ -49,7 +49,7 @@ public static class Bothers
         }
     }
 
-    private static void DrawBother(AddonFeature feature, BotherAttribute bother)
+    internal static void DrawBother(AddonFeature feature, BotherAttribute bother)
     {
         if (bother.RequiresEnabledProperty is { } required
             && !GetConfigBool(required))
@@ -122,7 +122,7 @@ public static class Bothers
             EzConfigGui.GetWindow<MateriaBlacklistWindow>()?.Toggle();
     }
 
-    private static bool GetConfigBool(string propertyName)
+    internal static bool GetConfigBool(string propertyName)
     {
         var prop = typeof(Configuration).GetProperty(propertyName, BindingFlags.Instance | BindingFlags.Public)
             ?? throw new InvalidOperationException($"Configuration has no property '{propertyName}'.");

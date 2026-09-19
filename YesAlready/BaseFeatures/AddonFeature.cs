@@ -21,6 +21,8 @@ public abstract class AddonFeature : BaseFeature
 
     public BotherAttribute[] Bothers { get; private set; } = [];
 
+    public string[] AddonNames => [.. GetType().GetCustomAttributes<AddonFeatureAttribute>(true).Select(a => a.AddonName ?? GetType().Name).Distinct()];
+
     public override void Enable()
     {
         base.Enable();
