@@ -90,6 +90,14 @@ public partial class Configuration() : IPluginConfiguration
     public bool AllowPartialFilling { get; set; } = true;
     public bool SelectStringAutoAcceptQuests { get; set; } = false;
     public bool RequestFill { get; set; } = false;
+    public bool HousingGardeningAutoSelect { get; set; } = false;
+    public uint HousingGardeningSoil { get; set; } = 0;
+    public uint HousingGardeningSeed { get; set; } = 0;
+    public uint HousingGardeningFertilizer { get; set; } = 0;
+    public bool HousingGardeningUseFertilizer { get; set; } = true;
+    public bool HousingGardeningFallback { get; set; } = true;
+    public bool HousingGardeningConfirm { get; set; } = false;
+    public bool HousingGardeningOnlyInventory { get; set; } = true;
 
     public List<CustomBother> CustomCallbacks { get; set; } = [];
 
