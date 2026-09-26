@@ -19,6 +19,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <EmbeddedResource Include="..\Assets\yesalready_badge.png" LogicalName="YesAlready.Assets.yesalready_badge.png" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <PackageReference Include="croizat.clib" Version="1.0.96" />
 	  <PackageReference Include="ECommons" Version="3.2.0.19" />
 	</ItemGroup>

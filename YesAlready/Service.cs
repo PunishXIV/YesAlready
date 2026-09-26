@@ -3,6 +3,7 @@ using Lumina.Excel.Sheets;
 using System.Collections.Generic;
 using System.Linq;
 using YesAlready.IPC;
+using YesAlready.UI;
 
 namespace YesAlready;
 
@@ -12,6 +13,7 @@ public static class Service
     public static BlockListHandler BlockListHandler { get; private set; } = null!;
     public static YesAlreadyIPC IPC { get; private set; } = null!;
     public static Watcher Watcher { get; private set; } = null!;
+    public static BotherBadges BotherBadges { get; private set; } = null!;
 
     public static Dictionary<uint, string> Quests = Quest.Where(q => !q.Name.IsEmpty).ToDictionary(k => k.RowId, v => v.Name.GetText());
 }

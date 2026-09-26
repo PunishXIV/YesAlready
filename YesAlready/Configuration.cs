@@ -18,6 +18,8 @@ public partial class Configuration() : IPluginConfiguration
     public VirtualKey ForcedTalkKey { get; set; } = VirtualKey.NO_KEY;
     public VirtualKey DisableKey { get; set; } = VirtualKey.NO_KEY;
     public bool SeparateForcedKeys { get; set; } = false;
+    public bool ShowBotherBadges { get; set; } = true;
+    public bool HideBadgeWhenBotherEnabled { get; set; } = true;
     public TextFolderNode RootFolder { get; private set; } = new TextFolderNode { Name = "/" };
     public TextFolderNode OkRootFolder { get; private set; } = new TextFolderNode { Name = "/" };
     public TextFolderNode ListRootFolder { get; private set; } = new TextFolderNode { Name = "/" };
