@@ -5,5 +5,8 @@
 internal class JournalAccept : AddonFeature
 {
     protected override unsafe void HandleAddonEvent(AddonEvent eventType, AddonArgs addonInfo)
-        => addonInfo.GetAddon<AddonJournalAccept>()->AcceptButton->Click();
+    {
+        if (addonInfo.GetAddon<AddonJournalAccept>()->AcceptButton is not null and var btn && btn->IsEnabled)
+            btn->Click();
+    }
 }

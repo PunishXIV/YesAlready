@@ -1,5 +1,6 @@
 ﻿using ECommons.Automation.NeoTaskManager;
 using Lumina.Excel.Sheets;
+using System.Collections.Generic;
 using System.Linq;
 using YesAlready.IPC;
 
@@ -12,5 +13,5 @@ public static class Service
     public static YesAlreadyIPC IPC { get; private set; } = null!;
     public static Watcher Watcher { get; private set; } = null!;
 
-    public static string[] QuestNames = [.. Svc.Data.GetExcelSheet<Quest>()!.Where(q => !q.Name.IsEmpty).Select(q => q.Name.GetText())];
+    public static Dictionary<uint, string> Quests = Quest.Where(q => !q.Name.IsEmpty).ToDictionary(k => k.RowId, v => v.Name.GetText());
 }

@@ -1,3 +1,5 @@
+using FFXIVClientStructs.FFXIV.Client.Game;
+using Lumina.Excel.Sheets;
 using System.Linq;
 
 namespace YesAlready.Features;
@@ -19,7 +21,7 @@ internal class SelectIconString : TextMatchingFeature
 
         if (C.SelectStringAutoAcceptQuests)
             foreach (var e in entries)
-                if (Service.QuestNames.Any(qn => qn.Equals(e)))
+                if (Service.Quests.Any(q => q.Value.Equals(e) && Quest.GetRow(q.Key).PreviousQuest.All(q => q.RowId is not 0 && QuestManager.IsQuestComplete(q.RowId))))
                     return GetMatchingIndex(entries, e, false);
 
         var nodes = C.GetAllNodes().OfType<ListEntryNode>();
