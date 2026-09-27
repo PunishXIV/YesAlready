@@ -32,16 +32,14 @@ public sealed class BotherBadges : IDisposable
         public bool AnyBotherEnabled => Bothers.Any(b => b.Bother.ContributesToEnable && Tabs.Bothers.GetConfigBool(b.Bother.ConfigProperty));
     }
 
-    private BadgedWindow[]? _windows;
-
     private static string? _addonWithOpenPopup;
 
     public BotherBadges() => Svc.PluginInterface.UiBuilder.Draw += Draw;
 
     public void Dispose() => Svc.PluginInterface.UiBuilder.Draw -= Draw;
 
-    private BadgedWindow[] Windows => _windows ??= [.. FeatureRegistry.Get().GetBothers()
-        .SelectMany(x => x.Feature.AddonNames.Select(addon => (Addon: addon, Entry: (x.Feature, x.Bother))))
+    private BadgedWindow[] Windows => field ??= [.. FeatureRegistry.Get().GetBothers()
+        .SelectMany(x => x.Feature.AddonNames.Where(a => !a.StartsWith("Inventory")).Select(addon => (Addon: addon, Entry: (x.Feature, x.Bother)))) // hack tbh
         .GroupBy(x => x.Addon)
         .Select(g => new BadgedWindow(g.Key, [.. g.Select(x => x.Entry)]))];
 
