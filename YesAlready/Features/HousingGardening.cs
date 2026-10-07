@@ -66,6 +66,7 @@ internal unsafe class HousingGardening : AddonFeature
         ref var seedSel = ref agent->SelectedItems[1];
         if (soilSel.InventoryType != InventoryType.Invalid && seedSel.InventoryType != InventoryType.Invalid)
         {
+            Log("Seed/Soil handled");
             _handled = true;
             return;
         }
@@ -75,9 +76,15 @@ internal unsafe class HousingGardening : AddonFeature
         var seedPick = FindItem(C.HousingGardeningSeed, 20, isOutdoors, seed: true);
 
         if (soilPick is { } soil && soilSel.InventoryType == InventoryType.Invalid)
+        {
+            Log($"Selecting soil {soil.ItemId} from {soil.Type}:{soil.Slot}");
             SelectItem(0, soil);
+        }
         if (seedPick is { } seed && seedSel.InventoryType == InventoryType.Invalid)
+        {
+            Log($"Selecting seed {seed.ItemId} from {seed.Type}:{seed.Slot}");
             SelectItem(1, seed);
+        }
 
         _handled = true;
 
@@ -89,6 +96,7 @@ internal unsafe class HousingGardening : AddonFeature
                 var a = AgentHousingPlant.Instance();
                 if (a == null || !a->IsAgentActive())
                     return true;
+                Log("Confirming seed/soil selection");
                 a->ConfirmSeedAndSoilSelection();
                 return true;
             }, "HousingGardening.Confirm");
