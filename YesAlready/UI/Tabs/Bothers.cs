@@ -1,4 +1,5 @@
 ﻿using Dalamud.Bindings.ImGui;
+using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using ECommons.SimpleGui;
 using FFXIVClientStructs.FFXIV.Client.Game;
@@ -11,6 +12,8 @@ namespace YesAlready.UI.Tabs;
 
 public static class Bothers
 {
+    private static string searchFilter = string.Empty;
+    private static bool _filterUpdate;
     private static readonly (BotherCategory Category, string Header)[] CategoryHeaders =
     [
         (BotherCategory.Desynthesis, "Desynthesis and Aetherial Reduction"),
@@ -33,17 +36,51 @@ public static class Bothers
         using var child = ImRaii.Child("BothersContent", System.Numerics.Vector2.Zero);
         if (!child) return;
 
+        DrawFilterInput();
         var bothersByCategory = FeatureRegistry.Get().GetBothers().GroupBy(x => x.Bother.Category).ToDictionary(g => g.Key, g => g.ToList());
         foreach (var (category, header) in CategoryHeaders)
         {
-            if (!bothersByCategory.TryGetValue(category, out var bothers) || bothers.Count == 0)
+            if (!bothersByCategory.TryGetValue(category, out var bothers))
                 continue;
+
+            if (searchFilter.Length > 0)
+                bothers = [.. bothers.Where(x =>
+                    x.Bother.Label != null && x.Bother.Label.Contains(searchFilter, StringComparison.OrdinalIgnoreCase) ||
+                    x.Feature.Key.Contains(searchFilter, StringComparison.OrdinalIgnoreCase) ||
+                    x.Bother.Description != null && x.Bother.Description.Contains(searchFilter, StringComparison.OrdinalIgnoreCase
+                    ))];
+
+            if (bothers.Count == 0)
+                continue;
+
+            if (_filterUpdate)
+                ImGui.SetNextItemOpen(searchFilter.Length > 0);
 
             if (!ImGui.CollapsingHeader(header))
                 continue;
 
             foreach (var (feature, bother) in bothers)
                 DrawBother(feature, bother);
+        }
+        _filterUpdate = false;
+    }
+
+    internal static void DrawFilterInput()
+    {
+        using var style = ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, new System.Numerics.Vector2(ImGui.GetStyle().ItemSpacing.X / 2, ImGui.GetStyle().ItemSpacing.Y));
+
+        if (ImGuiX.IconButton(FontAwesomeIcon.Times, "Clear search"))
+        {
+            searchFilter = string.Empty;
+            _filterUpdate = true;
+        }
+
+        ImGui.SameLine();
+        var filterBuf = searchFilter;
+        if (ImGui.InputTextEx($"##bothersFilter", "Search...", ref filterBuf, 512, flags: ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EnterReturnsTrue))
+        {
+            searchFilter = filterBuf;
+            _filterUpdate = true;
         }
     }
 
