@@ -3,7 +3,6 @@ using Dalamud.Memory;
 using Dalamud.Utility;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using Lumina.Excel.Sheets;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -38,6 +37,16 @@ internal class SelectYesno : TextMatchingFeature
         {
             Log($"Entry is party finder join confirmation");
             return new TextEntryNode { IsYes = true };
+        }
+
+        var callbackAddonId = atk->ParentId is 0 ? atk->Id : atk->ParentId;
+        if (C.HousingGardeningConfirm && RaptureAtkModule.Instance()->AddonCallbackMapping.TryGetValue(callbackAddonId, out var addonCallbackEntry, false))
+        {
+            if (addonCallbackEntry.AgentInterface != null && AgentModule.Instance()->GetAgentByInternalId(AgentId.HousingPlant) == addonCallbackEntry.AgentInterface)
+            {
+                Log($"Entry is planting confirmation");
+                return new TextEntryNode { IsYes = true };
+            }
         }
 
         if (C.AutoCollectable && collectablePatterns.Any(text.Contains))
