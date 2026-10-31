@@ -128,6 +128,21 @@ public static class Bothers
 
         if (bother.ConfigProperty == nameof(Configuration.HousingGardeningAutoSelect) && value)
             DrawAutoSelectGardeningSettings();
+
+        if (bother.ConfigProperty == nameof(Configuration.KupoOfFortune) && value)
+            DrawKupoOfFortuneSettings();
+    }
+
+    private static void DrawKupoOfFortuneSettings()
+    {
+        using var settingsIndent = ImRaii.PushIndent();
+        var side = (int)C.KupoOfFortuneSide;
+        if (ImGui.Combo("Side##KupoSide", ref side, Features.HWDLottery.Side.Values.Select(v => v.ToString()).ToList(), Features.HWDLottery.Side.Values.Length))
+        {
+            C.KupoOfFortuneSide = (Features.HWDLottery.Side)side;
+            C.Save();
+        }
+        ImGuiX.IndentedTextColored("Which side to select from when picking a fortune. Left eliminates 1st and 5th as candidate prizes.");
     }
 
     private static void DrawTradeMultipleSettings()

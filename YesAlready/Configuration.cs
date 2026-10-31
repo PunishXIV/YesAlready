@@ -72,6 +72,7 @@ public partial class Configuration() : IPluginConfiguration
     public bool TradeMultipleRequireUnique { get; set; } = false;
     public List<uint> TradeMultipleBlacklistItemIds { get; set; } = [];
     public bool KupoOfFortune { get; set; } = false;
+    public Features.HWDLottery.Side KupoOfFortuneSide { get; set; } = Features.HWDLottery.Side.Right;
     public bool CustomDeliveries { get; set; } = false;
     public bool MKSRecordQuit { get; set; } = false;
     public bool FrontlineRecordQuit { get; set; } = false;
