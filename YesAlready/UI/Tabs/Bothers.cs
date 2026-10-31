@@ -129,8 +129,8 @@ public static class Bothers
         if (bother.ConfigProperty == nameof(Configuration.HousingGardeningAutoSelect) && value)
             DrawAutoSelectGardeningSettings();
 
-        if (bother.ConfigProperty == nameof(Configuration.KupoOfFortune) && value)
-            DrawKupoOfFortuneSettings();
+        //if (bother.ConfigProperty == nameof(Configuration.KupoOfFortune) && value)
+        //    DrawKupoOfFortuneSettings();
     }
 
     private static void DrawKupoOfFortuneSettings()

@@ -16,15 +16,7 @@ public class HWDLottery : AddonFeature
         switch (eventType)
         {
             case AddonEvent.PostSetup:
-                switch (C.KupoOfFortuneSide)
-                {
-                    case Side.Left:
-                        Callback.Fire(addonInfo.GetAddon<AtkUnitBase>(), true, 0, 1);
-                        break;
-                    case Side.Right:
-                        Callback.Fire(addonInfo.GetAddon<AtkUnitBase>(), true, 0, 0);
-                        break;
-                }
+                Callback.Fire(addonInfo.GetAddon<AtkUnitBase>(), true, 0, 1);
                 break;
             case AddonEvent.PostUpdate:
                 var addon = addonInfo.GetAddon<AddonHWDLottery>();
