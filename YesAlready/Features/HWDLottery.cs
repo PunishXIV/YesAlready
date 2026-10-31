@@ -22,7 +22,7 @@ public class HWDLottery : AddonFeature
                         Callback.Fire(addonInfo.GetAddon<AtkUnitBase>(), true, 0, 1);
                         break;
                     case Side.Right:
-                        Callback.Fire(addonInfo.GetAddon<AtkUnitBase>(), true, 1, 0);
+                        Callback.Fire(addonInfo.GetAddon<AtkUnitBase>(), true, 0, 0);
                         break;
                 }
                 break;
