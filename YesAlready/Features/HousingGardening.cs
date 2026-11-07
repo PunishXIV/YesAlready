@@ -10,6 +10,7 @@ namespace YesAlready.Features;
 [AddonFeature(AddonEvent.PostShow, "Inventory")]
 [AddonFeature(AddonEvent.PostShow, "InventoryLarge")]
 [AddonFeature(AddonEvent.PostShow, "InventoryExpansion")]
+[AddonFeature(AddonEvent.PostShow, "AetherBags_MainBags")]
 [Bother(nameof(Configuration.HousingGardeningAutoSelect), BotherCategory.Other, "Automatically select soil and seed in the gardening window.")]
 internal unsafe class HousingGardening : AddonFeature
 {
@@ -30,7 +31,7 @@ internal unsafe class HousingGardening : AddonFeature
                         break;
                 }
                 break;
-            case var a when a.StartsWith("Inventory"):
+            case var a when a.StartsWith("Inventory") || a is "AetherBags_MainBags":
                 var inv = AgentInventory.Instance();
                 if (inv == null || inv->OpenTitleId != 15)
                     return;
