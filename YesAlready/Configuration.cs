@@ -66,6 +66,7 @@ public partial class Configuration() : IPluginConfiguration
     public bool PartyFinderJoinConfirm { get; set; } = false;
     public bool GimmickYesNo { get; set; } = false;
     public bool AutoCollectable { get; set; } = false;
+    public bool DontAcceptTeleportsIfSRankUp { get; set; } = false;
     public bool LotteryWeeklyInput { get; set; } = false;
     public bool TradeMultiple { get; set; } = false;
     public TradeMultipleMode TransmuteMode { get; set; } = TradeMultipleMode.AllDifferent;

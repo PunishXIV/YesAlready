@@ -99,7 +99,6 @@ public class YesNo
                 C.PartyFinderJoinConfirm = pfConfirm;
                 C.Save();
             }
-
             ImGuiX.IndentedTextColored("Automatically confirm when joining a party finder group.", wrapped: false);
 
             var autoCollect = C.AutoCollectable;
@@ -108,8 +107,15 @@ public class YesNo
                 C.AutoCollectable = autoCollect;
                 C.Save();
             }
-
             ImGuiX.IndentedTextColored("Automatically accept collectables that are worth turning in and decline insufficient ones.", wrapped: false);
+
+            var dontAcceptIfSRank = C.DontAcceptTeleportsIfSRankUp;
+            if (ImGui.Checkbox("Decline S-Rank Teleports", ref dontAcceptIfSRank))
+            {
+                C.DontAcceptTeleportsIfSRankUp = dontAcceptIfSRank;
+                C.Save();
+            }
+            ImGuiX.IndentedTextColored("If an s-rank is in the zone, decline teleport offers.", wrapped: false);
         }
     }
 

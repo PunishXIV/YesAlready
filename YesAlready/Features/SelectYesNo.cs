@@ -1,5 +1,7 @@
+using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Memory;
+using Dalamud.Plugin.Services;
 using Dalamud.Utility;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using Lumina.Excel.Sheets;
@@ -40,12 +42,21 @@ internal class SelectYesno : TextMatchingFeature
         }
 
         var callbackAddonId = atk->ParentId is 0 ? atk->Id : atk->ParentId;
-        if (C.HousingGardeningConfirm && RaptureAtkModule.Instance()->AddonCallbackMapping.TryGetValue(callbackAddonId, out var addonCallbackEntry, false))
+        if (RaptureAtkModule.Instance()->AddonCallbackMapping.TryGetValue(callbackAddonId, out var entry, false) && entry.AgentInterface != null)
         {
-            if (addonCallbackEntry.AgentInterface != null && AgentModule.Instance()->GetAgentByInternalId(AgentId.HousingPlant) == addonCallbackEntry.AgentInterface)
+            if (C.HousingGardeningConfirm && AgentModule.Instance()->GetAgentByInternalId(AgentId.HousingPlant) == entry.AgentInterface)
             {
                 Log($"Entry is planting confirmation");
                 return new TextEntryNode { IsYes = true };
+            }
+
+            if (C.DontAcceptTeleportsIfSRankUp && AgentModule.Instance()->GetAgentByInternalId(AgentId.Teleport) == entry.AgentInterface && entry.EventKind is 3)
+            {
+                if (IObjectTable.Get().OfType<IBattleChara>().Any(o => o.HuntRank is 3))
+                {
+                    Log($"Entry is teleport confirmation while an S rank is up");
+                    return new TextEntryNode { IsYes = false };
+                }
             }
         }
 
